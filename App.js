@@ -1,23 +1,18 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, Text, View } from 'react-native';
+import {StackNavigator} from 'react-navigation';
+import HomeScreen from './Components/Home';
+import TripsScreen from './Components/Trips'
+import ExpensesScreen from './Components/Expenses'
+
+const Router = StackNavigator({
+  Home: { screen: HomeScreen },
+  Trips: {screen: TripsScreen},
+  Expenses: {screen: ExpensesScreen}
+});
 
 export default class App extends React.Component {
   render() {
-    return (
-      <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Text>Changes you make will automatically reload.</Text>
-        <Text>Shake your phone to open the developer menu.</Text>
-      </View>
-    );
+    return <Router />;
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
