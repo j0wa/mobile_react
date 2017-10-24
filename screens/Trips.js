@@ -10,7 +10,7 @@ const trips = [
     { date: "10/10/2010", location: "algures", numPeople: 3}
 ]
 
-export default class TripsScreen extends React.Component{
+export default class Trips extends React.Component{
     onclick() {
         console.log("aa");
     }
