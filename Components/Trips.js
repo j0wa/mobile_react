@@ -1,19 +1,25 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import {StackNavigator} from 'react-navigation';
+import { FlatList, View, Text, StyleSheet } from "react-native";
+import StackNavigator from 'react-navigation';
+import Button from "./Button";
+import Card from "./Card";
+
+const trips = [
+    { date: "10/10/2000", location: "algures", numPeople: 5},
+    { date: "10/03/2000", location: "algures", numPeople: 2},
+    { date: "10/10/2010", location: "algures", numPeople: 3}
+]
 
 export default class TripsScreen extends React.Component{
-  static navigationOptions = {
-    //Todoo, addapt to language
-    title: 'Trips'
-  };
-  render(){
-    return (
-      <View>
-        <Text>
-          Wassup
-        </Text>
-      </View>
-    );
-  }
+    onclick() {
+        console.log("aa");
+    }
+ 
+    buildList(){
+        <Card click={this.onclick}/>
+    }
+
+    render(){
+        return this.buildList;
+    }
 }
