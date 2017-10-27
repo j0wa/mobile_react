@@ -1,6 +1,7 @@
 export default {
     trip: {
-        title: "Trips"
+        title: "Trips",
+        details: "Trip details"
     },
 
     expenses: {

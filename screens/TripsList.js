@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
+import { View, Text, Image, StyleSheet, ScrollView, Platform, StatusBar } from "react-native";
 import Card from "../components/Card";
-import {Icon} from 'react-native-elements'
-import lang from '../configs/settings';
+import {Icon} from 'react-native-elements';
+import lang from "../configs/languages/lang";
 
 const trips = [
     { id: 1, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
@@ -20,19 +20,14 @@ const trips = [
 
 export default class TripsList extends React.Component{
     static navigationOptions = {
-        //Todoo, addapt to language
-        title: "lang.en."
+        title: lang.trip.title
     };
 
     constructor(props){
         super(props);
     }
 
-    onclick() {
-        console.log("aa");
-    }
-
-    buildList(){
+    buildList(navigate){
         let cards = [];
         
         trips.map((item) =>  {
@@ -46,7 +41,7 @@ export default class TripsList extends React.Component{
                             <Text>{item.category}</Text>
                         </View>
                         <View style={{flex: 0, alignItems: "center", alignSelf: "center"}}>
-                            <Icon name='chevron-right' type="Entypo" onPress={() => navigate('Trips')} size={40.0}/>
+                            <Icon name='chevron-right' onPress={() => navigate('Trips', {new : false})} size={40.0}/>
                         </View>
                     </View>
                 </Card>
@@ -56,9 +51,9 @@ export default class TripsList extends React.Component{
         return <ScrollView>{cards}</ScrollView>
     }
 
-    buildButton(){
+    buildButton(navigate){
         return <View style={{marginBottom: 10, position: "absolute", left: 0, right: 0, bottom: 0, alignSelf: "center"}}>
-            <Icon name='add-circle' size={64.0} onPress={this.props.onPress}/>
+            <Icon name='add-circle' size={64.0} onPress={() => navigate('Trips', {new : false})}/>
         </View>
     }
 
@@ -67,8 +62,8 @@ export default class TripsList extends React.Component{
 
         return (
             <View style={{flex: 1, backgroundColor: "#f1f1f1"}}>
-                {this.buildList()}
-                {this.buildButton()}
+                {this.buildList(navigate)}
+                {this.buildButton(navigate)}
             </View>
         );
     }

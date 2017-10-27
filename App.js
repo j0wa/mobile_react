@@ -23,17 +23,19 @@ export default class App extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            fontLoaded: false,
+            fontLoaded: false
         };
     }
 
     async componentDidMount() {
         await Expo.Font.loadAsync({
+            'SimpleLineIcons': require('react-native-vector-icons/Fonts/SimpleLineIcons.ttf'),
             'MaterialIcons': require('react-native-vector-icons/Fonts/MaterialIcons.ttf'),
-            'FontAwesome': require('react-native-vector-icons/Fonts/FontAwesome.ttf')
+            'FontAwesome': require('react-native-vector-icons/Fonts/FontAwesome.ttf'),
+            'Ionicons': require('react-native-vector-icons/Fonts/Ionicons.ttf'),
         });
 
-        this.setState({ fontLoaded: true });        
+        this.setState({ fontLoaded: true });
     }
 
     render(){

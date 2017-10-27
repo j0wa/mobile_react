@@ -1,1 +1,1 @@
-export const lang = "en";
+module.exports.currLang = "en";
