@@ -1,7 +1,12 @@
 export default {
     trip: {
         title: "Trips",
-        details: "Trip details"
+        details: "Trip details",
+        title: "General Information",
+        location: "Location",
+        date: "Date",
+        members: "Members",
+        desc: "Description",
     },
 
     expenses: {
@@ -10,5 +15,14 @@ export default {
 
     home: {
         
+    },
+
+    misc: {
+        curr: "Currency",
+        btn: "SUBMIT",
+    },
+
+    err: {
+        required: "This field is required"
     }
 }
