@@ -1,3 +1,1 @@
-export default {
-    lang: "en"
-};
+export const lang = "en";
