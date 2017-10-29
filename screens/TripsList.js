@@ -41,7 +41,7 @@ export default class TripsList extends React.Component{
                             <Text>{item.category}</Text>
                         </View>
                         <View style={{flex: 0, alignItems: "center", alignSelf: "center"}}>
-                            <Icon name='chevron-right' onPress={() => navigate('Trips', {new : false})} size={40.0}/>
+                            <Icon name='chevron-right' onPress={() => navigate('Trips', {new : false, id: item.id})} size={40.0}/>
                         </View>
                     </View>
                 </Card>

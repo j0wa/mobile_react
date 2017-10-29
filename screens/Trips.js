@@ -1,7 +1,7 @@
 import React from 'react';
-import { Icon, FormLabel, FormInput, Divider, Badge, Button, FormValidationMessage} from 'react-native-elements'
+import { Icon, Divider, Badge, Button, FormValidationMessage, FormInput, FormLabel } from 'react-native-elements'
 import { TabNavigator } from 'react-navigation';
-import { View, Text, StyleSheet, Picker, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform } from "react-native";
 import DatePicker from 'react-native-datepicker';
 import Card from "../components/Card";
 import lang from "../configs/languages/lang";
@@ -26,13 +26,27 @@ const currs = [
 ];
 
 class TripScreen extends React.Component {
+    static navigationOptions = {
+        showLabel: false,
+        tabBarIcon: ({ tintColor }) => (
+            <Icon name='info' type="simple-line-icon" color="#fff"/>
+        ),
+    };
+
     constructor(props){
         super(props);
     }
 
     componentWillMount(){
         this.setState({
-            date: new Date()
+            date: new Date(),
+            curr: 1,
+            errLocation: false,
+            errMembers: false,
+            errDesc: false,
+            location: "",
+            members: "",
+            desc: ""
         });
     }    
     
@@ -45,21 +59,44 @@ class TripScreen extends React.Component {
             );
         })
 
-        return <Picker>
-            {items}
-        </Picker>
+        if (Platform.OS === "ios"){
+            return <PickerIOS selectedValue={this.state.curr}
+                onValueChange={(itemValue, itemIndex) => this.setState({curr: itemValue})}>
+                {items}
+            </PickerIOS>
+        }
+        else {
+            return <Picker selectedValue={this.state.curr}
+                onValueChange={(itemValue, itemIndex) => this.setState({curr: itemValue})}>
+                {items}
+            </Picker>
+        }
     }
 
-    submit(){
-        
-    }
+    _submit(){
+        var err = -1;
 
-    static navigationOptions = {
-        showLabel: false,
-        tabBarIcon: ({ tintColor }) => (
-            <Icon name='info' type="simple-line-icon" color="#fff"/>
-        ),
-    };
+        if (this.state.location == "") {
+            this.setState({ errLocation: true });
+            err = 1;
+        } else {
+            this.setState({ errLocation: false });            
+        }
+
+        if (this.state.members == "") {
+            this.setState({ errMembers: true });
+            err = 1;
+        } else {
+            this.setState({ errMembers: false });            
+        }
+
+        if (this.state.desc == "") {
+            this.setState({ errDesc: true });
+            err = 1;
+        } else {
+            this.setState({ errDesc: false });            
+        }
+    }
 
     render(){
         let infoLang = lang.trip;
@@ -74,13 +111,18 @@ class TripScreen extends React.Component {
 
                 <View>
                     <FormLabel>{lang.misc.curr}</FormLabel>
-                    <View style={styles.curr}>
+                    <View style={styles.curr}>  
                         {this.getCurrencies()}
                     </View>
                     
                     <FormLabel>{infoLang.location}</FormLabel>
-                    <FormInput autoCapitalize="sentences" editable={this.props.new} style={styles.input}/>
-                    <FormValidationMessage>{lang.err.required}</FormValidationMessage>
+                    <FormInput 
+                        autoCapitalize="sentences" 
+                        editable={this.props.new} 
+                        style={styles.input} 
+                        onChangeText={(location) => this.setState({location})} 
+                    />
+                    {this.state.errLocation && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
                     
                     <FormLabel>{infoLang.date}</FormLabel>
                     <View style={styles.date_container}>
@@ -105,12 +147,26 @@ class TripScreen extends React.Component {
                     </View>
                     
                     <FormLabel>{infoLang.members}</FormLabel>
-                    <FormInput autoCapitalize="sentences" editable={this.props.new} style={styles.input} />
-                    
+                    <FormInput 
+                        autoCapitalize="sentences"
+                        editable={this.props.new} 
+                        style={styles.input}
+                        onChangeText={(members) => this.setState({members})} 
+                    />
+                    {this.state.errMembers && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
+
                     <FormLabel>{infoLang.desc}</FormLabel>
-                    <FormInput autoCapitalize="sentences" editable={this.props.new} multiline={true} autoGrow={true} style={StyleSheet.flatten([styles.input, styles.input_textarea])}/>
-                    
-                    <Button title={lang.misc.btn} style={styles.btn} onPress={this.submit} />
+                    <FormInput 
+                        autoCapitalize="sentences"
+                        editable={this.props.new} 
+                        multiline={true} 
+                        autoGrow={true} 
+                        onChangeText={(desc) => this.setState({desc})} 
+                        style={StyleSheet.flatten([styles.input, styles.input_textarea])}
+                    />
+                    {this.state.errDesc && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
+
+                    <Button title={lang.misc.btn} style={styles.btn} onPress={this._submit.bind(this)} />
                 </View>
             </ScrollView>
         );
