@@ -28,31 +28,29 @@ export default class TripsList extends React.Component{
     }
 
     buildList(navigate){
-        let cards = [];
+        let items = [];
         
         trips.map((item) =>  {
-            cards.push( 
-                <Card key={item.id}>
-                    <View style={{flex: 1 , flexDirection: "row"}}>
-                        <View style={{flex: 1}}>
-                            <Text>{item.date}</Text>
-                            <Text>{item.location}</Text>
-                            <Text>{item.numPeople}</Text>
-                            <Text>{item.category}</Text>
-                        </View>
-                        <View style={{flex: 0, alignItems: "center", alignSelf: "center"}}>
-                            <Icon name='chevron-right' onPress={() => navigate('Trips', {new : false, id: item.id})} size={40.0}/>
-                        </View>
+            items.push( 
+                <View key={item.id} style={styles.list_item}>
+                    <View style={styles.list_item_info}>
+                        <Text>{item.date}</Text>
+                        <Text>{item.location}</Text>
+                        <Text>{item.numPeople}</Text>
+                        <Text>{item.category}</Text>
                     </View>
-                </Card>
+                    <View style={styles.arrow}>
+                        <Icon name='chevron-right' onPress={() => navigate('Trips', {new : false, id: item.id})} size={40.0}/>
+                    </View>
+                </View>
             );
         });
         
-        return <ScrollView>{cards}</ScrollView>
+        return <ScrollView>{items}</ScrollView>
     }
 
     buildButton(navigate){
-        return <View style={{marginBottom: 10, position: "absolute", left: 0, right: 0, bottom: 0, alignSelf: "center"}}>
+        return <View style={styles.button}>
             <Icon name='add-circle' size={64.0} onPress={() => navigate('Trips', {new : false})}/>
         </View>
     }
@@ -61,7 +59,7 @@ export default class TripsList extends React.Component{
         const { navigate } = this.props.navigation;
 
         return (
-            <View style={{flex: 1, backgroundColor: "#f1f1f1"}}>
+            <View style={styles.wrapper}>
                 {this.buildList(navigate)}
                 {this.buildButton(navigate)}
             </View>
@@ -71,15 +69,36 @@ export default class TripsList extends React.Component{
 
 const styles = StyleSheet.create({
     wrapper: {
-        flex: 1, 
+        backgroundColor: "#fff"
+    },
+
+    button: {
         marginBottom: 10,
-        borderWidth: .5,
-        borderRadius: 5,
-        borderColor: '#666',
-        marginLeft: 5,
-        marginRight: 5,
-        marginTop: 10,
-        elevation: 0,
-        height: 200
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        alignSelf: "center"
+    },
+
+    list_item: {
+        height: 120,
+        padding: 10,
+        borderBottomWidth: .5,
+        borderColor: "#aaa",
+        borderStyle: "solid",
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    
+    list_item_info: {
+        flex: 1
+    },
+
+    arrow: {
+        flex: 0, 
+        alignItems: "center", 
+        alignSelf: "center"
     }
 });
