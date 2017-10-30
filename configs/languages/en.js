@@ -2,19 +2,19 @@ export default {
     trip: {
         title: "Trips",
         details: "Trip details",
-        title: "General Information",
+        info_title: "General Information",
         location: "Location",
         date: "Date",
         members: "Members",
         desc: "Description",
     },
 
-    expenses: {
+    expense: {
         title: "Expenses"
     },
 
     home: {
-        
+        title: "Home"
     },
 
     misc: {

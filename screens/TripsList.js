@@ -19,10 +19,6 @@ const trips = [
 ]
 
 export default class TripsList extends React.Component{
-    static navigationOptions = {
-        title: lang.trip.title
-    };
-
     constructor(props){
         super(props);
     }

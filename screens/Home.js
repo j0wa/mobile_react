@@ -1,32 +1,43 @@
 import React from 'react';
-import { StyleSheet,Button, Text, View, Alert } from 'react-native';
-import StackNavigator from 'react-navigation';
+import { StyleSheet, View } from 'react-native';
+import { Button } from 'react-native-elements'
+import lang from "./configs/languages/lang";
 
 export default class Home extends React.Component {
     render() {
         const { navigate } = this.props.navigation;
         
         return(
-            <View style = {styles.container}>
-                <Button style = {styles.button}
-                    //Todoo, addapt to language
-                    title = "Trips"
+            <View >
+                <Button 
+                    style = {styles.button}
+                    title = {lang.trip.title}
                     onPress = {
                         () => {
                             console.log("triplist");
                             navigate('TripsList')
                         }
                     }
+                    large={true}
+                    borderRadius={15}
+                    raised
+                    backgroundColor="#4C3E54"
+                    containerViewStyle={{marginTop:150}}
                 />
-                <Button
-                    //Todoo, addapt to language
-                    title = "Expenses"
+                <Button 
+                    style = {styles.button}
+                    title = {lang.expense.title}
                     onPress = {
                         () => {
                             console.log("expenses")
                             navigate('Expenses')
                         }
                     }
+                    large={true}
+                    borderRadius={15}
+                    raised
+                    backgroundColor="#4C3E54"
+                    containerViewStyle={{marginTop:50}}
                 />
             </View>
         );
@@ -34,14 +45,9 @@ export default class Home extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container:{
-    flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flex:1
-  },
-  button:{
-    margin:50,
-    flex: 2
-  }
+    container:{
+        justifyContent: 'center',
+        alignItems: 'center',
+        flex:1
+    }
 })

@@ -7,10 +7,6 @@ import Card from "../components/Card";
 import lang from "../configs/languages/lang";
 
 export default class Trips extends React.Component {
-    static navigationOptions = {
-        title: lang.trip.details
-    };
-
     constructor(props){
         super(props);
     }
@@ -26,13 +22,6 @@ const currs = [
 ];
 
 class TripScreen extends React.Component {
-    static navigationOptions = {
-        showLabel: false,
-        tabBarIcon: ({ tintColor }) => (
-            <Icon name='info' type="simple-line-icon" color="#fff"/>
-        ),
-    };
-
     constructor(props){
         super(props);
     }
@@ -104,7 +93,7 @@ class TripScreen extends React.Component {
         return (
             <ScrollView style={{ marginBottom: 20}}>
                 <View style={styles.title}>
-                    <Text style={styles.title_font}>{infoLang.title}</Text>
+                    <Text style={styles.title_font}>{infoLang.info_title}</Text>
                 </View>
 
                 <Divider style={styles.divider} />
@@ -173,13 +162,7 @@ class TripScreen extends React.Component {
     }
 }
 
-class ExpensesScreen extends React.Component {
-    static navigationOptions = {
-        tabBarIcon: ({ tintColor }) => (
-            <Icon name='wallet' type="simple-line-icon" color="#fff"/>
-        ),
-    };
-  
+class ExpensesScreen extends React.Component {  
     render() {
         return (
             <Button
@@ -242,10 +225,21 @@ const styles = StyleSheet.create({
 
 const Tab = TabNavigator({
         Home: {
-           screen: TripScreen,
+            screen: TripScreen,
+            navigationOptions :{
+                showLabel: false,
+                tabBarIcon: ({ tintColor }) => (
+                    <Icon name='info' type="simple-line-icon" color="#fff"/>
+                )
+           }
         },
         Expenses: {
             screen: ExpensesScreen,
+            navigationOptions: {
+                tabBarIcon: ({ tintColor }) => (
+                    <Icon name='wallet' type="simple-line-icon" color="#fff"/>
+                )
+            }
         },
     }, {
         tabBarPosition: 'bottom',
