@@ -7,10 +7,25 @@ export default {
         date: "Date",
         members: "Members",
         desc: "Description",
+        no_trips: "You've no trips yet! Tap the \"+\" button to create your first!"
     },
 
     expense: {
-        title: "Expenses"
+        title: "Expenses",
+        no_expenses: "You've no expenses yet! Tap the \"+\" button to create your first!",
+        info_title: "General information",
+        receiver: "Receiver",
+        types: "Types",
+        date: "Date",
+        location: "Location",
+        members: "Members",
+        notes: "Notes",
+        new_item: "Add new item",
+        no_img: "You've added no images yet! Tap the \"+\" button to add your first!",
+        items: "Items",
+        galary: "Gallery",
+        item_name: "Name",
+        item_price: "Price"
     },
 
     home: {

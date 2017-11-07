@@ -3,7 +3,6 @@ import { Icon, Divider, Badge, Button, FormValidationMessage, FormInput, FormLab
 import { TabNavigator } from 'react-navigation';
 import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform } from "react-native";
 import DatePicker from 'react-native-datepicker';
-import Card from "../components/Card";
 import lang from "../configs/languages/lang";
 
 export default class Trips extends React.Component {
@@ -40,7 +39,7 @@ class TripScreen extends React.Component {
     }    
     
     getCurrencies(){
-        let items = [];
+        var items = [];
         
         currs.map((item) => {
             items.push(
@@ -88,7 +87,7 @@ class TripScreen extends React.Component {
     }
 
     render(){
-        let infoLang = lang.trip;
+        var infoLang = lang.trip;
 
         return (
             <ScrollView style={{ marginBottom: 20}}>

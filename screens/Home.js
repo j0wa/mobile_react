@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-elements'
-import lang from "./configs/languages/lang";
+import lang from "../configs/languages/lang";
 
 export default class Home extends React.Component {
     render() {
@@ -29,8 +29,8 @@ export default class Home extends React.Component {
                     title = {lang.expense.title}
                     onPress = {
                         () => {
-                            console.log("expenses")
-                            navigate('Expenses')
+                            console.log("expensesListx")
+                            navigate('ExpensesList')
                         }
                     }
                     large={true}

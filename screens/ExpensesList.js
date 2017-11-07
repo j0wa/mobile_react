@@ -3,21 +3,21 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Icon } from 'react-native-elements';
 import lang from "../configs/languages/lang";
 
-const trips = [
-    { id: 1, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 2, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 3, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 4, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 5, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 6, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 7, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 8, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 9, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 10, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 11, date: "10/10/2010", location: "algures", numPeople: 3, category: "cool cat man"}
+const expenses = [
+    { id: 1, date: "10/10/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
+    { id: 2, date: "10/03/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
+    { id: 3, date: "10/10/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
+    { id: 4, date: "10/03/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
+    { id: 5, date: "10/10/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
+    { id: 6, date: "10/03/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
+    { id: 7, date: "10/10/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
+    { id: 8, date: "10/03/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
+    { id: 9, date: "10/10/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
+    { id: 10, date: "10/03/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
+    { id: 11, date: "10/10/2010", location: "algures", type_split: "Half", reciever: "cool cat man"}
 ]
 
-export default class TripsList extends React.Component{
+export default class ExpensesList extends React.Component{
     constructor(props){
         super(props);
     }
@@ -25,23 +25,23 @@ export default class TripsList extends React.Component{
     buildList(navigate){
         var items = [];
         
-        if (trips == null || trips == ""){
+        if (expenses == null || expenses == ""){
             return <View style={styles.empty}>
-                <Text style={styles.empty_text}>{lang.trip.no_trips}</Text>
+                <Text style={styles.empty_text}>{lang.expense.no_expenses}</Text>
             </View>
         }
 
-        trips.map((item) =>  {
+        expenses.map((item) =>  {
             items.push( 
                 <View key={item.id} style={styles.list_item}>
                     <View style={styles.list_item_info}>
                         <Text>{item.date}</Text>
+                        <Text>{item.reciever}</Text>
+                        <Text>{item.type_split}</Text>
                         <Text>{item.location}</Text>
-                        <Text>{item.numPeople}</Text>
-                        <Text>{item.category}</Text>
                     </View>
                     <View style={styles.arrow}>
-                        <Icon name='chevron-right' onPress={() => navigate('Trips', {new : false, id: item.id})} size={40.0}/>
+                        <Icon name='chevron-right' onPress={() => navigate('Expenses', {new : false, id: item.id})} size={40.0}/>
                     </View>
                 </View>
             );
@@ -52,7 +52,7 @@ export default class TripsList extends React.Component{
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('Trips', {new : false})}/>
+            <Icon name='add-circle' size={64.0} onPress={() => navigate('Expenses', {new : true})}/>
         </View>
     }
 
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
         alignItems: "center", 
         alignSelf: "center"
     },
-    
+
     empty_text:{
         fontSize: 18,
         textAlign: "center"
