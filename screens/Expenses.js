@@ -1,7 +1,8 @@
 import React from 'react';
 import { TabNavigator } from 'react-navigation';
 import { Icon, Divider, Button, FormValidationMessage, FormInput, FormLabel, Tile } from 'react-native-elements'
-import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform, Image, Window } from "react-native";
+import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform, Image, Dimensions, CameraRoll, PermissionsAndroid } from "react-native";
+import { PhotoGrid } from 'react-native-photo-grid-frame';
 import lang from "../configs/languages/lang";
 
 export default class Expenses extends React.Component {
@@ -115,12 +116,6 @@ class GeneralScreen extends React.Component {
 
         return (
             <ScrollView style={{paddingBottom: 60}}>
-                <View style={styles.title}>
-                    <Text style={styles.title_font}>{infoLang.info_title}</Text>
-                </View>
-
-                <Divider style={styles.divider} />
-
                 <View>
                     {/* receiver */}
                     <FormLabel>{infoLang.receiver}</FormLabel>
@@ -201,6 +196,8 @@ const items = [
     {id: 2, name: "beef", price: "1.50"},
     {id: 3, name: "cake", price: "1.50"},
     {id: 4, name: "pasta", price: "1.50"},
+    {id: 5, name: "pasta", price: "1.50"},
+    {id: 6, name: "pasta", price: "1.50"},
 ]
 
 class ItemsScreen extends React.Component { 
@@ -232,12 +229,11 @@ class ItemsScreen extends React.Component {
 
     buildForm(){
         return (
-            <View>
-                <Divider style={styles.divider} />
+            <View style={styles.form_wrapper}>
                 <View>
-                    <Text style={{marginLeft: 20, fontSize: 16, marginTop: 10}}>{lang.expense.new_item}</Text>
+                    <Text style={styles.new_item}>{lang.expense.new_item}</Text>
                 </View>
-                <View style={{flexDirection:'row', width: window.width }}>
+                <View style={styles.form_container}>
                     <View style={{flex:4}}>
                         <FormLabel>{lang.expense.item_name}</FormLabel>
                         <FormInput 
@@ -250,26 +246,23 @@ class ItemsScreen extends React.Component {
                         <FormInput 
                             autoCapitalize="sentences"
                             onChangeText={(item_price) => this.setState({item_price})}
+                            keyboardType="numeric"
                         />
                     </View>
-                    
-                    <Icon name='add-circle' size={40.0} onPress={() => console.log("add some new item")} containerStyle={styles.item_add}/>
                 </View>
+                
+                <Icon name='add-circle' size={40.0} onPress={() => console.log("add some new item")} containerStyle={styles.button}/>
             </View>
         );
     }
 
     render(){
         return (
-            <View>
-                <View style={styles.title}>
-                    <Text style={styles.title_font}>{lang.expense.items}</Text>
-                </View>
-                
-                <Divider style={styles.divider} />
-                
-                <View>
+            <View style={{flex:1, justifyContent: "space-between"}}>
+                <View style={{flex: 3}}>
                     {this.buildList()}
+                </View>
+                <View style={{flex: 1.5}}>
                     {this.buildForm()}
                 </View>
             </View>
@@ -278,53 +271,34 @@ class ItemsScreen extends React.Component {
 }
 
 const imgs = [
-    {id: 1, caption: "receipt", img: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"},
-    {id: 2, caption: "something", img: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"},
-    {id: 3, caption: "or other", img: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"}
+    {id: 1, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"},
+    {id: 2, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"},
+    {id: 3, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"}
 ]
 
 class GalaryScreen extends React.Component {  
     constructor(props){
         super(props);
     }
-    
+
     buildGallery(){
-        if (imgs == null || imgs == "" || imgs == undefined){
-            return <View style={styles.empty}>
-                <Text style={styles.empty_text}>{lang.expense.no_img}</Text>
-            </View>
-        }
-
-        var items = [];
-
-        imgs.map((item) =>  {
-            items.push(
-                <View key={item.id} style={styles.galery_item}>
-                    <Image source={{uri: item.img}} style={styles.galery_image}/>
-                    <Text style={styles.galery_caption}>{item.caption}</Text>
-                </View>
-            );
-        });
-
-        return <ScrollView style={styles.galery_wrapper}>{items}</ScrollView>
+        return  <ScrollView>
+            <PhotoGrid PhotosList={imgs} borderRadius={10}/>
+        </ScrollView>;
     }
 
     buildButton(){
-        return <View style={styles.galery_button}>
-            <Icon name='add-circle' size={64.0} onPress={() => console.log("someone add new photo")} />
+        return <View style={styles.button}>
+            <Icon name='add-circle' size={64.0} onPress={() => {
+            }} />
         </View>
     }
 
     render() {
         return (
-            <View>
-                <View style={styles.title}>
-                    <Text style={styles.title_font}>{lang.expense.galary}</Text>
-                </View>
-                <Divider style={styles.divider} />
-
+            <View style={{flex: 1}}>
                 {this.buildGallery()}
-                
+
                 {this.buildButton()}
             </View>
         );
@@ -335,26 +309,19 @@ const Tab = TabNavigator({
     Home: {
         screen: GeneralScreen,
         navigationOptions :{
-            showLabel: false,
-            tabBarIcon: ({ tintColor }) => (
-                <Icon name='info-outline' color="#fff"/>
-            )
+            title: "General"
        }
     },
     Items: {
         screen: ItemsScreen,
         navigationOptions: {
-            tabBarIcon: ({ tintColor }) => (
-                <Icon name='format-list-bulleted' color="#fff"/>
-            )
+            title: "Items"
         }
     },
     Galary: {
         screen: GalaryScreen,
         navigationOptions: {
-            tabBarIcon: ({ tintColor }) => (
-                <Icon name='image' color="#fff"/>
-            )
+            title: "Gallary"
         }
     },
 }, {
@@ -364,9 +331,8 @@ const Tab = TabNavigator({
         iconStyle: {
             width: 40
         },
-        showIcon: true,
-        showLabel: false,
-        inactiveTintColor: "#303030",
+        showIcon: false,
+        inactiveTintColor: "#CECECE",
         style: { 
             backgroundColor: "#4C3E54",
             marginTop: 10
@@ -375,15 +341,8 @@ const Tab = TabNavigator({
 });
 
 const styles = StyleSheet.create({
-    items_input: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-
     list_item: {
-        padding: 40,
-        height: 30,
+        padding: 25,
         borderBottomWidth: .5,
         borderColor: "#aaa",
         borderStyle: "solid",
@@ -448,16 +407,28 @@ const styles = StyleSheet.create({
         minHeight: 46
     },
     
-    item_input: {
-        paddingLeft: 15,
-        paddingRight: 50,
-        minHeight: 46
+    form_wrapper: { 
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        elevation: 5,
+        borderRadius: 2,
+        shadowColor: "#000",
+        shadowOpacity: 0.3,
+        shadowRadius: 1
     },
 
-    item_add: {
-        position: "absolute",
-        right: 15, 
-        top: 30
+    form_container: {
+        flexDirection:'row',
+        width: Dimensions.get("window").width,
+        marginBottom: 50
+    },
+
+    new_item: {
+        marginLeft: 20,
+        fontSize: 16,
+        marginTop: 10
     },
 
     date_container: {
@@ -472,40 +443,11 @@ const styles = StyleSheet.create({
         height: 70
     },
 
-    galery_item: {
-        height: 200,
-        marginBottom: 20,
-        borderBottomWidth: .5,
-        borderColor: "#aaa",
-        borderStyle: "solid",
-        flex: 1,
-        justifyContent: "space-between"
-    },
-
-    galery_image: {
-        height: 150, 
-        resizeMode: "cover"
-    },
-        
-    galery_caption: {
-        marginTop: 10,
-        alignSelf: "center",
-        alignContent:"center",
-        fontSize: 20,
-        marginBottom: 10
-    },
-    
-    galery_button: {
-        marginBottom: 10,
+    button: {
         position: "absolute",
         left: 0,
         right: 0,
-        bottom: 60,
+        bottom: 0,
         alignSelf: "center"
-    },
-    
-    galery_wrapper: {
-        marginBottom: 60,
-        marginTop: 20
     },
 });
