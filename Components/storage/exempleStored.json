@@ -1,0 +1,22 @@
+"NameOfTrip" :{
+    "names" :["Nico","Benjax"],
+    "currency" : "EU",
+    "expenses" :{
+        "expensesId" :{
+            "title" :"Resto",
+            "whoPaid" :"Benjax",
+            "amount" :3.49,
+            "date" : "timeStamp",
+            "detail": {
+                "forWhom": {
+                    "Nico":{
+                        "parts" : 1
+                    },
+                    "Benjax":{
+                        "parts" : 2
+                    }
+                }
+            }
+        }
+    }
+}

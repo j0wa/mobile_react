@@ -1,35 +1,41 @@
 import React from 'react';
 import { StyleSheet,Button, Text, View, Alert } from 'react-native';
 import {StackNavigator} from 'react-navigation';
+import store from 'react-native-simple-store';
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
+    constructor(props){
+        super(props);
+    }
+    static navigationOptions = {
     //Todoo, addapt to language
     title: 'Welcome'
-  };
-  render() {
-    const { navigate } = this.props.navigation;
-    return(
-      <View style = {styles.container}>
-        <Button
-          style = {styles.button}
-        //Todoo, addapt to language
-          title = "Trips"
-          onPress = {
-             () => navigate('Trips')
-          }
-        />
-        <Button
-        //Todoo, addapt to language
-          title = "Expenses"
-          onPress = {
-             () => navigate('Expenses')
-          }
-        />
-      </View>
-    );
-  }
+    };
+    render() {
+        const { navigate } = this.props.navigation;
+        return(
+          <View style = {styles.container}>
+            <Button
+              style = {styles.button}
+            //Todoo, addapt to language
+              title = "Trips"
+              onPress = {
+                 () => navigate('Trips')
+              }
+            />
+            <Button
+            //Todoo, addapt to language
+              title = "Expenses"
+              onPress = {
+                 () => navigate('Expenses')
+              }
+            />
+          </View>
+        );
+    }
 }
+
+
 
 const styles = StyleSheet.create({
   container:{
