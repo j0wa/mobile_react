@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "react-native";
 import { Icon } from 'react-native-elements';
 import lang from "../configs/languages/lang";
 
@@ -33,17 +33,22 @@ export default class ExpensesList extends React.Component{
 
         expenses.map((item) =>  {
             items.push( 
-                <View key={item.id} style={styles.list_item}>
-                    <View style={styles.list_item_info}>
-                        <Text>{item.date}</Text>
-                        <Text>{item.reciever}</Text>
-                        <Text>{item.type_split}</Text>
-                        <Text>{item.location}</Text>
+                <TouchableNativeFeedback 
+                    key={item.id} 
+                    onPress={() => navigate('Expenses', {new : false, id: item.id})} 
+                >
+                    <View style={styles.list_item} >
+                        <View style={styles.list_item_info}>
+                            <Text>{item.date}</Text>
+                            <Text>{item.reciever}</Text>
+                            <Text>{item.type_split}</Text>
+                            <Text>{item.location}</Text>
+                        </View>
+                        <View style={styles.arrow}>
+                            <Icon name='chevron-right' size={40.0}/>
+                        </View>
                     </View>
-                    <View style={styles.arrow}>
-                        <Icon name='chevron-right' onPress={() => navigate('Expenses', {new : false, id: item.id})} size={40.0}/>
-                    </View>
-                </View>
+                </TouchableNativeFeedback>
             );
         });
         

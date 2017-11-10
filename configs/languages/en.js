@@ -32,6 +32,20 @@ export default {
         title: "Home"
     },
 
+    account: {
+        title: "Account"
+    },
+    
+    cat: {
+        title: "Tags",
+        new_item: "Add new tag",
+        no_tags: "You've added no tags yet! Tap the \"+\" button to add your first!",
+    },
+
+    setting: {
+        title: "Settings"
+    },
+
     misc: {
         curr: "Currency",
         btn: "SUBMIT",

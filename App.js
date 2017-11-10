@@ -65,7 +65,13 @@ const StackNav =  StackNavigator({
         navigationOptions:{
             title: lang.expense.title
         }
-    }
+    },
+    Categories: {
+        screen: Screens.Categories,
+        navigationOptions:{
+            title: lang.cat.title
+        }
+    },
 }, {
     navigationOptions: ({navigation}) => ({
         headerMode: "float",
@@ -104,6 +110,12 @@ const Menu = DrawerNavigator({
         screen: StackNav,
         navigationOptions:{
             title: lang.expense.title
+        }
+    },
+    Categories: {
+        screen: StackNav,
+        navigationOptions:{
+            title: lang.cat.title
         }
     },
 },{
