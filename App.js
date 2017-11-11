@@ -10,57 +10,57 @@ export default class App extends React.Component {
     constructor(props){
         super(props);
 
-        this.state = { 
+        this.state = {
             fontLoaded: false
         };
     }
 
     async componentDidMount() {
         await Expo.Font.loadAsync({
-            'MaterialIcons': require('react-native-vector-icons/Fonts/MaterialIcons.ttf'),
-            'SimpleLineIcons': require('react-native-vector-icons/Fonts/SimpleLineIcons.ttf'),
-            'FontAwesome': require('react-native-vector-icons/Fonts/FontAwesome.ttf'),
-            'Ionicons': require('react-native-vector-icons/Fonts/Ionicons.ttf'),
+            'Material Icons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
+            'SimpleLineIcons': require('./node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf'),
+            'FontAwesome': require('./node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf'),
+            'Ionicons': require('./node_modules/react-native-vector-icons/Fonts/Ionicons.ttf'),
         });
 
-        this.setState({ 
+        this.setState({
             fontLoaded: true
         });
     }
 
     render(){
         StatusBar.setHidden(true);
-        
+
         return (this.state.fontLoaded) ? <Menu /> : <AppLoading/>;
     }
 }
 
 const StackNav =  StackNavigator({
-    Home: { 
+    Home: {
         screen: Screens.Home,
         navigationOptions:{
             title: lang.home.title
         }
     },
-    TripsList: { 
+    TripsList: {
         screen: Screens.TripsList,
         navigationOptions:{
             title: lang.trip.title
         }
     },
-    Trips: { 
+    Trips: {
         screen: Screens.Trips,
         navigationOptions:{
             title: lang.trip.details
         }
     },
-    ExpensesList: { 
+    ExpensesList: {
         screen: Screens.ExpensesList,
         navigationOptions:{
             title: lang.expense.title
         }
     },
-    Expenses: { 
+    Expenses: {
         screen: Screens.Expenses,
         navigationOptions:{
             title: lang.expense.title
