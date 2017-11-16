@@ -24,7 +24,7 @@ export default class ExpensesList extends React.Component{
 
     buildList(navigate){
         var items = [];
-        
+
         if (expenses == null || expenses == ""){
             return <View style={styles.empty}>
                 <Text style={styles.empty_text}>{lang.expense.no_expenses}</Text>
@@ -32,7 +32,7 @@ export default class ExpensesList extends React.Component{
         }
 
         expenses.map((item) =>  {
-            items.push( 
+            items.push(
                 <View key={item.id} style={styles.list_item}>
                     <View style={styles.list_item_info}>
                         <Text>{item.date}</Text>
@@ -41,18 +41,18 @@ export default class ExpensesList extends React.Component{
                         <Text>{item.location}</Text>
                     </View>
                     <View style={styles.arrow}>
-                        <Icon name='chevron-right' onPress={() => navigate('Expenses', {new : false, id: item.id})} size={40.0}/>
+                        <Icon name='chevron-right' onPress={() => navigate('Expenses', {new : false, id: item.id, lang: this.props.lang})} size={40.0}/>
                     </View>
                 </View>
             );
         });
-        
+
         return <ScrollView>{items}</ScrollView>
     }
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('Expenses', {new : true})}/>
+            <Icon name='add-circle' size={64.0} onPress={() => navigate('Expenses', {new : true, lang: this.props.lang})}/>
         </View>
     }
 
@@ -92,14 +92,14 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center"
     },
-    
+
     list_item_info: {
         flex: 1
     },
 
     arrow: {
-        flex: 0, 
-        alignItems: "center", 
+        flex: 0,
+        alignItems: "center",
         alignSelf: "center"
     },
 

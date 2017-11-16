@@ -5,14 +5,14 @@ import { StackNavigator, DrawerNavigator, DrawerItems } from 'react-navigation';
 import Screens from "./screens/Screens";
 import lang from "./configs/languages/lang";
 import { Font, AppLoading } from 'expo';
+import store from 'react-native-simple-store';
 
 export default class App extends React.Component {
     constructor(props){
         super(props);
-
         this.state = {
-            fontLoaded: false
-        };
+            isLoading: true,
+        }
     }
 
     async componentDidMount() {
@@ -22,49 +22,59 @@ export default class App extends React.Component {
             'FontAwesome': require('./node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf'),
             'Ionicons': require('./node_modules/react-native-vector-icons/Fonts/Ionicons.ttf'),
         });
+        var infoLang
+        await store.get("pref_lang").then(langObj => {
+            if(langObj == null){
+                infoLang = lang[0]["content"]
+            }else{
+                for (var i = 0; i < lang.length; i++) {
+                    if (lang[i]["id"] == langObj.langId) {
+                        infoLang = lang[i]["content"];
+                    }
+                }
+            }
 
+        })
         this.setState({
-            fontLoaded: true
+            fontLoaded: true,
+            lang: infoLang,
         });
     }
 
     render(){
         StatusBar.setHidden(true);
+        /*var testVar = [this.state.lang]
+        console.log(testVar);*/
+        const screenProps = {
+                user: {
+                name: 'John Doe',
+                username: 'johndoe123',
+                email: 'john@doe.com',
+            },
+        }
 
-        return (this.state.fontLoaded) ? <Menu /> : <AppLoading/>;
+        return (this.state.fontLoaded) ? <Menu screenProps={this.state.lang} /> : <AppLoading/>;
     }
 }
 
 const StackNav =  StackNavigator({
     Home: {
         screen: Screens.Home,
-        navigationOptions:{
-            title: lang.home.title
-        }
     },
     TripsList: {
         screen: Screens.TripsList,
-        navigationOptions:{
-            title: lang.trip.title
-        }
     },
     Trips: {
         screen: Screens.Trips,
-        navigationOptions:{
-            title: lang.trip.details
-        }
     },
     ExpensesList: {
         screen: Screens.ExpensesList,
-        navigationOptions:{
-            title: lang.expense.title
-        }
     },
     Expenses: {
         screen: Screens.Expenses,
-        navigationOptions:{
-            title: lang.expense.title
-        }
+    },
+    Settings: {
+        screen: Screens.Settings,
     }
 }, {
     navigationOptions: ({navigation}) => ({
@@ -90,21 +100,15 @@ const StackNav =  StackNavigator({
 const Menu = DrawerNavigator({
     Home: {
         screen: StackNav,
-        navigationOptions:{
-            title: lang.home.title
-        }
     },
     TripsList: {
         screen: StackNav,
-        navigationOptions:{
-            title: lang.trip.title
-        }
     },
     ExpensesList: {
         screen: StackNav,
-        navigationOptions:{
-            title: lang.expense.title
-        }
+    },
+    Settings: {
+        screen: StackNav,
     },
 },{
     drawerPosition: "right",

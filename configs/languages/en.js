@@ -39,5 +39,10 @@ export default {
 
     err: {
         required: "This field is required"
+    },
+
+    setting: {
+        title: "Settings",
+        lang_select: "Preffered language"
     }
 }

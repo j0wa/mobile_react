@@ -1,17 +1,36 @@
 import React from 'react';
 import { TabNavigator } from 'react-navigation';
 import { Icon, Divider, Button, FormValidationMessage, FormInput, FormLabel, Tile } from 'react-native-elements'
-import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform, Image, Dimensions, CameraRoll, PermissionsAndroid } from "react-native";
+import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform, Image, Dimensions, CameraRoll, PermissionsAndroid, ActivityIndicator } from "react-native";
 import { PhotoGrid } from 'react-native-photo-grid-frame';
 import lang from "../configs/languages/lang";
+import store from 'react-native-simple-store';
 
 export default class Expenses extends React.Component {
     constructor(props){
         super(props);
+
+        this.state = {
+            isLoading: true,
+        }
+    }
+    componentDidMount(){
+        var infoLang = this.props.screenProps
+        this.setState({isLoading: false,lang: infoLang})
+        console.log(this.state);
+        //console.log("preferred language fetched");
     }
 
     render(){
-        return <Tab/>;
+        if(this.state.isLoading){
+            return(<View style={{flex: 1, paddingTop: 20}}>
+                <ActivityIndicator />
+            </View>)
+
+        }else{
+            return (<Tab screenProps={this.state.lang}/>)
+        }
+
     }
 }
 
@@ -30,7 +49,7 @@ const cats = [
     {id: 2, name: "Transport"}
 ];
 
-class GeneralScreen extends React.Component {  
+class GeneralScreen extends React.Component {
     constructor(props){
         super(props);
 
@@ -49,12 +68,18 @@ class GeneralScreen extends React.Component {
             location: "",
             members: "",
             notes: "",
+            isLoading: true,
         });
     }
-    
+
+    componentDidMount(){
+        var infoLang = this.props.screenProps
+        this.setState({isLoading: false,lang: infoLang})
+    }
+
     getComboBox(collection, stateItem){
         var items = [];
-        
+
         collection.map((item) => {
             items.push(
                 <Picker.Item label={item.name} value={item.id} key={item.id}/>
@@ -91,7 +116,7 @@ class GeneralScreen extends React.Component {
         } else {
             this.setState({ errMembers: false });
         }
-        
+
         if (err == -1)
             alert("expense registered (NOT!)");
     }
@@ -112,82 +137,88 @@ class GeneralScreen extends React.Component {
     }
 
     render() {
-        var infoLang = lang.expense;
-
-        return (
+        if(this.state.isLoading){
+            return (
+                <View style={{flex: 1, paddingTop: 20}}>
+                    <ActivityIndicator />
+                </View>
+            );
+        }
+        else{return (
             <ScrollView style={{paddingBottom: 60}}>
                 <View>
                     {/* receiver */}
-                    <FormLabel>{infoLang.receiver}</FormLabel>
-                    <FormInput 
-                        autoCapitalize="sentences" 
-                        editable={this.props.new} 
-                        style={styles.input} 
-                        onChangeText={(receiver) => this.setState({receiver})} 
+                    <FormLabel>{this.state.lang.expense.receiver}</FormLabel>
+                    <FormInput
+                        autoCapitalize="sentences"
+                        editable={this.props.new}
+                        style={styles.input}
+                        onChangeText={(receiver) => this.setState({receiver})}
                     />
-                    {this.state.errReceiver && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
+                    {this.state.errReceiver && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     {/* split type */}
-                    <FormLabel>{infoLang.types}</FormLabel>
-                    <View style={styles.combobox}>  
+                    <FormLabel>{this.state.lang.expense.types}</FormLabel>
+                    <View style={styles.combobox}>
                         {this.getComboBox(types, "type")}
                     </View>
-                    
+
                     {/* currencies */}
-                    <FormLabel>{lang.misc.curr}</FormLabel>
-                    <View style={styles.combobox}>  
+                    <FormLabel>{this.state.lang.misc.curr}</FormLabel>
+                    <View style={styles.combobox}>
                         {this.getComboBox(currs, "curr")}
                     </View>
-                    
+
                     {/* expense date */}
-                    <FormLabel>{infoLang.date}</FormLabel>
+                    <FormLabel>{this.state.lang.expense.date}</FormLabel>
                     <FormInput
                         editable={false}
                         value={this.formatDate(this.state.date.getTime())}
                         style={styles.input}
                     />
-                    
+
                     {/* category */}
-                    <FormLabel>{lang.misc.curr}</FormLabel>
-                    <View style={styles.combobox}>  
+                    <FormLabel>{this.state.lang.misc.curr}</FormLabel>
+                    <View style={styles.combobox}>
                         {this.getComboBox(cats, "category")}
                     </View>
 
                     {/* location */}
-                    <FormLabel>{infoLang.location}</FormLabel>
-                    <FormInput 
+                    <FormLabel>{this.state.lang.expense.location}</FormLabel>
+                    <FormInput
                         autoCapitalize="sentences"
-                        editable={this.props.new} 
+                        editable={this.props.new}
                         style={styles.input}
-                        onChangeText={(location) => this.setState({location})} 
+                        onChangeText={(location) => this.setState({location})}
                     />
-                    {this.state.errLocation && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
+                    {this.state.errLocation && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     {/* list of people */}
-                    <FormLabel>{infoLang.members}</FormLabel>
-                    <FormInput 
+                    <FormLabel>{this.state.lang.expense.members}</FormLabel>
+                    <FormInput
                         autoCapitalize="sentences"
-                        editable={this.props.new} 
+                        editable={this.props.new}
                         style={styles.input}
-                        onChangeText={(members) => this.setState({members})} 
+                        onChangeText={(members) => this.setState({members})}
                     />
-                    {this.state.errMembers && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
+                    {this.state.errMembers && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     {/* notes */}
-                    <FormLabel>{infoLang.notes}</FormLabel>
-                    <FormInput 
+                    <FormLabel>{this.state.lang.expense.notes}</FormLabel>
+                    <FormInput
                         autoCapitalize="sentences"
-                        editable={this.props.new} 
-                        multiline={true} 
-                        autoGrow={true} 
-                        onChangeText={(notes) => this.setState({notes})} 
+                        editable={this.props.new}
+                        multiline={true}
+                        autoGrow={true}
+                        onChangeText={(notes) => this.setState({notes})}
                         style={StyleSheet.flatten([styles.input, styles.input_textarea])}
                     />
 
-                    <Button title={lang.misc.btn} style={styles.btn} onPress={this._submit} />
+                    <Button title={this.state.lang.misc.btn} style={styles.btn} onPress={this._submit} />
                 </View>
             </ScrollView>
-        );
+            );
+        }
     }
 }
 
@@ -200,17 +231,25 @@ const items = [
     {id: 6, name: "pasta", price: "1.50"},
 ]
 
-class ItemsScreen extends React.Component { 
+class ItemsScreen extends React.Component {
     constructor(props){
         super(props);
+        this.state = {
+            isLoading: true,
+        }
     }
-    
+
+    componentDidMount(){
+        var infoLang = this.props.screenProps
+        this.setState({isLoading: false,lang: infoLang})
+    }
+
     buildList(){
         var tmp = [];
-        
+
         if (items == null || items == "" || items == undefined)
             return <View style={styles.empty}>
-                <Text style={styles.empty_text}>{lang.expense.no_expenses}</Text>
+                <Text style={styles.empty_text}>{this.state.lang.expense.no_expenses}</Text>
             </View>
 
         items.map((item) => {
@@ -224,40 +263,45 @@ class ItemsScreen extends React.Component {
             );
         })
 
-        return <ScrollView>{tmp}</ScrollView>        
+        return <ScrollView>{tmp}</ScrollView>
     }
 
     buildForm(){
         return (
             <View style={styles.form_wrapper}>
                 <View>
-                    <Text style={styles.new_item}>{lang.expense.new_item}</Text>
+                    <Text style={styles.new_item}>{this.state.lang.expense.new_item}</Text>
                 </View>
                 <View style={styles.form_container}>
                     <View style={{flex:4}}>
-                        <FormLabel>{lang.expense.item_name}</FormLabel>
-                        <FormInput 
+                        <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
+                        <FormInput
                             autoCapitalize="sentences"
                             onChangeText={(item_name) => this.setState({item_name})}
                         />
                     </View>
                     <View style={{flex:4}}>
-                        <FormLabel>{lang.expense.item_price}</FormLabel>
-                        <FormInput 
+                        <FormLabel>{this.state.lang.expense.item_price}</FormLabel>
+                        <FormInput
                             autoCapitalize="sentences"
                             onChangeText={(item_price) => this.setState({item_price})}
                             keyboardType="numeric"
                         />
                     </View>
                 </View>
-                
+
                 <Icon name='add-circle' size={40.0} onPress={() => console.log("add some new item")} containerStyle={styles.button}/>
             </View>
         );
     }
 
     render(){
-        return (
+        if(this.state.isLoading){
+            return(<View style={{flex: 1, paddingTop: 20}}>
+                <ActivityIndicator />
+            </View>)
+        }
+        else{return (
             <View style={{flex:1, justifyContent: "space-between"}}>
                 <View style={{flex: 3}}>
                     {this.buildList()}
@@ -266,8 +310,8 @@ class ItemsScreen extends React.Component {
                     {this.buildForm()}
                 </View>
             </View>
-        );
-    }   
+        );}
+    }
 }
 
 const imgs = [
@@ -276,9 +320,24 @@ const imgs = [
     {id: 3, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"}
 ]
 
-class GalaryScreen extends React.Component {  
+class GalaryScreen extends React.Component {
     constructor(props){
         super(props);
+        this.state = {
+            isLoading: true,
+        }
+    }
+
+    async componentDidMount(){
+        var infoLang = this.props.screenProps
+        /*
+        await store.get("pref_lang").then(langObj => {for (var i = 0; i < lang.length; i++) {
+            if (lang[i]["id"] == langObj.langId) {
+                 infoLang = lang[i]["content"];
+            }
+        }})
+        */
+        this.setState({isLoading: false,lang: infoLang})
     }
 
     buildGallery(){
@@ -295,13 +354,18 @@ class GalaryScreen extends React.Component {
     }
 
     render() {
-        return (
+        if(this.state.isLoading){
+            return(<View style={{flex: 1, paddingTop: 20}}>
+                <ActivityIndicator />
+            </View>)
+        }
+        else{return (
             <View style={{flex: 1}}>
                 {this.buildGallery()}
 
                 {this.buildButton()}
             </View>
-        );
+        );}
     }
 }
 
@@ -333,7 +397,7 @@ const Tab = TabNavigator({
         },
         showIcon: false,
         inactiveTintColor: "#CECECE",
-        style: { 
+        style: {
             backgroundColor: "#4C3E54",
             marginTop: 10
         }
@@ -350,7 +414,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center"
     },
-    
+
     list_item_info: {
         flex: 1,
         justifyContent: "space-between",
@@ -358,8 +422,8 @@ const styles = StyleSheet.create({
     },
 
     arrow: {
-        flex: 0, 
-        alignItems: "center", 
+        flex: 0,
+        alignItems: "center",
         alignSelf: "center"
     },
 
@@ -387,13 +451,13 @@ const styles = StyleSheet.create({
         fontSize: 24
     },
 
-    divider: { 
+    divider: {
         backgroundColor: '#4db8ff',
         marginLeft: 10,
-        marginRight: 10 
+        marginRight: 10
     },
 
-    combobox: { 
+    combobox: {
         marginLeft: 20,
         marginRight: 20,
         borderBottomWidth: 1,
@@ -406,8 +470,8 @@ const styles = StyleSheet.create({
         paddingRight: 15,
         minHeight: 46
     },
-    
-    form_wrapper: { 
+
+    form_wrapper: {
         position: "absolute",
         bottom: 0,
         left: 0,
@@ -436,7 +500,7 @@ const styles = StyleSheet.create({
         marginRight: 20,
         borderBottomWidth: 1,
         borderBottomColor: "#8c8c8c",
-        borderStyle: "solid" 
+        borderStyle: "solid"
     },
 
     input_textarea: {
