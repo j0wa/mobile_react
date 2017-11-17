@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "react-native";
 import { Icon } from 'react-native-elements';
 import lang from "../configs/languages/lang";
 
@@ -32,18 +32,23 @@ export default class TripsList extends React.Component{
         }
 
         trips.map((item) =>  {
-            items.push(
-                <View key={item.id} style={styles.list_item}>
-                    <View style={styles.list_item_info}>
-                        <Text>{item.date}</Text>
-                        <Text>{item.location}</Text>
-                        <Text>{item.numPeople}</Text>
-                        <Text>{item.category}</Text>
+            items.push( 
+                <TouchableNativeFeedback 
+                    key={item.id} 
+                    onPress={() => navigate('Trips', {new : false, id: item.id, lang: this.props.lang})}
+                >
+                    <View style={styles.list_item}>
+                        <View style={styles.list_item_info}>
+                            <Text>{item.date}</Text>
+                            <Text>{item.location}</Text>
+                            <Text>{item.numPeople}</Text>
+                            <Text>{item.category}</Text>
+                        </View>
+                        <View style={styles.arrow}>
+                            <Icon name='chevron-right' size={40.0}/>
+                        </View>
                     </View>
-                    <View style={styles.arrow}>
-                        <Icon name='chevron-right' onPress={() => navigate('Trips', {new : false, id: item.id, lang: this.props.lang})} size={40.0}/>
-                    </View>
-                </View>
+                </TouchableNativeFeedback >                
             );
         });
 
@@ -52,7 +57,7 @@ export default class TripsList extends React.Component{
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('Trips', {new : false, lang: this.props.lang})}/>
+            <Icon name='add-circle' size={64.0} onPress={() => navigate('Trips', {new : true, lang: this.props.lang})}/>
         </View>
     }
 

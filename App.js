@@ -11,32 +11,37 @@ export default class App extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            isLoading: true,
+            fontLoaded: false,
+            langLoaded: false,
+            lang: null,
         }
     }
 
     async componentDidMount() {
         await Expo.Font.loadAsync({
-            'Material Icons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
-            'simple-line-icons': require('./node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf'),
+            'MaterialIcons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
+            'SimpleLineIcons': require('./node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf'),
             'FontAwesome': require('./node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf'),
             'Ionicons': require('./node_modules/react-native-vector-icons/Fonts/Ionicons.ttf'),
         });
+
         var infoLang
         await store.get("pref_lang").then(langObj => {
-            if(langObj == null){
-                infoLang = lang[0]["content"]
-            }else{
-                for (var i = 0; i < lang.length; i++) {
-                    if (lang[i]["id"] == langObj.langId) {
-                        infoLang = lang[i]["content"];
+            if (langObj != null) {
+                lang.find((item) => {
+                    if (item.id == langObj.langId) {
+                        infoLang = item.content;
+                        return;
                     }
-                }
+                }) 
+            } else {
+                infoLang = lang[0]["content"]
             }
-
         })
+
         this.setState({
             fontLoaded: true,
+            langLoaded: true,
             lang: infoLang,
         });
     }
@@ -53,15 +58,12 @@ export default class App extends React.Component {
             },
         }
 
-        return (this.state.fontLoaded) ? <Menu screenProps={this.state.lang} /> : <AppLoading/>;
+        return (this.state.fontLoaded && this.state.langLoaded) ? <Menu screenProps={this.state.lang} /> : <AppLoading/>;
     }
-}
+};
 
 const StackNav =  StackNavigator({
     Home: {
-        screen: Screens.Home,
-    },
-    TripsList: {
         screen: Screens.TripsList,
     },
     Trips: {
@@ -75,7 +77,10 @@ const StackNav =  StackNavigator({
     },
     Settings: {
         screen: Screens.Settings,
-    }
+    },
+    Categories: {
+        screen: Screens.Categories,
+    },
 }, {
     navigationOptions: ({navigation}) => ({
         headerMode: "float",
@@ -101,13 +106,13 @@ const Menu = DrawerNavigator({
     Home: {
         screen: StackNav,
     },
-    TripsList: {
-        screen: StackNav,
-    },
     ExpensesList: {
         screen: StackNav,
     },
     Settings: {
+        screen: StackNav,
+    },
+    Categories: {
         screen: StackNav,
     },
 },{

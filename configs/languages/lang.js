@@ -3,8 +3,8 @@ import fr from "./fr";
 import store from 'react-native-simple-store';
 
 export default lang = [
-    {id: 1,name: "English",shortName: "en",content: en,},
-    {id: 2,name: "Français",shortName: "fr",content: fr,}
+    {id: 1, name: "English", shortName: "en", content: en,},
+    {id: 2, name: "Français", shortName: "fr", content: fr,}
 ];
 
 

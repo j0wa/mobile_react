@@ -32,6 +32,15 @@ export default {
         title: "Page d'accueil"
     },
 
+    cat: {
+        title: "Categories",
+        new_item: "Add new category",
+        remove_title: "Remove Category",
+        remove_text: "Are you sure you want to remove this category?",
+        remove_yes: "Yes",
+        remove_no: "No",
+    },
+
     misc: {
         curr: "Devise",
         btn: "SOUMETTRE",
