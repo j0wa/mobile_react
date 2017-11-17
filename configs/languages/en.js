@@ -37,9 +37,12 @@ export default {
     },
     
     cat: {
-        title: "Tags",
-        new_item: "Add new tag",
-        no_tags: "You've added no tags yet! Tap the \"+\" button to add your first!",
+        title: "Categories",
+        new_item: "Add new category",
+        remove_title: "Remove Category",
+        remove_text: "Are you sure you want to remove this category?",
+        remove_yes: "Yes",
+        remove_no: "No",
     },
 
     setting: {

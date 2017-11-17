@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Dimensions, Modal, TouchableHighlight, Platform, Alert } from "react-native";
 import { Icon, Button, FormValidationMessage, FormInput, FormLabel } from 'react-native-elements'
 import lang from "../configs/languages/lang";
 
@@ -18,12 +18,19 @@ const cats = [
 export default class Categories extends React.Component{
     constructor(props){
         super(props);
+
+        this.state = {
+            modalVisible: false,
+            errName: false,
+            name: "",
+        }
     }
 
     componentWillMount(){
         this.setState({
             errName: false,
-            name: ""
+            name: "",
+            modalVisible: false
         })
     }
 
@@ -52,31 +59,15 @@ export default class Categories extends React.Component{
         return <ScrollView>{items}</ScrollView>
     }
     
-    buildForm(){
-        return (
-            <View style={styles.form_wrapper}>
-                <View>
-                    <Text style={styles.new_item}>{lang.cat.new_item}</Text>
-                </View>
-                <View style={styles.form_container}>
-                    <View style={{flex:5}}>
-                        <FormLabel>{lang.expense.item_name}</FormLabel>
-                        <FormInput 
-                            autoCapitalize="sentences"
-                            onChangeText={(name) => this.setState({name})}
-                        />
-                        {this.state.errName && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
-                    </View>
-                    <View style={{width: 40, marginRight: 20}}>
-                        <Icon name='add-circle' size={40.0} onPress={() => this._submit} containerStyle={styles.button}/>
-                    </View>
-                </View>                
-            </View>
-        );
-    }
-
     _delete(id){
-        // confirms deletion and removes
+        Alert.alert(
+            lang.cat.remove_title,
+            lang.cat.remove_text,
+            [
+                {text: lang.cat.remove_no, style: 'cancel'},
+                {text: lang.cat.remove_yes, onPress: () => { alert("item removed") } },
+            ],
+        );
     }
 
     _submit(){
@@ -96,16 +87,47 @@ export default class Categories extends React.Component{
         }
     }
 
+    setModalVisible(visible) {
+        this.setState({modalVisible: visible});
+    }
+
+    buildButton(){
+        return <View style={styles.button}>
+            <Icon name='add-circle' size={64.0} onPress={() => this.setModalVisible(true)}/>
+        </View>
+    }
+
+    buildModal(){
+        return <Modal
+            transparent={true}
+            visible={this.state.modalVisible}
+            onRequestClose={() => { this.setModalVisible(false) }}
+        >
+            <TouchableHighlight style={{flex: 1, backgroundColor: "rgba(0, 0, 0, 0.3)"}} onPress={() => { this.setModalVisible(false) }}>
+                <View style={{marginTop: 50, alignSelf: "center", backgroundColor: "#fff", minHeight: 200, width: (Dimensions.get("window").width - 50), borderRadius: 10}}>
+                    <Text style={styles.new_item}>{lang.cat.new_item}</Text>
+
+                    <FormLabel>{lang.expense.item_name}</FormLabel>
+                    <FormInput 
+                        autoCapitalize="sentences"
+                        onChangeText={(name) => this.setState({name: name})}
+                        style={styles.input}
+                    />
+                    { this.state.errName && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
+
+                    <Button title={lang.misc.btn} containerViewStyle={{marginTop: 10, marginBottom: 10}} buttonStyle={{borderRadius: 5}} onPress={this._submit.bind(this)} />
+                </View>
+            </TouchableHighlight>
+        </Modal>
+    }
+
     render(){
         return (
-            <View style={{flex:1, justifyContent: "space-between"}}>
-                <View style={{flex: 3.5}}>
-                    {this.buildList()}
-                </View>
-                <View style={{flex: 1}}>
-                    {this.buildForm()}
-                </View>
-            </View>
+            <View>
+                {this.buildModal()}
+                {this.buildList()}
+                {this.buildButton()}
+            </View>  
         );
     }   
 }
