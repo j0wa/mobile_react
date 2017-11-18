@@ -1,33 +1,36 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "react-native";
 import { Icon } from 'react-native-elements';
-import lang from "../configs/languages/lang";
-
-const trips = [
-    { id: 1, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 2, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 3, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 4, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 5, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 6, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 7, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 8, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 9, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
-    { id: 10, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
-    { id: 11, date: "10/10/2010", location: "algures", numPeople: 3, category: "cool cat man"}
-]
+import store from 'react-native-simple-store';
+import Loader from '../components/Loader';
 
 export default class TripsList extends React.Component{
     constructor(props){
         super(props);
+
+        this.state = {
+            trips: null,
+            loaded: false,
+            lang: this.props.screenProps
+        }
+    }
+
+    async componentWillMount(){
+        store.get("trips").then(
+            trips => this.setState({
+                trips : trips,
+                loaded: true
+            })
+        );
     }
 
     buildList(navigate){
         var items = [];
-
+        var trips = this.state.trips;
+        
         if (trips == null || trips == ""){
             return <View style={styles.empty}>
-                <Text style={styles.empty_text}>{lang.trip.no_trips}</Text>
+                <Text style={styles.empty_text}>{this.state.lang.trip.no_trips}</Text>
             </View>
         }
 
@@ -35,7 +38,7 @@ export default class TripsList extends React.Component{
             items.push( 
                 <TouchableNativeFeedback 
                     key={item.id} 
-                    onPress={() => navigate('Trips', {new : false, id: item.id, lang: this.props.lang})}
+                    onPress={() => navigate('TripsItem', {new : false, id: item.id, lang: this.state.lang})}
                 >
                     <View style={styles.list_item}>
                         <View style={styles.list_item_info}>
@@ -57,25 +60,27 @@ export default class TripsList extends React.Component{
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('Trips', {new : true, lang: this.props.lang})}/>
+            <Icon name='add-circle' size={64.0} onPress={() => navigate('TripsItem', {new : true, lang: this.state.lang})}/>
         </View>
     }
 
     render(){
         const { navigate } = this.props.navigation;
 
-        return (
+        return this.state.loaded ? (
             <View style={styles.wrapper}>
                 {this.buildList(navigate)}
                 {this.buildButton(navigate)}
             </View>
-        );
+        ) : 
+        <Loader />
     }
 }
 
 const styles = StyleSheet.create({
     wrapper: {
-        backgroundColor: "#fff"
+        backgroundColor: "#fff",
+        flex: 1
     },
 
     button: {

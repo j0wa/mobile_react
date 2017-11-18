@@ -1,76 +1,79 @@
 import React from 'react';
 import { Icon, Divider, Badge, Button, FormValidationMessage, FormInput, FormLabel } from 'react-native-elements'
 import { TabNavigator } from 'react-navigation';
-import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform,ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform, TouchableNativeFeedback, TouchableHighlight, Dimensions, Modal } from "react-native";
 import DatePicker from 'react-native-datepicker';
-import lang from "../configs/languages/lang";
+import ExpensesList from "./ExpensesList";
+import Loader from '../components/Loader';
+import store from 'react-native-simple-store';
+
 
 export default class Trips extends React.Component {
     constructor(props){
         super(props);
-
     }
 
     render(){
-            return (<Tab screenProps={this.props.screenProps}/>)
-
-
+        return <Tab screenProps={this.props.screenProps}/>;
     }
 }
-
-const currs = [
-    {id: 1, name: "euro", img: ""},
-    {id: 2, name: "dolar", img: ""}
-];
 
 class TripScreen extends React.Component {
     constructor(props){
         super(props);
-    }
 
-    componentWillMount(){
-        this.setState({
+        this.state = {
+            loaded: false,
+            modalVisible: false,
+            members: [],
             date: new Date(),
             curr: 1,
             errLocation: false,
             errMembers: false,
             errDesc: false,
+            errMemberName: false,
             location: "",
-            members: "",
+            memberName: "",
             desc: "",
-            isLoading: true,
-        });
-    }
-
-    componentDidMount(){
-        var infoLang = this.props.screenProps
-        this.setState({isLoading: false,lang: infoLang})
-    }
-
-    getCurrencies(){
-        var items = [];
-
-        currs.map((item) => {
-            items.push(
-                <Picker.Item label={item.name} value={item.id} key={item.id}/>
-            );
-        })
-
-        if (Platform.OS === "ios"){
-            return <PickerIOS selectedValue={this.state.curr}
-                onValueChange={(itemValue, itemIndex) => this.setState({curr: itemValue})}>
-                {items}
-            </PickerIOS>
         }
-        else {
-            return <Picker selectedValue={this.state.curr}
-                onValueChange={(itemValue, itemIndex) => this.setState({curr: itemValue})}>
-                {items}
-            </Picker>
-        }
+
+        this._submit_new_member = this._submit_new_member.bind(this)
+        this._submit = this._submit.bind(this)
     }
 
-    _submit(){
+    async componentWillMount(){
+        store.get("currencies").then(
+            (currs) => {
+                this.setState({ 
+                    currs: currs 
+                });
+            }
+        );
+
+        store.get("trips").then(
+            trips => {
+                var trip = null;
+
+                if (trips != null)
+                {
+                    trips.find((t) => {
+                        if (t.id == this.props.id){
+                            trip = t;
+                            return;
+                        }
+                    });
+                }
+
+                this.setState({
+                    trip : trip,
+                    loaded: true,
+                    lang: this.props.screenProps,
+                })
+            }
+        );
+    }
+
+    _submit() {
         var err = -1;
 
         if (this.state.location == "") {
@@ -93,96 +96,190 @@ class TripScreen extends React.Component {
         } else {
             this.setState({ errDesc: false });
         }
+
+        if (err === -1){
+            store.push("trips", {
+                id: "",
+                location: this.state.location,
+                date: this.state.date,
+                curr: this.state.curr,
+                members: this.state.members,
+                desc: this.state.desc,
+            }).then(() => this.props.navigation.goBack());
+        }        
+    }
+
+    _submit_new_member() {
+        var err = -1;
+
+        if (this.state.memberName == "") {
+            this.setState({ errMemberName: true });
+            err = 1;
+        } else {
+            this.setState({ errMemberName: false });
+        }
+
+        if (err === -1) {
+            this.setState(prevState => ({
+                members: [...prevState.members, prevState.memberName],
+                modalVisible: false,
+                memberName: ""
+            }));
+        }
+    }
+
+    _delete_member(index){
+        Alert.alert(
+            lang.trip.remove_title,
+            lang.trip.remove_text,
+            [
+                {text: lang.misc.remove_no, style: 'cancel'},
+                {text: lang.misc.remove_yes, onPress: () => { 
+                    this.setState(prevState => ({
+                        members: [prevState.members.splice(index, 1)]
+                    }));
+                }},
+            ],
+        );
+    }
+
+    setModalVisible(visible) {
+        this.setState({modalVisible: visible});
+    }
+
+    buildCurrencies(){
+        var items = [];
+
+        this.state.currs.map((item) => {
+            items.push(
+                <Picker.Item label={item.name} value={item.id} key={item.id}/>
+            );
+        })
+
+        if (Platform.OS === "ios"){
+            return <PickerIOS selectedValue={this.state.curr}
+                onValueChange={(itemValue, itemIndex) => this.setState({curr: itemValue})}>
+                {items}
+            </PickerIOS>
+        }
+        else {
+            return <Picker selectedValue={this.state.curr}
+                onValueChange={(itemValue, itemIndex) => this.setState({curr: itemValue})}>
+                {items}
+            </Picker>
+        }
+    }
+
+    buildMembersList(){
+        return (
+            <View style={styles.members_wrapper}>
+                <FormLabel>{this.state.lang.trip.members}</FormLabel>
+                
+                <TouchableNativeFeedback onPress={() => { this.setModalVisible(true) }} >
+                    <FormLabel containerStyle={styles.new_member}>{this.state.lang.trip.new_member}</FormLabel>
+                </TouchableNativeFeedback>
+
+                <ScrollView style={styles.members_list_wrapper}>
+                    {this.state.members != "" && this.state.members.map((item, index) => {
+                        return <View key={index} style={styles.list_item}>
+                            <Text key={index} style={styles.list_item_text}>{item}</Text>
+                            <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_member(index) }} size={32.0}/>
+                        </View>
+                    })}
+                </ScrollView>
+            </View>
+        );
+    }
+
+    buildModal(){
+        return <Modal
+            transparent={true}
+            visible={this.state.modalVisible}
+            onRequestClose={() => { this.setModalVisible(false) }}
+        >
+            <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.setModalVisible(false) }}>
+                <View style={styles.modal_container}>
+                    <Text style={styles.modal_title}>{this.state.lang.trip.new_member_title}</Text>
+
+                    <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
+                    <FormInput 
+                        autoCapitalize="sentences"
+                        onChangeText={(name) => this.setState({memberName: name})}
+                        style={styles.input}
+                    />
+                    { this.state.errMemberName && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                    <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit_new_member} />
+                </View>
+            </TouchableHighlight>
+        </Modal>
+    }
+
+    buildForm(){
+        return (
+            <ScrollView style={styles.flex_1}>
+                <FormLabel>{this.state.lang.misc.curr}</FormLabel>
+                <View style={styles.curr}>
+                    {this.buildCurrencies()}
+                </View>
+
+                <FormLabel>{this.state.lang.trip.location}</FormLabel>
+                <FormInput
+                    autoCapitalize="sentences"
+                    editable={this.props.new}
+                    style={styles.input}
+                    onChangeText={(location) => this.setState({location})}
+                />
+                {this.state.errLocation && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                <FormLabel>{this.state.lang.trip.date}</FormLabel>
+                <View style={styles.date_container}>
+                    <DatePicker
+                        date={this.state.date}
+                        mode="date"
+                        minDate={new Date()}
+                        format="DD-MM-YYYY"
+                        showIcon={false}
+                        customStyles={{
+                            dateInput: styles.date_input
+                        }}
+                        onDateChange={(date) => {this.setState({date: date})}}
+                    />
+                </View>
+
+                <FormLabel>{this.state.lang.trip.desc}</FormLabel>
+                <FormInput
+                    autoCapitalize="sentences"
+                    editable={this.props.new}
+                    multiline={true}
+                    autoGrow={true}
+                    onChangeText={(desc) => this.setState({desc})}
+                    style={StyleSheet.flatten([styles.input, styles.input_textarea])}
+                />
+                {this.state.errDesc && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                {this.buildMembersList()}
+                {this.state.errMembers && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit} />
+            </ScrollView>
+        );
     }
 
     render(){
-
-        if(this.state.isLoading){
-            return (
-                <View style={{flex: 1, paddingTop: 20}}>
-                    <ActivityIndicator />
-                </View>
-            );
-        }else{return (
-            <ScrollView style={{ marginBottom: 20}}>
-                <View style={styles.title}>
-                    <Text style={styles.title_font}>{this.state.lang.trip.info_title}</Text>
-                </View>
-
-                <Divider style={styles.divider} />
-
-                <View>
-                    <FormLabel>{this.state.lang.misc.curr}</FormLabel>
-                    <View style={styles.curr}>
-                        {this.getCurrencies()}
-                    </View>
-
-                    <FormLabel>{this.state.lang.trip.location}</FormLabel>
-                    <FormInput
-                        autoCapitalize="sentences"
-                        editable={this.props.new}
-                        style={styles.input}
-                        onChangeText={(location) => this.setState({location})}
-                    />
-                    {this.state.errLocation && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
-
-                    <FormLabel>{this.state.lang.trip.date}</FormLabel>
-                    <View style={styles.date_container}>
-                        <DatePicker
-                            date={this.state.date}
-                            mode="date"
-                            placeholder="select date"
-                            minDate={new Date()}
-                            confirmBtnText="Confirm"
-                            cancelBtnText="Cancel"
-                            format="DD-MM-YYYY"
-                            showIcon={false}
-                            customStyles={{
-                                dateInput: {
-                                    borderWidth: 0,
-                                    alignItems: "flex-start",
-                                    paddingLeft: 10
-                                }
-                            }}
-                            onDateChange={(date) => {this.setState({date: date})}}
-                        />
-                    </View>
-
-                    <FormLabel>{this.state.lang.trip.members}</FormLabel>
-                    <FormInput
-                        autoCapitalize="sentences"
-                        editable={this.props.new}
-                        style={styles.input}
-                        onChangeText={(members) => this.setState({members})}
-                    />
-                    {this.state.errMembers && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
-
-                    <FormLabel>{this.state.lang.trip.desc}</FormLabel>
-                    <FormInput
-                        autoCapitalize="sentences"
-                        editable={this.props.new}
-                        multiline={true}
-                        autoGrow={true}
-                        onChangeText={(desc) => this.setState({desc})}
-                        style={StyleSheet.flatten([styles.input, styles.input_textarea])}
-                    />
-                    {this.state.errDesc && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
-
-                    <Button title={this.state.lang.misc.btn} style={styles.btn} onPress={this._submit.bind(this)} />
-                </View>
-            </ScrollView>
-            );
-        }
+        return (this.state.loaded) ? 
+            <View style={styles.flex_1}> 
+                {this.buildForm()} 
+                {this.buildModal()} 
+            </View> : 
+            <Loader />
     }
 }
 
-class ExpensesScreen extends React.Component {
+class SummariesScreen extends React.Component {
     render() {
         return (
-            <Button
-                onPress={() => this.props.navigation.goBack()}
-                title="Go back home"
-            />
+            <View><Text>THE SUMMARIES WILL BE DISPLAYED HERE</Text></View>
         );
     }
 }
@@ -191,7 +288,6 @@ const styles = StyleSheet.create({
     title: {
         alignItems:"center",
         justifyContent:"center",
-        marginBottom: 20
     },
 
     title_font: {
@@ -201,7 +297,8 @@ const styles = StyleSheet.create({
     divider: {
         backgroundColor: '#4db8ff',
         marginLeft: 10,
-        marginRight: 10
+        marginRight: 10,
+        marginTop: 20
     },
 
     curr: {
@@ -230,30 +327,108 @@ const styles = StyleSheet.create({
         height: 70
     },
 
-    btn: {
-        fontSize: 20,
-        fontWeight: "bold",
-        marginTop: 10
+    btnContainer: {
+        marginTop: 10, 
+        marginBottom: 10,
+        marginLeft: 50,
+        marginRight: 50,
+    },
+    
+    btnStyle: {
+        borderRadius: 5
+    },
+
+    sub_title_font: {
+        fontSize: 18,
+        margin: 15,
+        marginBottom: 0
+    },
+
+    new_member: {
+        position: "absolute", 
+        right: 15,
+        paddingBottom: 15,
+        borderWidth: 1, 
+        borderColor: "#000",
+        borderStyle: "dashed",
+        borderRadius: 5,
+        alignItems: "center",
+        justifyContent: "center",
+        top: 8,
+        height: 30
+    },
+
+    date_input: {
+        borderWidth: 0,
+        alignItems: "flex-start",
+        paddingLeft: 10
+    },
+
+    modal_wrapper: {
+        flex: 1, 
+        backgroundColor: "rgba(0, 0, 0, 0.3)"
+    },
+
+    modal_container: {
+        marginTop: 50,
+        alignSelf: "center",
+        backgroundColor: "#fff",
+        minHeight: 200,
+        width: (Dimensions.get("window").width - 50),
+        borderRadius: 10
+    },
+
+    members_wrapper: {
+        marginBottom: 20
+    },
+
+    members_list_wrapper: {
+        marginTop: 20,
+        flex: 1
+    },
+
+    flex_1: {
+        flex: 1
+    },
+
+    modal_title: {
+        marginLeft: 20,
+        fontSize: 16,
+        marginTop: 20
+    },
+
+    list_item: {
+        height: 50,
+        marginLeft: 30,
+        marginRight: 30,
+        borderBottomColor: "#aaa",
+        borderBottomWidth: .5,
+    },
+
+    list_item_text: {
+        flex: 1,
+        paddingLeft: 30,
+        marginTop: 10,
+        fontSize: 18  
+    },
+
+    list_item_icon: {
+        flex: 1,
+        position: "absolute",
+        right: 10,
+        top: 10
     },
 });
 
 const Tab = TabNavigator({
-        Home: {
+        General: {
             screen: TripScreen,
-            navigationOptions :{
-                showLabel: false,
-                tabBarIcon: ({ tintColor }) => (
-                    <Icon name='info' type="simple-line-icon" color="#fff"/>
-                )
-           }
         },
         Expenses: {
-            screen: ExpensesScreen,
-            navigationOptions: {
-                tabBarIcon: ({ tintColor }) => (
-                    <Icon name='wallet' type="simple-line-icon" color="#fff"/>
-                )
-            }
+            screen: ExpensesList,
+        },
+        Summaries: {
+            screen: SummariesScreen,
         },
     }, {
         tabBarPosition: 'bottom',
@@ -262,9 +437,12 @@ const Tab = TabNavigator({
             iconStyle: {
                 width: 40
             },
-            activeTintColor: '#e91e63',
-            showIcon: true,
-            showLabel: false
-        },
+            showIcon: false,
+            inactiveTintColor: "#CECECE",
+            style: {
+                backgroundColor: "#4C3E54",
+                marginTop: 10
+            }
+        }
     }
 );

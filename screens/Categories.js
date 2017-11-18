@@ -64,8 +64,8 @@ export default class Categories extends React.Component{
             lang.cat.remove_title,
             lang.cat.remove_text,
             [
-                {text: lang.cat.remove_no, style: 'cancel'},
-                {text: lang.cat.remove_yes, onPress: () => { alert("item removed") } },
+                {text: lang.misc.remove_no, style: 'cancel'},
+                {text: lang.misc.remove_yes, onPress: () => { alert("item removed") } },
             ],
         );
     }
@@ -115,7 +115,7 @@ export default class Categories extends React.Component{
                     />
                     { this.state.errName && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
 
-                    <Button title={lang.misc.btn} containerViewStyle={{marginTop: 10, marginBottom: 10}} buttonStyle={{borderRadius: 5}} onPress={this._submit.bind(this)} />
+                    <Button title={lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit.bind(this)} />
                 </View>
             </TouchableHighlight>
         </Modal>
@@ -135,6 +135,15 @@ export default class Categories extends React.Component{
 const styles = StyleSheet.create({
     wrapper: {
         backgroundColor: "#fff"
+    },
+
+    btnContainer: {
+        marginTop: 10, 
+        marginBottom: 10
+    },
+    
+    btnStyle: {
+        borderRadius: 5
     },
 
     button: {

@@ -2,18 +2,20 @@ export default {
     trip: {
         title: "Trips",
         details: "Trip details",
-        info_title: "General Information",
         location: "Location",
         date: "Date",
         members: "Members",
         desc: "Description",
-        no_trips: "You've no trips yet! Tap the \"+\" button to create your first!"
+        no_trips: "You've no trips yet! Tap the \"+\" button to create your first!",
+        new_member: "New member",
+        new_member_title: "Add new member",
+        remove_title: "Remove member",
+        remove_text: "Are you sure you want to remove this category?",
     },
 
     expense: {
         title: "Expenses",
-        no_expenses: "You've no expenses yet! Tap the \"+\" button to create your first!",
-        info_title: "General information",
+        no_expenses: "You've no expenses yet! Tap the \"+\" button to create your first!",        
         receiver: "Receiver",
         types: "Types",
         date: "Date",
@@ -41,8 +43,6 @@ export default {
         new_item: "Add new category",
         remove_title: "Remove Category",
         remove_text: "Are you sure you want to remove this category?",
-        remove_yes: "Yes",
-        remove_no: "No",
     },
 
     setting: {
@@ -52,6 +52,10 @@ export default {
     misc: {
         curr: "Currency",
         btn: "SUBMIT",
+        general: "General",
+        info_title: "General Information",
+        remove_yes: "Yes",
+        remove_no: "No",
     },
 
     err: {
@@ -61,5 +65,9 @@ export default {
     setting: {
         title: "Settings",
         lang_select: "Preffered language"
+    },
+
+    summaries: {
+        title: "Summaries",
     }
 }

@@ -4,8 +4,10 @@ import { Icon } from 'react-native-elements'
 import { StackNavigator, DrawerNavigator, DrawerItems } from 'react-navigation';
 import Screens from "./screens/Screens";
 import lang from "./configs/languages/lang";
-import { Font, AppLoading } from 'expo';
+import { Font } from 'expo';
 import store from 'react-native-simple-store';
+import dataFeed from './data/data_feed';
+import Loader from './components/Loader';
 
 export default class App extends React.Component {
     constructor(props){
@@ -18,6 +20,10 @@ export default class App extends React.Component {
     }
 
     async componentDidMount() {
+        dataFeed.currencies();
+        dataFeed.expenseType();
+        dataFeed.categories();
+
         await Expo.Font.loadAsync({
             'MaterialIcons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
             'SimpleLineIcons': require('./node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf'),
@@ -48,31 +54,24 @@ export default class App extends React.Component {
 
     render(){
         StatusBar.setHidden(true);
-        /*var testVar = [this.state.lang]
-        console.log(testVar);*/
-        const screenProps = {
-                user: {
-                name: 'John Doe',
-                username: 'johndoe123',
-                email: 'john@doe.com',
-            },
-        }
 
-        return (this.state.fontLoaded && this.state.langLoaded) ? <Menu screenProps={this.state.lang} /> : <AppLoading/>;
+        return (this.state.fontLoaded && this.state.langLoaded) ? <Menu screenProps={this.state.lang} /> : <Loader />;
     }
 };
 
+
+
 const StackNav =  StackNavigator({
-    Home: {
+    Trips: {
         screen: Screens.TripsList,
     },
-    Trips: {
+    TripsItem: {
         screen: Screens.Trips,
     },
-    ExpensesList: {
+    Expenses: {
         screen: Screens.ExpensesList,
     },
-    Expenses: {
+    ExpensesItem: {
         screen: Screens.Expenses,
     },
     Settings: {
@@ -103,10 +102,10 @@ const StackNav =  StackNavigator({
 });
 
 const Menu = DrawerNavigator({
-    Home: {
+    Trips: {
         screen: StackNav,
     },
-    ExpensesList: {
+    Expenses: {
         screen: StackNav,
     },
     Settings: {

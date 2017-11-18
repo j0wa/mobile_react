@@ -20,6 +20,10 @@ const expenses = [
 export default class ExpensesList extends React.Component{
     constructor(props){
         super(props);
+
+        // this.props.trip
+        // this will tell us if we're showing this screen on the trip menu
+        // if we are, we'll have to get all expenses associated with the trip with the this.props.trip (which is an ID)
     }
 
     buildList(navigate){

@@ -330,13 +330,6 @@ class GalaryScreen extends React.Component {
 
     async componentDidMount(){
         var infoLang = this.props.screenProps
-        /*
-        await store.get("pref_lang").then(langObj => {for (var i = 0; i < lang.length; i++) {
-            if (lang[i]["id"] == langObj.langId) {
-                 infoLang = lang[i]["content"];
-            }
-        }})
-        */
         this.setState({isLoading: false,lang: infoLang})
     }
 
@@ -372,21 +365,12 @@ class GalaryScreen extends React.Component {
 const Tab = TabNavigator({
     Home: {
         screen: GeneralScreen,
-        navigationOptions :{
-            title: "General"
-       }
     },
     Items: {
         screen: ItemsScreen,
-        navigationOptions: {
-            title: "Items"
-        }
     },
     Galary: {
         screen: GalaryScreen,
-        navigationOptions: {
-            title: "Gallary"
-        }
     },
 }, {
     tabBarPosition: 'bottom',
