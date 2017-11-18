@@ -16,8 +16,8 @@ export default dataFeed = {
     },
 
     expenseType() {
-        store.get("expenseType").then(currs => {
-            if (currs == null) {
+        store.get("expenseType").then(type => {
+            if (type == null) {
                 store.save('expenseType', [
                     {id: 1, name: "Split even"},
                     {id: 2, name: "To each his own"},
@@ -28,8 +28,8 @@ export default dataFeed = {
     },
 
     categories() {
-        store.get("cats").then(currs => {
-            if (currs == null) {
+        store.get("cats").then(cats => {
+            if (cats == null) {
                 store.save('cats', [
                     {id: 1, name: "Restaurant"},
                     {id: 2, name: "Transport"},

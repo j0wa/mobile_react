@@ -7,6 +7,7 @@ import lang from "./configs/languages/lang";
 import { Font } from 'expo';
 import store from 'react-native-simple-store';
 import dataFeed from './data/data_feed';
+import resetStorage from './data/reset_storage';
 import Loader from './components/Loader';
 
 export default class App extends React.Component {
@@ -20,6 +21,10 @@ export default class App extends React.Component {
     }
 
     async componentDidMount() {
+        /* uncomment when storage reset needed */
+        // resetStorage.trips();
+        // resetStorage.expenses();
+        // resetStorage.categories();
         dataFeed.currencies();
         dataFeed.expenseType();
         dataFeed.categories();
@@ -67,6 +72,7 @@ const StackNav =  StackNavigator({
     },
     TripsItem: {
         screen: Screens.Trips,
+        path: 'trips/:derp',
     },
     Expenses: {
         screen: Screens.ExpensesList,

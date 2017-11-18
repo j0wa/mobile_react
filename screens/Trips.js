@@ -25,16 +25,12 @@ class TripScreen extends React.Component {
         this.state = {
             loaded: false,
             modalVisible: false,
-            members: [],
-            date: new Date(),
-            curr: 1,
             errLocation: false,
             errMembers: false,
             errDesc: false,
             errMemberName: false,
-            location: "",
             memberName: "",
-            desc: "",
+            id: -1
         }
 
         this._submit_new_member = this._submit_new_member.bind(this)
@@ -52,9 +48,9 @@ class TripScreen extends React.Component {
 
         store.get("trips").then(
             trips => {
-                var trip = null;
+                var trip = {};
 
-                if (trips != null)
+                if (!this.props.new)
                 {
                     trips.find((t) => {
                         if (t.id == this.props.id){
@@ -68,7 +64,12 @@ class TripScreen extends React.Component {
                     trip : trip,
                     loaded: true,
                     lang: this.props.screenProps,
-                })
+                    id: (trips != null) ? (trips.length + 1) : 1,
+                    location: trip.location || "",
+                    date: trip.date || new Date(),
+                    members: trip.members || [],
+                    curr: trip.curr || 1
+                });
             }
         );
     }
@@ -99,13 +100,13 @@ class TripScreen extends React.Component {
 
         if (err === -1){
             store.push("trips", {
-                id: "",
+                id: this.state.id,
                 location: this.state.location,
                 date: this.state.date,
                 curr: this.state.curr,
                 members: this.state.members,
                 desc: this.state.desc,
-            }).then(() => this.props.navigation.goBack());
+            }).then(() => {alert('yuuup'); this.props.navigation.goBack()});
         }        
     }
 
@@ -158,13 +159,13 @@ class TripScreen extends React.Component {
 
         if (Platform.OS === "ios"){
             return <PickerIOS selectedValue={this.state.curr}
-                onValueChange={(itemValue, itemIndex) => this.setState({curr: itemValue})}>
+                onValueChange={(value) => this.setState({curr: value})}>
                 {items}
             </PickerIOS>
         }
         else {
             return <Picker selectedValue={this.state.curr}
-                onValueChange={(itemValue, itemIndex) => this.setState({curr: itemValue})}>
+                onValueChange={(value) => this.setState({curr: value})}>
                 {items}
             </Picker>
         }
@@ -183,7 +184,7 @@ class TripScreen extends React.Component {
                     {this.state.members != "" && this.state.members.map((item, index) => {
                         return <View key={index} style={styles.list_item}>
                             <Text key={index} style={styles.list_item_text}>{item}</Text>
-                            <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_member(index) }} size={32.0}/>
+                            {this.props.id == null && <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_member(index) }} size={32.0}/> }
                         </View>
                     })}
                 </ScrollView>
@@ -223,15 +224,6 @@ class TripScreen extends React.Component {
                     {this.buildCurrencies()}
                 </View>
 
-                <FormLabel>{this.state.lang.trip.location}</FormLabel>
-                <FormInput
-                    autoCapitalize="sentences"
-                    editable={this.props.new}
-                    style={styles.input}
-                    onChangeText={(location) => this.setState({location})}
-                />
-                {this.state.errLocation && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
-
                 <FormLabel>{this.state.lang.trip.date}</FormLabel>
                 <View style={styles.date_container}>
                     <DatePicker
@@ -243,9 +235,19 @@ class TripScreen extends React.Component {
                         customStyles={{
                             dateInput: styles.date_input
                         }}
-                        onDateChange={(date) => {this.setState({date: date})}}
+                        onChangeText={(date) => {this.state.loaded && this.setState({date: date})}}
                     />
                 </View>
+
+                <FormLabel>{this.state.lang.trip.location}</FormLabel>
+                <FormInput
+                    autoCapitalize="sentences"
+                    editable={this.props.new}
+                    style={styles.input}
+                    value={this.state.name}
+                    onChangeText={(location) => {this.state.loaded && this.setState({location: location})}}
+                />
+                {this.state.errLocation && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                 <FormLabel>{this.state.lang.trip.desc}</FormLabel>
                 <FormInput
@@ -253,7 +255,8 @@ class TripScreen extends React.Component {
                     editable={this.props.new}
                     multiline={true}
                     autoGrow={true}
-                    onChangeText={(desc) => this.setState({desc})}
+                    value={this.state.desc}                    
+                    onChangeText={(desc) => {this.state.loaded && this.setState({desc: desc})}}
                     style={StyleSheet.flatten([styles.input, styles.input_textarea])}
                 />
                 {this.state.errDesc && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
@@ -261,7 +264,7 @@ class TripScreen extends React.Component {
                 {this.buildMembersList()}
                 {this.state.errMembers && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
-                <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit} />
+                {this.props.id == null && <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit} />}
             </ScrollView>
         );
     }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "react-native";
+import { NavigationActions } from 'react-navigation'
 import { Icon } from 'react-native-elements';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
@@ -24,7 +25,7 @@ export default class TripsList extends React.Component{
         );
     }
 
-    buildList(navigate){
+    buildList(navigation){
         var items = [];
         var trips = this.state.trips;
         
@@ -38,7 +39,9 @@ export default class TripsList extends React.Component{
             items.push( 
                 <TouchableNativeFeedback 
                     key={item.id} 
-                    onPress={() => navigate('TripsItem', {new : false, id: item.id, lang: this.state.lang})}
+                    onPress={() => {
+                        navigation.navigate('TripsItem', {derp: "dsa"});
+                    }}
                 >
                     <View style={styles.list_item}>
                         <View style={styles.list_item_info}>
@@ -58,19 +61,20 @@ export default class TripsList extends React.Component{
         return <ScrollView>{items}</ScrollView>
     }
 
-    buildButton(navigate){
+    buildButton(navigation){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('TripsItem', {new : true, lang: this.state.lang})}/>
+            <Icon name='add-circle' size={64.0} onPress={() => {
+                navigation.setParams({new : true})
+                navigation.navigate('TripsItem')
+            }} />
         </View>
     }
 
     render(){
-        const { navigate } = this.props.navigation;
-
         return this.state.loaded ? (
             <View style={styles.wrapper}>
-                {this.buildList(navigate)}
-                {this.buildButton(navigate)}
+                {this.buildList(this.props.navigation)}
+                {this.buildButton(this.props.navigation)}
             </View>
         ) : 
         <Loader />
