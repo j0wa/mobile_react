@@ -11,7 +11,7 @@ export default class ExpensesList extends React.Component{
         this.state = {
             expenses: null,
             loaded: false,
-            lang: this.props.screenProps            
+            lang: this.props.screenProps  
         }
     }
 

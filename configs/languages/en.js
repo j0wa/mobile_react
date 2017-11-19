@@ -15,6 +15,7 @@ export default {
 
     expense: {
         title: "Expenses",
+        details: "Expense details",
         no_expenses: "You've no expenses yet! Tap the \"+\" button to create your first!",        
         receiver: "Receiver",
         types: "Types",
@@ -44,10 +45,6 @@ export default {
         new_item: "Add new category",
         remove_title: "Remove Category",
         remove_text: "Are you sure you want to remove this category?",
-    },
-
-    setting: {
-        title: "Settings"
     },
 
     misc: {
