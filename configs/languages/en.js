@@ -27,7 +27,8 @@ export default {
         items: "Items",
         galary: "Gallery",
         item_name: "Name",
-        item_price: "Price"
+        item_price: "Price",
+        cost: "Cost"
     },
 
     home: {

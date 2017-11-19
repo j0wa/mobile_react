@@ -16,21 +16,20 @@ export default dataFeed = {
     },
 
     expenseType() {
-        store.get("expenseTypes").then(type => {
+        store.get("splitType").then(type => {
             if (type == null) {
-                store.save('expenseTypes', [
+                store.save('splitType', [
                     {id: 1, name: "Split even"},
-                    {id: 2, name: "To each his own"},
-                    {id: 3, name: "Free choice"},
+                    {id: 2, name: "Free choice"},
                 ]);
             }
         });
     },
 
     categories() {
-        store.get("cats").then(cats => {
+        store.get("categories").then(cats => {
             if (cats == null) {
-                store.save('cats', [
+                store.save('categories', [
                     {id: 1, name: "Restaurant"},
                     {id: 2, name: "Transport"},
                     {id: 3, name: "Groceries"},
