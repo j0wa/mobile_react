@@ -16,9 +16,9 @@ export default dataFeed = {
     },
 
     expenseType() {
-        store.get("expenseType").then(type => {
+        store.get("expenseTypes").then(type => {
             if (type == null) {
-                store.save('expenseType', [
+                store.save('expenseTypes', [
                     {id: 1, name: "Split even"},
                     {id: 2, name: "To each his own"},
                     {id: 3, name: "Free choice"},

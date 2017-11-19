@@ -4,6 +4,7 @@ import { NavigationActions } from 'react-navigation'
 import { Icon } from 'react-native-elements';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
+import formatDate from '../utils/date_format';
 
 export default class TripsList extends React.Component{
     constructor(props){
@@ -45,7 +46,7 @@ export default class TripsList extends React.Component{
                 >
                     <View style={styles.list_item}>
                         <View style={styles.list_item_info}>
-                            <Text>{item.date}</Text>
+                            <Text>{formatDate(item.date)}</Text>
                             <Text>{item.location}</Text>
                             <Text>{item.numPeople}</Text>
                             <Text>{item.category}</Text>
