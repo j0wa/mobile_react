@@ -15,7 +15,7 @@ export default dataFeed = {
         });
     },
 
-    expenseType() {
+    spitType() {
         store.get("splitType").then(type => {
             if (type == null) {
                 store.save('splitType', [

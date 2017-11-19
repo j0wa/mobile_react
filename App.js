@@ -26,7 +26,7 @@ export default class App extends React.Component {
         // resetStorage.expenses();
         // resetStorage.categories();
         dataFeed.currencies();
-        dataFeed.expenseType();
+        dataFeed.spitType();
         dataFeed.categories();
 
         await Expo.Font.loadAsync({
