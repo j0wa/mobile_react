@@ -11,12 +11,50 @@ import formatDate from '../utils/date_format';
 export default class Expenses extends React.Component {
     constructor(props){
         super(props);
+
+        this.state = { loaded: false }
+    }
+
+    // faz o async aqui e depois manda os items por params para os ecrãs     
+    async componentWillMount(){
+        store.get("expenses").then(
+            expenses => {
+                var neww = this.props.navigation.state.params.new;
+                var expense = {};
+                if (!neww)
+                {
+                    var id = this.props.navigation.state.params.id;
+                    expenses.find((e) => {
+                        if (e.id == id){
+                            expense = e;
+                            return;
+                        }
+                    });
+                }
+
+                var imgs = expense.gallery || {};
+                var items = expense.items || {};
+                var {imgs, items, ...expense} = info || {};
+                this.setState({ 
+                    new: neww,
+                    gallery: imgs,
+                    items: items,
+                    info: info,
+                    loaded: true,
+                });
+            }
+        )
     }
 
     render(){
-        return <Tab screenProps={{
+        return !loaded ? <Loader/> : <Tab screenProps={{
             lang: this.props.screenProps, 
-            params: this.props.navigation.state.params
+            params: {
+                new: this.props.navigation.state.params.new,
+                info: this.state.info,
+                items: this.state.items,
+                summaries: this.state.summaries
+            }
         }} />;
     }
 }
@@ -28,29 +66,22 @@ class GeneralScreen extends React.Component {
         this.state = {
             loaded: false,
             new: this.props.screenProps.params.new,
+            exp: this.props.screenProps.params.info,
             errReceiver: false,
-            checked: false,
             catLoaded: false,
             currLoaded: false,
-            typeLoaded: false
+            typeLoaded: false,
+            lang: this.props.screenProps.lang
         }
 
         this._submit = this._submit.bind(this)
     }
 
-    componentWillMount(){
+    async componentWillMount(){
         store.get("currencies").then(
             (currs) => {  
                 this.setState({ 
                     currs: currs 
-                });
-            }
-        );
-        
-        store.get("categories").then(
-            (cats) => {
-                this.setState({ 
-                    cats: cats 
                 });
             }
         );
@@ -63,31 +94,19 @@ class GeneralScreen extends React.Component {
             }
         );
 
-        store.get("expenses").then(
-            expenses => {
-                var expense = {};
-                var id = this.props.screenProps.params.id;
+        store.get("categories").then(
+            (cats) => {
+                var exp = this.state.exp;
 
-                if (this.props.new != null)
-                {
-                    expenses.find((e) => {
-                        if (e.id == id){
-                            expense = e;
-                            return;
-                        }
-                    });
-                }
-
-                this.setState({
-                    expense : expense,
+                this.setState({ 
+                    cats: cats,
+                    date: exp.date || new Date(),
+                    members: exp.members || [],
+                    curr: exp.curr || 1,
+                    type: exp.type || 1,
+                    cat: exp.cat || 1,
                     loaded: true,
-                    id: (expenses != null) ? (expenses.length + 1) : id,
-                    date: expense.date || new Date(),
-                    members: expense.members || [],
-                    curr: expense.curr || 1,
-                    type: expense.type || 1,
-                    cat: expense.cat || 1,
-                    lang: this.props.screenProps.lang                    
+                    id: (exp != null) ? (exp.length + 1) : exp.id,
                 });
             }
         );
@@ -264,30 +283,78 @@ class GeneralScreen extends React.Component {
     }
 }
 
-const items = [
-    {id: 1, name: "water", price: "1.50"},
-    {id: 2, name: "beef", price: "1.50"},
-    {id: 3, name: "cake", price: "1.50"},
-    {id: 4, name: "pasta", price: "1.50"},
-    {id: 5, name: "pasta", price: "1.50"},
-    {id: 6, name: "pasta", price: "1.50"},
-]
-
 class ItemsScreen extends React.Component {
     constructor(props){
         super(props);
+        
         this.state = {
-            isLoading: true,
+            loaded: false,
+            lang: this.props.screenProp,
+            items: this.props.screenProps.params.items,
+            modalVisible: false,
+            errItemName: false,
+            errItemPrice: false,
+            itemName: "",
+            itemPrice: "",
+        }
+
+        this._submit_new_item = this._submit_new_item.bind(this)
+        this._delete_item = this._delete_item.bind(this)
+        this._submit = this._submit.bind(this)
+    }
+
+    _delete_item(index){
+        Alert.alert(
+            lang.trip.remove_title,
+            lang.trip.remove_text,
+            [
+                {text: lang.misc.remove_no, style: 'cancel'},
+                {text: lang.misc.remove_yes, onPress: () => { 
+                    this.setState(prevState => ({
+                        items: [prevState.items.splice(index, 1)]
+                    }));
+                }},
+            ],
+        );
+    }
+
+    _submit_new_item() {
+        var err = -1;
+
+        if (this.state.itemName == "") {
+            this.setState({ errItemName: true });
+            err = 1;
+        } else {
+            this.setState({ errItemName: false });
+        }
+
+        if (this.state.itemPrice == "") {
+            this.setState({ errItemPrice: true });
+            err = 1;
+        } else {
+            this.setState({ errItemPrice: false });
+        }
+
+        if (err === -1) {
+            this.setState(prevState => ({
+                items: [
+                    ...prevState.items, 
+                    {name: this.state.itemName, price: this.state.itemName}
+                ],
+                modalVisible: false,
+                itemPrice: "",
+                itemName: ""
+            }));
         }
     }
 
-    componentDidMount(){
-        var infoLang = this.props.screenProps
-        this.setState({isLoading: false,lang: infoLang})
+    setModalVisible(visible) {
+        this.setState({modalVisible: visible});
     }
 
     buildList(){
         var tmp = [];
+        var items = this.state.items;
 
         if (items == null || items == "" || items == undefined)
             return <View style={styles.empty}>
@@ -330,29 +397,52 @@ class ItemsScreen extends React.Component {
                             keyboardType="numeric"
                         />
                     </View>
+                    <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_item(index) }} size={32.0}/>
                 </View>
-
-                <Icon name='add-circle' size={40.0} onPress={() => console.log("add some new item")} containerStyle={styles.button}/>
             </View>
         );
     }
 
+    buildModal(){
+        return <Modal
+            transparent={true}
+            visible={this.state.modalVisible}
+            onRequestClose={() => { this.setModalVisible(false) }}
+        >
+            <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.setModalVisible(false) }}>
+                <View style={styles.modal_container}>
+                    <Text style={styles.modal_title}>{this.state.lang.trip.new_member_title}</Text>
+
+                    <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
+                    <FormInput 
+                        autoCapitalize="sentences"
+                        onChangeText={(name) => this.setState({itemName: name})}
+                        style={styles.input}
+                    />
+                    { this.state.errItemName && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                    <FormLabel>{this.state.lang.expense.item_price}</FormLabel>
+                    <FormInput 
+                        autoCapitalize="sentences"
+                        onChangeText={(price) => this.setState({itemPrice: price})}
+                        style={styles.input}
+                    />
+                    { this.state.errItemPrice && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                    <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit_item} />
+                </View>
+            </TouchableHighlight>
+        </Modal>
+    }
+
     render(){
-        if(this.state.isLoading){
-            return(<View style={{flex: 1, paddingTop: 20}}>
-                <Loader />
-            </View>)
-        }
-        else{return (
-            <View style={{flex:1, justifyContent: "space-between"}}>
-                <View style={{flex: 3}}>
-                    {this.buildList()}
-                </View>
-                <View style={{flex: 1.5}}>
-                    {this.buildForm()}
-                </View>
-            </View>
-        );}
+        return (this.state.loaded) ? 
+            <View style={styles.flex_1}> 
+                {this.buildForm()} 
+                {this.buildModal()} 
+            </View> : 
+            <Loader />
+
     }
 }
 
@@ -509,6 +599,10 @@ const styles = StyleSheet.create({
         shadowRadius: 1
     },
 
+    flex_1: {
+        flex:1 
+    },
+
     form_container: {
         flexDirection:'row',
         width: Dimensions.get("window").width,
@@ -567,5 +661,12 @@ const styles = StyleSheet.create({
     
     btnStyle: {
         borderRadius: 5
+    },
+
+    list_item_icon: {
+        flex: 1,
+        position: "absolute",
+        right: 10,
+        top: 10
     },
 });

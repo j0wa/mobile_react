@@ -37,6 +37,7 @@ class TripScreen extends React.Component {
         }
 
         this._submit_new_member = this._submit_new_member.bind(this)
+        this._delete_member = this._delete_member.bind(this)
         this._submit = this._submit.bind(this)
     }
 
@@ -126,7 +127,7 @@ class TripScreen extends React.Component {
 
         if (err === -1) {
             this.setState(prevState => ({
-                members: [...prevState.members, prevState.memberName],
+                members: [...prevState.members, this.state.memberName],
                 modalVisible: false,
                 memberName: ""
             }));
