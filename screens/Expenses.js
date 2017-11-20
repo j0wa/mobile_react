@@ -446,51 +446,64 @@ class ItemsScreen extends React.Component {
     }
 }
 
-const imgs = [
-    {id: 1, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"},
-    {id: 2, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"},
-    {id: 3, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"}
-]
-
 class GalaryScreen extends React.Component {
     constructor(props){
         super(props);
-        this.state = {
-            isLoading: true,
-        }
-    }
 
-    async componentDidMount(){
-        var infoLang = this.props.screenProps
-        this.setState({isLoading: false,lang: infoLang})
+        this.state = {
+            lang: this.props.screenProps.params.lang,
+            gallary: this.props.screenProps.params.gallary,
+            showPhotoGallery: false,
+            cameraPhotos: "" 
+        }
     }
 
     buildGallery(){
         return  <ScrollView>
-            <PhotoGrid PhotosList={imgs} borderRadius={10}/>
+            <PhotoGrid PhotosList={this.state.gallary} borderRadius={10}/>
         </ScrollView>;
+    }
+
+
+    getPhotos(){
+        CameraRoll.getPhotos({ first: 1000000 }).then(pics => {
+            this.setState({ 
+                showPhotoGallery: true, 
+                cameraPhotos: pics.edges
+            })
+        });
     }
 
     buildButton(){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => {
-            }} />
+            <Icon name='add-circle' size={64.0} onPress={() => this.getPhotos} />
         </View>
     }
 
-    render() {
-        if(this.state.isLoading){
-            return(<View style={{flex: 1, paddingTop: 20}}>
-                <Loader />
-            </View>)
-        }
-        else{return (
+    selectPic(pic){
+        var len = this.state.gallary.lenght + 1;
+
+        console.log(pic);
+        
+        this.setState(prevState => ({
+            gallary: [...prevState.gallary, {id: len, url: "something"}]
+        }));
+    }
+
+    buildScreen(){
+        if (this.state.showPhotoGallery)
+            return <PhotoGrid PhotosList={this.state.cameraPhotos} borderRadius={10} onPress ={(pic) => { this.selectPic(pic) }} />
+
+        return 
             <View style={{flex: 1}}>
                 {this.buildGallery()}
 
                 {this.buildButton()}
             </View>
-        );}
+    }
+
+    render() {
+        return this.state.loaded ? this.buildScreen() : <Loader />
     }
 }
 
