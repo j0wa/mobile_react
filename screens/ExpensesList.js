@@ -11,22 +11,22 @@ export default class ExpensesList extends React.Component{
         this.state = {
             expenses: null,
             loaded: false,
-            lang: this.props.screenProps  
+            lang: this.props.screenProps.lang || this.props.screenProps,
+            // this will tell us if we're showing this screen on the trip menu
+            // if we are, we'll have to get all expenses associated with the trip with the this.state.trip (which is an ID)
+            trip_id: this.props.screenProps.params.trip_id || null,
         }
     }
 
     async componentWillMount(){
         store.get("expenses").then(
             expenses => {
-                // this.props.trip
-                // this will tell us if we're showing this screen on the trip menu
-                // if we are, we'll have to get all expenses associated with the trip with the this.props.trip (which is an ID)
-                if (this.props.trip){
+                if (this.state.trip_id){
                     expenses.filter((e) => {
-                        return e.trip = this.props.trip;
+                        return e.trip_id = this.props.trip_id;
                     });
                 }
-
+                
                 this.setState({
                     expenses : expenses,
                     loaded: true
@@ -49,7 +49,7 @@ export default class ExpensesList extends React.Component{
             items.push( 
                 <TouchableNativeFeedback 
                     key={item.id} 
-                    onPress={() => navigate('ExpensesItem')}
+                    onPress={() => navigate('ExpensesItem', {id: item.id, new: false})}
                 >
                     <View style={styles.list_item} >
                         <View style={styles.list_item_info}>
@@ -71,7 +71,7 @@ export default class ExpensesList extends React.Component{
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('ExpensesItem')}/>
+            <Icon name='add-circle' size={64.0} onPress={() => navigate('ExpensesItem', {id: null, new: true})}/>
         </View>
     }
 

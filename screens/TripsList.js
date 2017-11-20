@@ -9,7 +9,7 @@ import formatDate from '../utils/date_format';
 export default class TripsList extends React.Component{
     constructor(props){
         super(props);
-
+    
         this.state = {
             trips: null,
             loaded: false,
@@ -41,7 +41,7 @@ export default class TripsList extends React.Component{
                 <TouchableNativeFeedback 
                     key={item.id} 
                     onPress={() => {
-                        navigation.navigate('TripsItem', {derp: "dsa"});
+                        navigation.navigate('TripsItem', {trip_id: item.id, new: false});
                     }}
                 >
                     <View style={styles.list_item}>
@@ -65,8 +65,7 @@ export default class TripsList extends React.Component{
     buildButton(navigation){
         return <View style={styles.button}>
             <Icon name='add-circle' size={64.0} onPress={() => {
-                navigation.setParams({new : true})
-                navigation.navigate('TripsItem')
+                navigation.navigate('TripsItem', {new: false})
             }} />
         </View>
     }

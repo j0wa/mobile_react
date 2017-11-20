@@ -14,7 +14,10 @@ export default class Trips extends React.Component {
     }
 
     render(){
-        return <Tab screenProps={this.props.screenProps}/>;
+        return <Tab screenProps={{
+            lang: this.props.screenProps, 
+            params: this.props.navigation.state.params
+        }} />;
     }
 }
 
@@ -30,7 +33,7 @@ class TripScreen extends React.Component {
             errDesc: false,
             errMemberName: false,
             memberName: "",
-            id: -1
+            new: this.props.screenProps.params.new
         }
 
         this._submit_new_member = this._submit_new_member.bind(this)
@@ -49,11 +52,12 @@ class TripScreen extends React.Component {
         store.get("trips").then(
             trips => {
                 var trip = {};
+                var id = this.props.screenProps.params.trip_id;
 
-                if (!this.props.new)
+                if (!this.state.new)
                 {
                     trips.find((t) => {
-                        if (t.id == this.props.id){
+                        if (t.id == id){
                             trip = t;
                             return;
                         }
@@ -63,12 +67,12 @@ class TripScreen extends React.Component {
                 this.setState({
                     trip : trip,
                     loaded: true,
-                    lang: this.props.screenProps,
-                    id: (trips != null) ? (trips.length + 1) : 1,
+                    id: (trips != null) ? (trips.length + 1) : id,
                     location: trip.location || "",
                     date: trip.date || new Date(),
                     members: trip.members || [],
-                    curr: trip.curr || 1
+                    curr: trip.curr || 1,
+                    lang: this.props.screenProps.lang
                 });
             }
         );

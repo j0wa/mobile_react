@@ -14,17 +14,20 @@ export default class Expenses extends React.Component {
     }
 
     render(){
-        return <Tab screenProps={this.props.screenProps} />
+        return <Tab screenProps={{
+            lang: this.props.screenProps, 
+            params: this.props.navigation.state.params
+        }} />;
     }
 }
 
 class GeneralScreen extends React.Component {
     constructor(props){
         super(props);
-
+        
         this.state = {
             loaded: false,
-            lang: this.props.screenProps,
+            new: this.props.screenProps.params.new,
             errReceiver: false,
             checked: false,
             catLoaded: false,
@@ -63,11 +66,12 @@ class GeneralScreen extends React.Component {
         store.get("expenses").then(
             expenses => {
                 var expense = {};
+                var id = this.props.screenProps.params.id;
 
                 if (this.props.new != null)
                 {
                     expenses.find((e) => {
-                        if (e.id == this.props.id){
+                        if (e.id == id){
                             expense = e;
                             return;
                         }
@@ -77,13 +81,13 @@ class GeneralScreen extends React.Component {
                 this.setState({
                     expense : expense,
                     loaded: true,
-                    lang: this.props.screenProps,
-                    id: (expenses != null) ? (expenses.length + 1) : 1,
+                    id: (expenses != null) ? (expenses.length + 1) : id,
                     date: expense.date || new Date(),
                     members: expense.members || [],
                     curr: expense.curr || 1,
                     type: expense.type || 1,
-                    cat: expense.cat || 1
+                    cat: expense.cat || 1,
+                    lang: this.props.screenProps.lang                    
                 });
             }
         );
