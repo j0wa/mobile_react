@@ -14,7 +14,7 @@ export default class ExpensesList extends React.Component{
             lang: this.props.screenProps.lang || this.props.screenProps,
             // this will tell us if we're showing this screen on the trip menu
             // if we are, we'll have to get all expenses associated with the trip with the this.state.trip (which is an ID)
-            trip_id: this.props.screenProps.params.trip_id || null,
+            trip_id: this.props.screenProps.params ? this.props.screenProps.params.trip_id : null,
         }
     }
 

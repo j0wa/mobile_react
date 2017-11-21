@@ -16,20 +16,21 @@ export default {
     expense: {
         title: "Expenses",
         details: "Expense details",
-        no_expenses: "You've no expenses yet! Tap the \"+\" button to create your first!",        
+        no_expenses: "You've no expenses yet! Tap the \"+\" button to create your first!",
+        no_items: "You've no items yet! Tap the \"+\" button to create your first!",
         receiver: "Receiver",
         types: "Types",
         date: "Date",
         location: "Location",
         members: "Members",
         notes: "Notes",
-        new_item: "Add new item",
+        new_item_title: "Add new item",
         no_img: "You've added no images yet! Tap the \"+\" button to add your first!",
         items: "Items",
         galary: "Gallery",
         item_name: "Name",
         item_price: "Price",
-        cost: "Cost"
+        cost: "Cost",
     },
 
     home: {

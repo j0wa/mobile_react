@@ -6,10 +6,10 @@ export default dataFeed = {
         store.get("currencies").then(currs => {
             if (currs == null) {
                 store.save('currencies', [
-                    {id: 1, name: "Eur"},
-                    {id: 2, name: "USD"},
-                    {id: 3, name: "AUD"},
-                    {id: 4, name: "GBP"},
+                    {id: 1, name: "Eur", symbol: "€"},
+                    {id: 2, name: "USD", symbol: "$"},
+                    {id: 3, name: "AUD", symbol: "$"},
+                    {id: 4, name: "GBP", symbol: "£"},
                 ]);
             }
         });

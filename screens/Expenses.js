@@ -1,7 +1,7 @@
 import React from 'react';
 import { TabNavigator } from 'react-navigation';
 import { Icon, Button, FormValidationMessage, FormInput, FormLabel, CheckBox } from 'react-native-elements'
-import { View, Text, StyleSheet, ScrollView, Image, Dimensions, CameraRoll, PermissionsAndroid } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, Dimensions, CameraRoll, PermissionsAndroid, Modal, TouchableHighlight } from "react-native";
 import { PhotoGrid } from 'react-native-photo-grid-frame';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
@@ -12,10 +12,12 @@ export default class Expenses extends React.Component {
     constructor(props){
         super(props);
 
-        this.state = { loaded: false }
+        this.state = {
+            loaded: false
+        }
     }
 
-    // faz o async aqui e depois manda os items por params para os ecrãs     
+    // faz o async aqui e depois manda os items por params para os ecrãs
     async componentWillMount(){
         store.get("expenses").then(
             expenses => {
@@ -32,14 +34,19 @@ export default class Expenses extends React.Component {
                     });
                 }
 
-                var imgs = expense.gallery || {};
-                var items = expense.items || {};
-                var {imgs, items, ...expense} = info || {};
                 this.setState({ 
                     new: neww,
-                    gallery: imgs,
-                    items: items,
-                    info: info,
+                    gallery: expense.gallery || {},
+                    items: expense.items || {},
+                    info: Object.keys(expense).length != 0 ? {
+                        receiver: expense.receiver,
+                        type: expense.type,
+                        curr: expense.curr,
+                        cat: expense.cat,
+                        date: new Date(expense.date),
+                        cost: expense.cost,
+                        notes: expense.notes
+                    } : {},
                     loaded: true,
                 });
             }
@@ -47,7 +54,7 @@ export default class Expenses extends React.Component {
     }
 
     render(){
-        return !loaded ? <Loader/> : <Tab screenProps={{
+        return this.state.loaded ? <Tab screenProps={{
             lang: this.props.screenProps, 
             params: {
                 new: this.props.navigation.state.params.new,
@@ -55,7 +62,7 @@ export default class Expenses extends React.Component {
                 items: this.state.items,
                 summaries: this.state.summaries
             }
-        }} />;
+        }} /> : <Loader/>;
     }
 }
 
@@ -182,7 +189,6 @@ class GeneralScreen extends React.Component {
         
         return <ComboBox>
             {collection.map(item => {
-                console.log(item);
                 return <ComboBoxItem label={item.name} value={item.id} key={item.id}/>
             })}
         </ComboBox>
@@ -288,8 +294,7 @@ class ItemsScreen extends React.Component {
         super(props);
         
         this.state = {
-            loaded: false,
-            lang: this.props.screenProp,
+            lang: this.props.screenProps.lang,
             items: this.props.screenProps.params.items,
             modalVisible: false,
             errItemName: false,
@@ -298,9 +303,8 @@ class ItemsScreen extends React.Component {
             itemPrice: "",
         }
 
-        this._submit_new_item = this._submit_new_item.bind(this)
-        this._delete_item = this._delete_item.bind(this)
-        this._submit = this._submit.bind(this)
+        this._submit_new_item = this._submit_new_item.bind(this);
+        this._delete_item = this._delete_item.bind(this);
     }
 
     _delete_item(index){
@@ -339,7 +343,7 @@ class ItemsScreen extends React.Component {
             this.setState(prevState => ({
                 items: [
                     ...prevState.items, 
-                    {name: this.state.itemName, price: this.state.itemName}
+                    {name: this.state.itemName, price: this.state.itemPrice}
                 ],
                 modalVisible: false,
                 itemPrice: "",
@@ -353,54 +357,30 @@ class ItemsScreen extends React.Component {
     }
 
     buildList(){
-        var tmp = [];
         var items = this.state.items;
 
-        if (items == null || items == "" || items == undefined)
+        if (Object.keys(items).length == 0)
             return <View style={styles.empty}>
-                <Text style={styles.empty_text}>{this.state.lang.expense.no_expenses}</Text>
+                <Text style={styles.empty_text}>{this.state.lang.expense.no_items}</Text>
             </View>
 
-        items.map((item) => {
-            tmp.push(
-                <View key={item.id} style={styles.list_item}>
-                    <View style={styles.list_item_info}>
-                        <Text>{item.name}</Text>
-                        <Text>{item.price}</Text>
-                    </View>
-                </View>
-            );
-        })
-
-        return <ScrollView>{tmp}</ScrollView>
-    }
-
-    buildForm(){
         return (
-            <View style={styles.form_wrapper}>
-                <View>
-                    <Text style={styles.new_item}>{this.state.lang.expense.new_item}</Text>
-                </View>
-                <View style={styles.form_container}>
-                    <View style={{flex:4}}>
-                        <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
-                        <FormInput
-                            autoCapitalize="sentences"
-                            onChangeText={(item_name) => this.setState({item_name})}
-                        />
+            <ScrollView>
+                {items.map((item, index) => {
+                    return <View key={index} style={styles.list_item}>
+                        <View style={styles.list_item_info}>
+                            <View>
+                                <Text>{item.name}</Text>
+                            </View>
+                            <View>
+                                <Text>{item.price}</Text>
+                            </View>
                     </View>
-                    <View style={{flex:4}}>
-                        <FormLabel>{this.state.lang.expense.item_price}</FormLabel>
-                        <FormInput
-                            autoCapitalize="sentences"
-                            onChangeText={(item_price) => this.setState({item_price})}
-                            keyboardType="numeric"
-                        />
+                            <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_item(index) }} size={32.0}/>
                     </View>
-                    <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_item(index) }} size={32.0}/>
-                </View>
-            </View>
-        );
+                })}
+            </ScrollView>
+        )
     }
 
     buildModal(){
@@ -411,7 +391,7 @@ class ItemsScreen extends React.Component {
         >
             <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.setModalVisible(false) }}>
                 <View style={styles.modal_container}>
-                    <Text style={styles.modal_title}>{this.state.lang.trip.new_member_title}</Text>
+                    <Text style={styles.modal_title}>{this.state.lang.expense.new_item_title}</Text>
 
                     <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
                     <FormInput 
@@ -424,24 +404,30 @@ class ItemsScreen extends React.Component {
                     <FormLabel>{this.state.lang.expense.item_price}</FormLabel>
                     <FormInput 
                         autoCapitalize="sentences"
+                        keyboardType="numeric"
                         onChangeText={(price) => this.setState({itemPrice: price})}
                         style={styles.input}
                     />
                     { this.state.errItemPrice && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
-                    <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit_item} />
+                    <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit_new_item} />
                 </View>
             </TouchableHighlight>
         </Modal>
     }
 
+    buildButton(){
+        return <View style={styles.button}>
+            <Icon name='add-circle' size={64.0} onPress={() => {this.setModalVisible(true)}}/>
+        </View>
+    }
+
     render(){
-        return (this.state.loaded) ? 
-            <View style={styles.flex_1}> 
-                {this.buildForm()} 
-                {this.buildModal()} 
-            </View> : 
-            <Loader />
+        return <View style={styles.flex_1}> 
+            {this.buildModal()} 
+            {this.buildList()} 
+            {this.buildButton()}
+        </View>
 
     }
 }
@@ -520,6 +506,7 @@ const Tab = TabNavigator({
 }, {
     tabBarPosition: 'bottom',
     animationEnabled: true,
+    lazy: true,
     tabBarOptions: {
         iconStyle: {
             width: 40
@@ -539,15 +526,14 @@ const styles = StyleSheet.create({
         borderBottomWidth: .5,
         borderColor: "#aaa",
         borderStyle: "solid",
-        flex: 1,
-        flexDirection: "row",
-        alignItems: "center"
+        flex: 1
     },
 
     list_item_info: {
-        flex: 1,
-        justifyContent: "space-between",
-        flexDirection: "row"
+        marginRight: 100, 
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent:"space-between"
     },
 
     arrow: {
@@ -680,6 +666,26 @@ const styles = StyleSheet.create({
         flex: 1,
         position: "absolute",
         right: 10,
-        top: 10
+        top: 15
+    },
+
+    modal_wrapper: {
+        flex: 1, 
+        backgroundColor: "rgba(0, 0, 0, 0.3)"
+    },
+
+    modal_container: {
+        marginTop: 50,
+        alignSelf: "center",
+        backgroundColor: "#fff",
+        minHeight: 200,
+        width: (Dimensions.get("window").width - 50),
+        borderRadius: 10
+    },
+    
+    modal_title: {
+        marginLeft: 20,
+        fontSize: 16,
+        marginTop: 20
     },
 });
