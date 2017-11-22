@@ -10,7 +10,7 @@ export default {
         new_member: "New member",
         new_member_title: "Add new member",
         remove_title: "Remove member",
-        remove_text: "Are you sure you want to remove this category?",
+        remove_text: "Are you sure you want to remove this member?",
     },
 
     expense: {
@@ -31,6 +31,8 @@ export default {
         item_name: "Name",
         item_price: "Price",
         cost: "Cost",
+        remove_title: "Remove item",
+        remove_text: "Are you sure you want to remove this item?",
     },
 
     home: {

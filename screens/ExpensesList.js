@@ -18,7 +18,7 @@ export default class ExpensesList extends React.Component{
             trip_id: this.props.screenProps.params ? this.props.screenProps.params.trip_id : null,
         }
     }
-
+ 
     async componentWillMount() {
         store.get("expenses").then(
             expenses => {
@@ -36,6 +36,15 @@ export default class ExpensesList extends React.Component{
         );
     }
 
+    updateList(e) {
+        this.setState(prevState => ({
+            expense: {
+                ...prevState.expenses,
+                e
+            }
+        }));
+    }
+
     buildList(navigate) {
         var items = [];
         var expenses = this.state.expenses;
@@ -50,7 +59,7 @@ export default class ExpensesList extends React.Component{
             items.push( 
                 <TouchableNativeFeedback 
                     key={item.id} 
-                    onPress={() => navigate('ExpensesItem', {id: item.id, new: false})}
+                    onPress={() => navigate('ExpensesItem', {id: item.id, new: false, updateExpenses: this.updateList})}
                 >
                     <View style={styles.list_item} >
                         <View style={styles.list_item_info}>
@@ -72,7 +81,7 @@ export default class ExpensesList extends React.Component{
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('ExpensesItem', {id: null, new: true})}/>
+            <Icon name='add-circle' size={64.0} onPress={() => navigate('ExpensesItem', {id: null, new: true, updateExpenses: this.updateList})}/>
         </View>
     }
 

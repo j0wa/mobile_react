@@ -1,7 +1,7 @@
 import React from 'react';
 import { TabNavigator } from 'react-navigation';
 import { Icon, Button, FormValidationMessage, FormInput, FormLabel, CheckBox } from 'react-native-elements'
-import { View, Text, StyleSheet, ScrollView, Image, Dimensions, CameraRoll, PermissionsAndroid, Modal, TouchableHighlight } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, Dimensions, CameraRoll, PermissionsAndroid, Modal, TouchableHighlight, Alert } from "react-native";
 import { PhotoGrid } from 'react-native-photo-grid-frame';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
@@ -13,8 +13,21 @@ export default class Expenses extends React.Component {
         super(props);
 
         this.state = {
-            loaded: false
+            loaded: false,
         }
+
+        this._updateItems = this._updateItems.bind(this);
+        this.updateGallary = this.updateGallary.bind(this);
+    }
+
+    updateGallary(gallary){
+        this.setState({ gallary: gallary });
+    }
+
+    _updateItems(items){
+        this.setState({ 
+            items: items 
+        });
     }
 
     // faz o async aqui e depois manda os items por params para os ecrãs
@@ -55,13 +68,17 @@ export default class Expenses extends React.Component {
 
     render(){
         return this.state.loaded ? <Tab screenProps={{
+            navigation: this.props.navigation,
             lang: this.props.screenProps, 
             params: {
                 new: this.props.navigation.state.params.new,
                 info: this.state.info,
                 items: this.state.items,
                 summaries: this.state.summaries
-            }
+            },
+            updateExpenses: this.props.screenProps.updateExpenses,
+            updateGallary: this.updateGallary,
+            updateItems: this._updateItems,
         }} /> : <Loader/>;
     }
 }
@@ -74,11 +91,13 @@ class GeneralScreen extends React.Component {
             loaded: false,
             new: this.props.screenProps.params.new,
             exp: this.props.screenProps.params.info,
+            items: this.props.screenProps.params.items,
+            gallary: this.props.screenProps.params.gallary,
+            lang: this.props.screenProps.lang,
             errReceiver: false,
             catLoaded: false,
             currLoaded: false,
             typeLoaded: false,
-            lang: this.props.screenProps.lang
         }
 
         this._submit = this._submit.bind(this)
@@ -129,17 +148,24 @@ class GeneralScreen extends React.Component {
             this.setState({ errReceiver: false });
         }
 
+        var e = {
+            id: this.state.id,
+            reciever: this.state.reciever,
+            date: this.state.date,
+            curr: this.state.curr,
+            type: this.state.type,
+            cat: this.state.cat,
+            members: this.state.members,
+            notes: this.state.notes,
+            items: this.state.items,
+            gallary: this.state.gallary,
+        };
+
         if (err == -1){
-            store.push("expenses", {
-                id: this.state.id,
-                reciever: this.state.reciever,
-                date: this.state.date,
-                curr: this.state.curr,
-                type: this.state.type,
-                cat: this.state.cat,
-                members: this.state.members,
-                notes: this.state.notes,
-            }).then(() => {alert('yuuup'); this.props.navigation.goBack()});
+            store.push("expenses", e).then(() => {
+                this.props.navigation.state.updateExpenses(e);
+                this.props.screenProps.navigation.goBack()} 
+            );
         }
     }
 
@@ -309,14 +335,19 @@ class ItemsScreen extends React.Component {
 
     _delete_item(index){
         Alert.alert(
-            lang.trip.remove_title,
-            lang.trip.remove_text,
+            this.state.lang.expense.remove_title,
+            this.state.lang.expense.remove_text,
             [
-                {text: lang.misc.remove_no, style: 'cancel'},
-                {text: lang.misc.remove_yes, onPress: () => { 
-                    this.setState(prevState => ({
-                        items: [prevState.items.splice(index, 1)]
-                    }));
+                {text: this.state.lang.misc.remove_no, style: 'cancel'},
+                {text: this.state.lang.misc.remove_yes, onPress: () => { 
+                    var items = this.state.items;
+                    items.splice(0, 1);
+                    
+                    this.setState({
+                        items: items
+                    });
+                    
+                    this.props.screenProps.updateItems(this.state.items);
                 }},
             ],
         );
@@ -340,15 +371,19 @@ class ItemsScreen extends React.Component {
         }
 
         if (err === -1) {
-            this.setState(prevState => ({
-                items: [
-                    ...prevState.items, 
-                    {name: this.state.itemName, price: this.state.itemPrice}
-                ],
+            var items =  [
+                ...this.state.items, 
+                {name: this.state.itemName, price: this.state.itemPrice}
+            ];
+
+            this.setState({
+                items: items,
                 modalVisible: false,
                 itemPrice: "",
                 itemName: ""
-            }));
+            });
+
+            this.props.screenProps.updateItems(items);
         }
     }
 
@@ -458,8 +493,7 @@ class GalaryScreen extends React.Component {
                 <PhotoGrid PhotosList={this.state.gallary} borderRadius={10}/>
             </ScrollView>
         );
-    }   
-
+    }
 
     getPhotos(){
         CameraRoll.getPhotos({ first: 1000000 }).then(pics => {
