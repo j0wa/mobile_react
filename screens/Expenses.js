@@ -428,7 +428,6 @@ class ItemsScreen extends React.Component {
             {this.buildList()} 
             {this.buildButton()}
         </View>
-
     }
 }
 
@@ -437,7 +436,7 @@ class GalaryScreen extends React.Component {
         super(props);
 
         this.state = {
-            lang: this.props.screenProps.params.lang,
+            lang: this.props.screenProps.lang,
             gallary: this.props.screenProps.params.gallary,
             showPhotoGallery: false,
             cameraPhotos: "" 
@@ -445,10 +444,21 @@ class GalaryScreen extends React.Component {
     }
 
     buildGallery(){
-        return  <ScrollView>
-            <PhotoGrid PhotosList={this.state.gallary} borderRadius={10}/>
-        </ScrollView>;
-    }
+        if  (this.state.gallary  == "" || this.state.gallary == null || this.state.gallary == {})
+        {
+            return (
+                <View style={styles.empty}>
+                    <Text style={styles.empty_text}>{this.state.lang.expense.no_img}</Text>
+                </View>
+            );
+        }
+        
+        return (
+            <ScrollView>
+                <PhotoGrid PhotosList={this.state.gallary} borderRadius={10}/>
+            </ScrollView>
+        );
+    }   
 
 
     getPhotos(){
@@ -462,7 +472,7 @@ class GalaryScreen extends React.Component {
 
     buildButton(){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => this.getPhotos} />
+            <Icon name='add-circle' size={64.0} onPress={() => {this.getPhotos()}} />
         </View>
     }
 
@@ -477,19 +487,25 @@ class GalaryScreen extends React.Component {
     }
 
     buildScreen(){
-        if (this.state.showPhotoGallery)
-            return <PhotoGrid PhotosList={this.state.cameraPhotos} borderRadius={10} onPress ={(pic) => { this.selectPic(pic) }} />
+        if (this.state.showPhotoGallery){
+            return (
+                <View style={styles.flex_1}>
+                    <PhotoGrid PhotosList={this.state.cameraPhotos} borderRadius={10} onPress ={(pic) => { this.selectPic(pic) }} />
+                </View>
+            );
+        }
 
-        return 
-            <View style={{flex: 1}}>
+        return (
+            <View style={styles.flex_1}>
                 {this.buildGallery()}
 
                 {this.buildButton()}
             </View>
+        );
     }
 
     render() {
-        return this.state.loaded ? this.buildScreen() : <Loader />
+        return <View style={{flex: 1}}>{this.buildScreen()}</View>
     }
 }
 

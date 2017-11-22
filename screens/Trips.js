@@ -7,7 +7,6 @@ import ExpensesList from "./ExpensesList";
 import Loader from '../components/Loader';
 import store from 'react-native-simple-store';
 
-
 export default class Trips extends React.Component {
     constructor(props){
         super(props);

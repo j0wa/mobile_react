@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "rea
 import { Icon } from 'react-native-elements';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
+import formatDate from '../utils/date_format';
 
 export default class ExpensesList extends React.Component{
     constructor(props){
         super(props);
-
+        
         this.state = {
             expenses: null,
             loaded: false,
@@ -18,10 +19,10 @@ export default class ExpensesList extends React.Component{
         }
     }
 
-    async componentWillMount(){
+    async componentWillMount() {
         store.get("expenses").then(
             expenses => {
-                if (this.state.trip_id){
+                if (this.state.trip_id != undefined && this.state.trip_id != null && this.state.trip_id != ""){
                     expenses.filter((e) => {
                         return e.trip_id = this.props.trip_id;
                     });
@@ -35,7 +36,7 @@ export default class ExpensesList extends React.Component{
         );
     }
 
-    buildList(navigate){
+    buildList(navigate) {
         var items = [];
         var expenses = this.state.expenses;
 
@@ -53,7 +54,7 @@ export default class ExpensesList extends React.Component{
                 >
                     <View style={styles.list_item} >
                         <View style={styles.list_item_info}>
-                            <Text>{item.date}</Text>
+                            <Text>{formatDate(item.date)}</Text>
                             <Text>{item.reciever}</Text>
                             <Text>{item.type_split}</Text>
                             <Text>{item.location}</Text>
