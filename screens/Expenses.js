@@ -6,6 +6,7 @@ import { PhotoGrid } from 'react-native-photo-grid-frame';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
 import { ComboBox, ComboBoxItem } from '../components/ComboBox';
+import Required from '../components/Required';
 import formatDate from '../utils/date_format';
 
 export default class Expenses extends React.Component {
@@ -35,10 +36,10 @@ export default class Expenses extends React.Component {
         store.get("expenses").then(
             expenses => {
                 var neww = this.props.navigation.state.params.new;
+                var id = this.props.navigation.state.params.id;
                 var expense = {};
                 if (!neww)
                 {
-                    var id = this.props.navigation.state.params.id;
                     expenses.find((e) => {
                         if (e.id == id){
                             expense = e;
@@ -58,8 +59,11 @@ export default class Expenses extends React.Component {
                         cat: expense.cat,
                         date: new Date(expense.date),
                         cost: expense.cost,
-                        notes: expense.notes
-                    } : {},
+                        notes: expense.notes,
+                        id: id
+                    } : { 
+                        id: id
+                    },
                     loaded: true,
                 });
             }
@@ -86,7 +90,7 @@ export default class Expenses extends React.Component {
 class GeneralScreen extends React.Component {
     constructor(props){
         super(props);
-        
+
         this.state = {
             loaded: false,
             new: this.props.screenProps.params.new,
@@ -94,12 +98,15 @@ class GeneralScreen extends React.Component {
             items: this.props.screenProps.params.items,
             gallary: this.props.screenProps.params.gallary,
             lang: this.props.screenProps.lang,
+            id: this.props.screenProps.params.info.id,
             errReceiver: false,
+            errCost: false,
             catLoaded: false,
             currLoaded: false,
             typeLoaded: false,
+            cost: ""
         }
-
+        
         this._submit = this._submit.bind(this)
     }
 
@@ -122,7 +129,7 @@ class GeneralScreen extends React.Component {
 
         store.get("categories").then(
             (cats) => {
-                var exp = this.state.exp;
+                var exp = this.state.exp; 
 
                 this.setState({ 
                     cats: cats,
@@ -131,8 +138,10 @@ class GeneralScreen extends React.Component {
                     curr: exp.curr || 1,
                     type: exp.type || 1,
                     cat: exp.cat || 1,
+                    receiver: exp.receiver || "",
                     loaded: true,
-                    id: (exp != null) ? (exp.length + 1) : exp.id,
+                    cost: exp.cost || "",
+                    notes: exp.notes || ""
                 });
             }
         );
@@ -148,22 +157,32 @@ class GeneralScreen extends React.Component {
             this.setState({ errReceiver: false });
         }
 
-        var e = {
-            id: this.state.id,
-            reciever: this.state.reciever,
-            date: this.state.date,
-            curr: this.state.curr,
-            type: this.state.type,
-            cat: this.state.cat,
-            members: this.state.members,
-            notes: this.state.notes,
-            items: this.state.items,
-            gallary: this.state.gallary,
-        };
+        if (this.state.cost == "") {
+            this.setState({ errCost: true });
+            err = 1;
+        } else {
+            this.setState({ errCost: false });
+        }
 
         if (err == -1){
+            var e = {
+                id: this.state.id,
+                receiver: this.state.receiver,
+                date: this.state.date,
+                curr: this.state.curr,
+                type: this.state.type,
+                cat: this.state.cat,
+                members: this.state.members,
+                cost: this.state.cost,
+                notes: this.state.notes,
+                items: this.state.items,
+                gallary: this.state.gallary,
+            };
+            
             store.push("expenses", e).then(() => {
-                this.props.navigation.state.updateExpenses(e);
+                if (this.state.new)
+                    this.props.screenProps.navigation.state.params.updateExpenses(e);
+                    
                 this.props.screenProps.navigation.goBack()} 
             );
         }
@@ -213,7 +232,17 @@ class GeneralScreen extends React.Component {
         if (!collection || collection == "" || collection == [] || collection == null) 
             return;
         
-        return <ComboBox>
+        return <ComboBox 
+                selectedValue={this.state[stateItem]}
+                onValueChange={(value) => { 
+                    if (stateItem == "type")
+                        this.setState({type: value});
+                    else if (stateItem == "curr")
+                        this.setState({curr: value});
+                    else
+                        this.setState({cat: value});
+                }}
+            >
             {collection.map(item => {
                 return <ComboBoxItem label={item.name} value={item.id} key={item.id}/>
             })}
@@ -242,11 +271,13 @@ class GeneralScreen extends React.Component {
             <ScrollView style={{paddingBottom: 60}}>
                 <View>
                     {/* receiver */}
-                    <FormLabel>{this.state.lang.expense.receiver}</FormLabel>
+                    <FormLabel>{this.state.lang.expense.receiver}<Required /></FormLabel>
                     <FormInput
                         autoCapitalize="sentences"
+                        value={this.state.receiver}
                         editable={this.props.new}
                         style={styles.input}
+                        returnKeyType="next"
                         onChangeText={(receiver) => this.setState({receiver: receiver})}
                     />
                     {this.state.errReceiver && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
@@ -278,17 +309,19 @@ class GeneralScreen extends React.Component {
                     />
                     
                     {/* cost */}
-                    <FormLabel>{this.state.lang.expense.cost}</FormLabel>
+                    <FormLabel>{this.state.lang.expense.cost} <Required /></FormLabel>
                     <FormInput
                         editable={this.props.new}                        
                         style={styles.input}
-                        value={this.state.cost}
+                        value={String(this.state.cost)}
                         keyboardType="numeric"
+                        returnKeyType="next"
                         onChangeText={(cost) => { 
                             this.setState({cost: cost});
                             this.updateValues();
                         }}
                     />
+                    {this.state.errCost && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }                    
 
                     {/* notes */}
                     <FormLabel>{this.state.lang.expense.notes}</FormLabel>
@@ -297,6 +330,7 @@ class GeneralScreen extends React.Component {
                         editable={this.props.new}
                         multiline={true}
                         autoGrow={true}
+                        value={this.state.notes}
                         onChangeText={(notes) => this.setState({notes: notes})}
                         style={StyleSheet.flatten([styles.input, styles.input_textarea])}
                     />

@@ -10,13 +10,15 @@ export default class ExpensesList extends React.Component{
         super(props);
         
         this.state = {
-            expenses: null,
+            expenses: [],
             loaded: false,
             lang: this.props.screenProps.lang || this.props.screenProps,
             // this will tell us if we're showing this screen on the trip menu
             // if we are, we'll have to get all expenses associated with the trip with the this.state.trip (which is an ID)
             trip_id: this.props.screenProps.params ? this.props.screenProps.params.trip_id : null,
         }
+
+        this.updateList = this.updateList.bind(this);
     }
  
     async componentWillMount() {
@@ -27,9 +29,9 @@ export default class ExpensesList extends React.Component{
                         return e.trip_id = this.props.trip_id;
                     });
                 }
-                
+
                 this.setState({
-                    expenses : expenses,
+                    expenses : expenses == null ? [] : expenses,
                     loaded: true
                 })
             }
@@ -37,6 +39,7 @@ export default class ExpensesList extends React.Component{
     }
 
     updateList(e) {
+        console.log(this.state);
         this.setState(prevState => ({
             expense: {
                 ...prevState.expenses,
@@ -55,33 +58,29 @@ export default class ExpensesList extends React.Component{
             </View>
         }
 
-        expenses.map((item) =>  {
-            items.push( 
-                <TouchableNativeFeedback 
+        return <ScrollView>{
+            expenses.map((item) =>  {
+                return <TouchableNativeFeedback 
                     key={item.id} 
                     onPress={() => navigate('ExpensesItem', {id: item.id, new: false, updateExpenses: this.updateList})}
                 >
                     <View style={styles.list_item} >
                         <View style={styles.list_item_info}>
+                            <Text>{item.receiver}</Text>
                             <Text>{formatDate(item.date)}</Text>
-                            <Text>{item.reciever}</Text>
-                            <Text>{item.type_split}</Text>
-                            <Text>{item.location}</Text>
                         </View>
                         <View style={styles.arrow}>
                             <Icon name='chevron-right' size={40.0}/>
                         </View>
                     </View>
                 </TouchableNativeFeedback>
-            );
-        });
-
-        return <ScrollView>{items}</ScrollView>
+            })
+        }</ScrollView>
     }
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('ExpensesItem', {id: null, new: true, updateExpenses: this.updateList})}/>
+            <Icon name='add-circle' size={64.0} onPress={() => { navigate('ExpensesItem', {id: (this.state.expenses.length + 1), new: true, updateExpenses: this.updateList})}}/>
         </View>
     }
 
@@ -113,7 +112,7 @@ const styles = StyleSheet.create({
     },
 
     list_item: {
-        height: 120,
+        height: 80,
         padding: 10,
         borderBottomWidth: .5,
         borderColor: "#aaa",
