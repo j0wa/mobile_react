@@ -103,8 +103,8 @@ export default class Categories extends React.Component{
             visible={this.state.modalVisible}
             onRequestClose={() => { this.setModalVisible(false) }}
         >
-            <TouchableHighlight style={{flex: 1, backgroundColor: "rgba(0, 0, 0, 0.3)"}} onPress={() => { this.setModalVisible(false) }}>
-                <View style={{marginTop: 50, alignSelf: "center", backgroundColor: "#fff", minHeight: 200, width: (Dimensions.get("window").width - 50), borderRadius: 10}}>
+            <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.setModalVisible(false) }}>
+                <View style={styles.modal_container}>
                     <Text style={styles.new_item}>{lang.cat.new_item}</Text>
 
                     <FormLabel>{lang.expense.item_name}</FormLabel>
@@ -214,5 +214,19 @@ const styles = StyleSheet.create({
         marginLeft: 20,
         fontSize: 16,
         marginTop: 20
+    },
+
+    modal_wrapper: {
+        flex: 1, 
+        backgroundColor: "rgba(0, 0, 0, 0.3)"
+    },
+
+    modal_container: {
+        marginTop: 50,
+        alignSelf: "center",
+        backgroundColor: "#fff",
+        minHeight: 200,
+        width: (Dimensions.get("window").width - 50),
+        borderRadius: 10
     },
 });

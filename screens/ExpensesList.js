@@ -1,67 +1,86 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "react-native";
 import { Icon } from 'react-native-elements';
-import lang from "../configs/languages/lang";
-
-const expenses = [
-    { id: 1, date: "10/10/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
-    { id: 2, date: "10/03/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
-    { id: 3, date: "10/10/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
-    { id: 4, date: "10/03/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
-    { id: 5, date: "10/10/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
-    { id: 6, date: "10/03/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
-    { id: 7, date: "10/10/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
-    { id: 8, date: "10/03/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
-    { id: 9, date: "10/10/2000", location: "algures", type_split: "Half", reciever: "cool cat man"},
-    { id: 10, date: "10/03/2000", location: "algures", type_split: "Each", reciever: "cool cat man"},
-    { id: 11, date: "10/10/2010", location: "algures", type_split: "Half", reciever: "cool cat man"}
-]
+import store from 'react-native-simple-store';
+import Loader from '../components/Loader';
+import formatDate from '../utils/date_format';
 
 export default class ExpensesList extends React.Component{
     constructor(props){
         super(props);
+        
+        this.state = {
+            expenses: [],
+            loaded: false,
+            lang: this.props.screenProps.lang || this.props.screenProps,
+            // this will tell us if we're showing this screen on the trip menu
+            // if we are, we'll have to get all expenses associated with the trip with the this.state.trip (which is an ID)
+            trip_id: this.props.screenProps.params ? this.props.screenProps.params.trip_id : null,
+        }
 
-        // this.props.trip
-        // this will tell us if we're showing this screen on the trip menu
-        // if we are, we'll have to get all expenses associated with the trip with the this.props.trip (which is an ID)
+        this.updateList = this.updateList.bind(this);
+    }
+ 
+    async componentWillMount() {
+        store.get("expenses").then(
+            expenses => {
+                if (this.state.trip_id != undefined && this.state.trip_id != null && this.state.trip_id != ""){
+                    expenses.filter((e) => {
+                        return e.trip_id = this.props.trip_id;
+                    });
+                }
+
+                this.setState({
+                    expenses : expenses == null ? [] : expenses,
+                    loaded: true
+                })
+            }
+        );
     }
 
-    buildList(navigate){
+    updateList(e) {
+        console.log(this.state);
+        this.setState(prevState => ({
+            expense: {
+                ...prevState.expenses,
+                e
+            }
+        }));
+    }
+
+    buildList(navigate) {
         var items = [];
+        var expenses = this.state.expenses;
 
         if (expenses == null || expenses == ""){
             return <View style={styles.empty}>
-                <Text style={styles.empty_text}>{lang.expense.no_expenses}</Text>
+                <Text style={styles.empty_text}>{this.state.lang.expense.no_expenses}</Text>
             </View>
         }
 
-        expenses.map((item) =>  {
-            items.push( 
-                <TouchableNativeFeedback 
+        return <ScrollView>{
+            expenses.map((item) =>  {
+                return <TouchableNativeFeedback 
                     key={item.id} 
-                    onPress={() => navigate('Expenses', {new : false, id: item.id, lang: this.props.lang})} 
+                    onPress={() => navigate('ExpensesItem', {id: item.id, new: false, updateExpenses: this.updateList})}
                 >
                     <View style={styles.list_item} >
                         <View style={styles.list_item_info}>
-                            <Text>{item.date}</Text>
-                            <Text>{item.reciever}</Text>
-                            <Text>{item.type_split}</Text>
-                            <Text>{item.location}</Text>
+                            <Text>{item.receiver}</Text>
+                            <Text>{formatDate(item.date)}</Text>
                         </View>
                         <View style={styles.arrow}>
                             <Icon name='chevron-right' size={40.0}/>
                         </View>
                     </View>
                 </TouchableNativeFeedback>
-            );
-        });
-
-        return <ScrollView>{items}</ScrollView>
+            })
+        }</ScrollView>
     }
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('Expenses', {new : true, lang: this.props.lang})}/>
+            <Icon name='add-circle' size={64.0} onPress={() => { navigate('ExpensesItem', {id: (this.state.expenses.length + 1), new: true, updateExpenses: this.updateList})}}/>
         </View>
     }
 
@@ -79,7 +98,8 @@ export default class ExpensesList extends React.Component{
 
 const styles = StyleSheet.create({
     wrapper: {
-        backgroundColor: "#fff"
+        backgroundColor: "#fff",
+        flex: 1
     },
 
     button: {
@@ -92,7 +112,7 @@ const styles = StyleSheet.create({
     },
 
     list_item: {
-        height: 120,
+        height: 80,
         padding: 10,
         borderBottomWidth: .5,
         borderColor: "#aaa",

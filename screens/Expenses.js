@@ -1,103 +1,150 @@
 import React from 'react';
 import { TabNavigator } from 'react-navigation';
-import { Icon, Divider, Button, FormValidationMessage, FormInput, FormLabel, Tile } from 'react-native-elements'
-import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform, Image, Dimensions, CameraRoll, PermissionsAndroid, ActivityIndicator } from "react-native";
+import { Icon, Button, FormValidationMessage, FormInput, FormLabel, CheckBox } from 'react-native-elements'
+import { View, Text, StyleSheet, ScrollView, Image, Dimensions, CameraRoll, PermissionsAndroid, Modal, TouchableHighlight, Alert } from "react-native";
 import { PhotoGrid } from 'react-native-photo-grid-frame';
-import lang from "../configs/languages/lang";
 import store from 'react-native-simple-store';
+import Loader from '../components/Loader';
+import { ComboBox, ComboBoxItem } from '../components/ComboBox';
+import Required from '../components/Required';
+import formatDate from '../utils/date_format';
 
 export default class Expenses extends React.Component {
     constructor(props){
         super(props);
 
         this.state = {
-            isLoading: true,
+            loaded: false,
         }
+
+        this._updateItems = this._updateItems.bind(this);
+        this.updateGallary = this.updateGallary.bind(this);
     }
-    componentDidMount(){
-        var infoLang = this.props.screenProps
-        this.setState({isLoading: false,lang: infoLang})
-        console.log(this.state);
-        //console.log("preferred language fetched");
+
+    updateGallary(gallary){
+        this.setState({ gallary: gallary });
+    }
+
+    _updateItems(items){
+        this.setState({ 
+            items: items 
+        });
+    }
+
+    // faz o async aqui e depois manda os items por params para os ecrãs
+    async componentWillMount(){
+        store.get("expenses").then(
+            expenses => {
+                var neww = this.props.navigation.state.params.new;
+                var id = this.props.navigation.state.params.id;
+                var expense = {};
+                if (!neww)
+                {
+                    expenses.find((e) => {
+                        if (e.id == id){
+                            expense = e;
+                            return;
+                        }
+                    });
+                }
+
+                this.setState({ 
+                    new: neww,
+                    gallery: expense.gallery || {},
+                    items: expense.items || {},
+                    info: Object.keys(expense).length != 0 ? {
+                        receiver: expense.receiver,
+                        type: expense.type,
+                        curr: expense.curr,
+                        cat: expense.cat,
+                        date: new Date(expense.date),
+                        cost: expense.cost,
+                        notes: expense.notes,
+                        id: id
+                    } : { 
+                        id: id
+                    },
+                    loaded: true,
+                });
+            }
+        )
     }
 
     render(){
-        if(this.state.isLoading){
-            return(<View style={{flex: 1, paddingTop: 20}}>
-                <ActivityIndicator />
-            </View>)
-
-        }else{
-            return (<Tab screenProps={this.state.lang}/>)
-        }
-
+        return this.state.loaded ? <Tab screenProps={{
+            navigation: this.props.navigation,
+            lang: this.props.screenProps, 
+            params: {
+                new: this.props.navigation.state.params.new,
+                info: this.state.info,
+                items: this.state.items,
+                summaries: this.state.summaries
+            },
+            updateExpenses: this.props.screenProps.updateExpenses,
+            updateGallary: this.updateGallary,
+            updateItems: this._updateItems,
+        }} /> : <Loader/>;
     }
 }
-
-const types = [
-    {id: 1, name: "Half"},
-    {id: 2, name: "Each"}
-];
-
-const currs = [
-    {id: 1, name: "euro"},
-    {id: 2, name: "dolar"}
-];
-
-const cats = [
-    {id: 1, name: "Food"},
-    {id: 2, name: "Transport"}
-];
 
 class GeneralScreen extends React.Component {
     constructor(props){
         super(props);
 
+        this.state = {
+            loaded: false,
+            new: this.props.screenProps.params.new,
+            exp: this.props.screenProps.params.info,
+            items: this.props.screenProps.params.items,
+            gallary: this.props.screenProps.params.gallary,
+            lang: this.props.screenProps.lang,
+            id: this.props.screenProps.params.info.id,
+            errReceiver: false,
+            errCost: false,
+            catLoaded: false,
+            currLoaded: false,
+            typeLoaded: false,
+            cost: ""
+        }
+        
         this._submit = this._submit.bind(this)
     }
 
-    componentWillMount(){
-        this.setState({
-            date: new Date(),
-            type: 1,
-            curr: 1,
-            category: 1,
-            errReceiver: false,
-            errMembers: false,
-            receiver: "",
-            location: "",
-            members: "",
-            notes: "",
-            isLoading: true,
-        });
-    }
+    async componentWillMount(){
+        store.get("currencies").then(
+            (currs) => {  
+                this.setState({ 
+                    currs: currs 
+                });
+            }
+        );
 
-    componentDidMount(){
-        var infoLang = this.props.screenProps
-        this.setState({isLoading: false,lang: infoLang})
-    }
+        store.get("splitType").then(
+            (types) => {
+                this.setState({ 
+                    types: types 
+                });
+            }
+        );
 
-    getComboBox(collection, stateItem){
-        var items = [];
+        store.get("categories").then(
+            (cats) => {
+                var exp = this.state.exp; 
 
-        collection.map((item) => {
-            items.push(
-                <Picker.Item label={item.name} value={item.id} key={item.id}/>
-            );
-        })
-
-        if (Platform.OS === "ios"){
-            return <PickerIOS selectedValue={this.state[stateItem]}
-                onValueChange={(itemValue, itemIndex) => this.setState({stateItem: itemValue})}>
-                {items}
-            </PickerIOS>
-        }
-        else {
-            return <Picker selectedValue={this.state[stateItem]}
-                onValueChange={(itemValue, itemIndex) => this.setState({stateItem: itemValue})}>
-                {items}
-            </Picker>
-        }
+                this.setState({ 
+                    cats: cats,
+                    date: exp.date || new Date(),
+                    members: exp.members || [],
+                    curr: exp.curr || 1,
+                    type: exp.type || 1,
+                    cat: exp.cat || 1,
+                    receiver: exp.receiver || "",
+                    loaded: true,
+                    cost: exp.cost || "",
+                    notes: exp.notes || ""
+                });
+            }
+        );
     }
 
     _submit(){
@@ -110,98 +157,171 @@ class GeneralScreen extends React.Component {
             this.setState({ errReceiver: false });
         }
 
-        if (this.state.members == "") {
-            this.setState({ errMembers: true });
+        if (this.state.cost == "") {
+            this.setState({ errCost: true });
             err = 1;
         } else {
-            this.setState({ errMembers: false });
+            this.setState({ errCost: false });
         }
 
-        if (err == -1)
-            alert("expense registered (NOT!)");
-    }
-
-    formatDate(timestamp){
-        var tmp = new Date(timestamp);
-        var day = tmp.getDate();
-        var month = tmp.getMonth() + 1;
-        var hours = tmp.getHours();
-        var minutes = tmp.getMinutes();
-
-        day = (day >= 10) ? day : "0" + day;
-        month = (month >= 10) ? month : "0" + month;
-        hours = (hours >= 10) ? hours : "0" + hours;
-        minutes = (minutes >= 10) ? minutes : "0" + minutes;
-
-        return hours + ":" + minutes + "  " + day + "/" + month + "/" + tmp.getFullYear();
-    }
-
-    render() {
-        if(this.state.isLoading){
-            return (
-                <View style={{flex: 1, paddingTop: 20}}>
-                    <ActivityIndicator />
-                </View>
+        if (err == -1){
+            var e = {
+                id: this.state.id,
+                receiver: this.state.receiver,
+                date: this.state.date,
+                curr: this.state.curr,
+                type: this.state.type,
+                cat: this.state.cat,
+                members: this.state.members,
+                cost: this.state.cost,
+                notes: this.state.notes,
+                items: this.state.items,
+                gallary: this.state.gallary,
+            };
+            
+            store.push("expenses", e).then(() => {
+                if (this.state.new)
+                    this.props.screenProps.navigation.state.params.updateExpenses(e);
+                    
+                this.props.screenProps.navigation.goBack()} 
             );
         }
-        else{return (
+    }
+
+    updateValues(){
+        var type = this.state.type;
+
+        if (type == 1) {
+            var cost = this.state.cost;
+            var members = this.state.members;
+            var len = 0;
+
+            members.map(m => {
+                if (m.selected)
+                    len++;
+            });
+
+            var value = cost / len;
+
+            members.map((m, index) => {
+                if (m.selected)
+                    return {name: m.name, cost: value, selected: m.selected}
+            });
+            
+            this.setState({
+                members: members
+            })
+        }
+    }
+
+    memberSelection(index){
+        var members = this.state.members;
+
+        members[index].selected = !members[index].selected;
+
+        this.setState({
+            members: members
+        });
+
+        this.updateValues();
+    }
+
+    getComboBox(collection, stateItem){
+        var items = [];
+        
+        if (!collection || collection == "" || collection == [] || collection == null) 
+            return;
+        
+        return <ComboBox 
+                selectedValue={this.state[stateItem]}
+                onValueChange={(value) => { 
+                    if (stateItem == "type")
+                        this.setState({type: value});
+                    else if (stateItem == "curr")
+                        this.setState({curr: value});
+                    else
+                        this.setState({cat: value});
+                }}
+            >
+            {collection.map(item => {
+                return <ComboBoxItem label={item.name} value={item.id} key={item.id}/>
+            })}
+        </ComboBox>
+    }
+
+    buildPaymentList() {
+        return (
+            <View style={styles.members_wrapper}>
+                <FormLabel>{this.state.lang.trip.members}</FormLabel>
+                
+                <ScrollView style={styles.members_list_wrapper}>
+                    {this.state.members != "" && this.state.members.map((item, index) => {
+                        return <View key={index} style={styles.members_list_item}>
+                            <CheckBox onPress={this.memberSelection(index)} checked={itenm.selected} title={item} />
+                            <FormInput keyboardType="numeric" value={item.cost} />
+                        </View>
+                    })}
+                </ScrollView>
+            </View>
+        );
+    }
+
+    buildForm(){
+        return (
             <ScrollView style={{paddingBottom: 60}}>
                 <View>
                     {/* receiver */}
-                    <FormLabel>{this.state.lang.expense.receiver}</FormLabel>
+                    <FormLabel>{this.state.lang.expense.receiver}<Required /></FormLabel>
                     <FormInput
                         autoCapitalize="sentences"
+                        value={this.state.receiver}
                         editable={this.props.new}
                         style={styles.input}
-                        onChangeText={(receiver) => this.setState({receiver})}
+                        returnKeyType="next"
+                        onChangeText={(receiver) => this.setState({receiver: receiver})}
                     />
                     {this.state.errReceiver && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     {/* split type */}
                     <FormLabel>{this.state.lang.expense.types}</FormLabel>
                     <View style={styles.combobox}>
-                        {this.getComboBox(types, "type")}
+                        {this.getComboBox(this.state.types, "type")}
                     </View>
 
                     {/* currencies */}
                     <FormLabel>{this.state.lang.misc.curr}</FormLabel>
                     <View style={styles.combobox}>
-                        {this.getComboBox(currs, "curr")}
+                        {this.getComboBox(this.state.currs, "curr")}
+                    </View>
+
+                    {/* category */}
+                    <FormLabel>{this.state.lang.cat.title}</FormLabel>
+                    <View style={styles.combobox}>
+                        {this.getComboBox(this.state.cats, "cat")}
                     </View>
 
                     {/* expense date */}
                     <FormLabel>{this.state.lang.expense.date}</FormLabel>
                     <FormInput
                         editable={false}
-                        value={this.formatDate(this.state.date.getTime())}
+                        value={formatDate(this.state.date.getTime())}
                         style={styles.input}
                     />
-
-                    {/* category */}
-                    <FormLabel>{this.state.lang.misc.curr}</FormLabel>
-                    <View style={styles.combobox}>
-                        {this.getComboBox(cats, "category")}
-                    </View>
-
-                    {/* location */}
-                    <FormLabel>{this.state.lang.expense.location}</FormLabel>
+                    
+                    {/* cost */}
+                    <FormLabel>{this.state.lang.expense.cost} <Required /></FormLabel>
                     <FormInput
-                        autoCapitalize="sentences"
-                        editable={this.props.new}
+                        editable={this.props.new}                        
                         style={styles.input}
-                        onChangeText={(location) => this.setState({location})}
+                        value={String(this.state.cost)}
+                        keyboardType="numeric"
+                        returnKeyType="next"
+                        onChangeText={(cost) => { 
+                            this.setState({cost: cost});
+                            this.updateValues();
+                        }}
                     />
-                    {this.state.errLocation && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
-
-                    {/* list of people */}
-                    <FormLabel>{this.state.lang.expense.members}</FormLabel>
-                    <FormInput
-                        autoCapitalize="sentences"
-                        editable={this.props.new}
-                        style={styles.input}
-                        onChangeText={(members) => this.setState({members})}
-                    />
-                    {this.state.errMembers && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+                    {this.state.errCost && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }                    
 
                     {/* notes */}
                     <FormLabel>{this.state.lang.expense.notes}</FormLabel>
@@ -210,160 +330,255 @@ class GeneralScreen extends React.Component {
                         editable={this.props.new}
                         multiline={true}
                         autoGrow={true}
-                        onChangeText={(notes) => this.setState({notes})}
+                        value={this.state.notes}
+                        onChangeText={(notes) => this.setState({notes: notes})}
                         style={StyleSheet.flatten([styles.input, styles.input_textarea])}
                     />
 
-                    <Button title={this.state.lang.misc.btn} style={styles.btn} onPress={this._submit} />
+                    {/* payments */}
+                    {this.buildPaymentList()}
+                    
+                    <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit} />
                 </View>
             </ScrollView>
-            );
-        }
+        );
+    }
+
+    render() {
+        return this.state.loaded ? this.buildForm() : <Loader/>;
     }
 }
-
-const items = [
-    {id: 1, name: "water", price: "1.50"},
-    {id: 2, name: "beef", price: "1.50"},
-    {id: 3, name: "cake", price: "1.50"},
-    {id: 4, name: "pasta", price: "1.50"},
-    {id: 5, name: "pasta", price: "1.50"},
-    {id: 6, name: "pasta", price: "1.50"},
-]
 
 class ItemsScreen extends React.Component {
     constructor(props){
         super(props);
+        
         this.state = {
-            isLoading: true,
+            lang: this.props.screenProps.lang,
+            items: this.props.screenProps.params.items,
+            modalVisible: false,
+            errItemName: false,
+            errItemPrice: false,
+            itemName: "",
+            itemPrice: "",
         }
+
+        this._submit_new_item = this._submit_new_item.bind(this);
+        this._delete_item = this._delete_item.bind(this);
     }
 
-    componentDidMount(){
-        var infoLang = this.props.screenProps
-        this.setState({isLoading: false,lang: infoLang})
-    }
-
-    buildList(){
-        var tmp = [];
-
-        if (items == null || items == "" || items == undefined)
-            return <View style={styles.empty}>
-                <Text style={styles.empty_text}>{this.state.lang.expense.no_expenses}</Text>
-            </View>
-
-        items.map((item) => {
-            tmp.push(
-                <View key={item.id} style={styles.list_item}>
-                    <View style={styles.list_item_info}>
-                        <Text>{item.name}</Text>
-                        <Text>{item.price}</Text>
-                    </View>
-                </View>
-            );
-        })
-
-        return <ScrollView>{tmp}</ScrollView>
-    }
-
-    buildForm(){
-        return (
-            <View style={styles.form_wrapper}>
-                <View>
-                    <Text style={styles.new_item}>{this.state.lang.expense.new_item}</Text>
-                </View>
-                <View style={styles.form_container}>
-                    <View style={{flex:4}}>
-                        <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
-                        <FormInput
-                            autoCapitalize="sentences"
-                            onChangeText={(item_name) => this.setState({item_name})}
-                        />
-                    </View>
-                    <View style={{flex:4}}>
-                        <FormLabel>{this.state.lang.expense.item_price}</FormLabel>
-                        <FormInput
-                            autoCapitalize="sentences"
-                            onChangeText={(item_price) => this.setState({item_price})}
-                            keyboardType="numeric"
-                        />
-                    </View>
-                </View>
-
-                <Icon name='add-circle' size={40.0} onPress={() => console.log("add some new item")} containerStyle={styles.button}/>
-            </View>
+    _delete_item(index){
+        Alert.alert(
+            this.state.lang.expense.remove_title,
+            this.state.lang.expense.remove_text,
+            [
+                {text: this.state.lang.misc.remove_no, style: 'cancel'},
+                {text: this.state.lang.misc.remove_yes, onPress: () => { 
+                    var items = this.state.items;
+                    items.splice(0, 1);
+                    
+                    this.setState({
+                        items: items
+                    });
+                    
+                    this.props.screenProps.updateItems(this.state.items);
+                }},
+            ],
         );
     }
 
-    render(){
-        if(this.state.isLoading){
-            return(<View style={{flex: 1, paddingTop: 20}}>
-                <ActivityIndicator />
-            </View>)
+    _submit_new_item() {
+        var err = -1;
+
+        if (this.state.itemName == "") {
+            this.setState({ errItemName: true });
+            err = 1;
+        } else {
+            this.setState({ errItemName: false });
         }
-        else{return (
-            <View style={{flex:1, justifyContent: "space-between"}}>
-                <View style={{flex: 3}}>
-                    {this.buildList()}
-                </View>
-                <View style={{flex: 1.5}}>
-                    {this.buildForm()}
-                </View>
+
+        if (this.state.itemPrice == "") {
+            this.setState({ errItemPrice: true });
+            err = 1;
+        } else {
+            this.setState({ errItemPrice: false });
+        }
+
+        if (err === -1) {
+            var items =  [
+                ...this.state.items, 
+                {name: this.state.itemName, price: this.state.itemPrice}
+            ];
+
+            this.setState({
+                items: items,
+                modalVisible: false,
+                itemPrice: "",
+                itemName: ""
+            });
+
+            this.props.screenProps.updateItems(items);
+        }
+    }
+
+    setModalVisible(visible) {
+        this.setState({modalVisible: visible});
+    }
+
+    buildList(){
+        var items = this.state.items;
+
+        if (Object.keys(items).length == 0)
+            return <View style={styles.empty}>
+                <Text style={styles.empty_text}>{this.state.lang.expense.no_items}</Text>
             </View>
-        );}
-    }
-}
 
-const imgs = [
-    {id: 1, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"},
-    {id: 2, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"},
-    {id: 3, url: "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg"}
-]
-
-class GalaryScreen extends React.Component {
-    constructor(props){
-        super(props);
-        this.state = {
-            isLoading: true,
-        }
-    }
-
-    async componentDidMount(){
-        var infoLang = this.props.screenProps
-        this.setState({isLoading: false,lang: infoLang})
+        return (
+            <ScrollView>
+                {items.map((item, index) => {
+                    return <View key={index} style={styles.list_item}>
+                        <View style={styles.list_item_info}>
+                            <View>
+                                <Text>{item.name}</Text>
+                            </View>
+                            <View>
+                                <Text>{item.price}</Text>
+                            </View>
+                    </View>
+                            <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_item(index) }} size={32.0}/>
+                    </View>
+                })}
+            </ScrollView>
+        )
     }
 
-    buildGallery(){
-        return  <ScrollView>
-            <PhotoGrid PhotosList={imgs} borderRadius={10}/>
-        </ScrollView>;
+    buildModal(){
+        return <Modal
+            transparent={true}
+            visible={this.state.modalVisible}
+            onRequestClose={() => { this.setModalVisible(false) }}
+        >
+            <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.setModalVisible(false) }}>
+                <View style={styles.modal_container}>
+                    <Text style={styles.modal_title}>{this.state.lang.expense.new_item_title}</Text>
+
+                    <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
+                    <FormInput 
+                        autoCapitalize="sentences"
+                        onChangeText={(name) => this.setState({itemName: name})}
+                        style={styles.input}
+                    />
+                    { this.state.errItemName && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                    <FormLabel>{this.state.lang.expense.item_price}</FormLabel>
+                    <FormInput 
+                        autoCapitalize="sentences"
+                        keyboardType="numeric"
+                        onChangeText={(price) => this.setState({itemPrice: price})}
+                        style={styles.input}
+                    />
+                    { this.state.errItemPrice && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                    <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit_new_item} />
+                </View>
+            </TouchableHighlight>
+        </Modal>
     }
 
     buildButton(){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => {
-            }} />
+            <Icon name='add-circle' size={64.0} onPress={() => {this.setModalVisible(true)}}/>
         </View>
     }
 
-    render() {
-        if(this.state.isLoading){
-            return(<View style={{flex: 1, paddingTop: 20}}>
-                <ActivityIndicator />
-            </View>)
+    render(){
+        return <View style={styles.flex_1}> 
+            {this.buildModal()} 
+            {this.buildList()} 
+            {this.buildButton()}
+        </View>
+    }
+}
+
+class GalaryScreen extends React.Component {
+    constructor(props){
+        super(props);
+
+        this.state = {
+            lang: this.props.screenProps.lang,
+            gallary: this.props.screenProps.params.gallary,
+            showPhotoGallery: false,
+            cameraPhotos: "" 
         }
-        else{return (
-            <View style={{flex: 1}}>
+    }
+
+    buildGallery(){
+        if  (this.state.gallary  == "" || this.state.gallary == null || this.state.gallary == {})
+        {
+            return (
+                <View style={styles.empty}>
+                    <Text style={styles.empty_text}>{this.state.lang.expense.no_img}</Text>
+                </View>
+            );
+        }
+        
+        return (
+            <ScrollView>
+                <PhotoGrid PhotosList={this.state.gallary} borderRadius={10}/>
+            </ScrollView>
+        );
+    }
+
+    getPhotos(){
+        CameraRoll.getPhotos({ first: 1000000 }).then(pics => {
+            this.setState({ 
+                showPhotoGallery: true, 
+                cameraPhotos: pics.edges
+            })
+        });
+    }
+
+    buildButton(){
+        return <View style={styles.button}>
+            <Icon name='add-circle' size={64.0} onPress={() => {this.getPhotos()}} />
+        </View>
+    }
+
+    selectPic(pic){
+        var len = this.state.gallary.lenght + 1;
+
+        console.log(pic);
+        
+        this.setState(prevState => ({
+            gallary: [...prevState.gallary, {id: len, url: "something"}]
+        }));
+    }
+
+    buildScreen(){
+        if (this.state.showPhotoGallery){
+            return (
+                <View style={styles.flex_1}>
+                    <PhotoGrid PhotosList={this.state.cameraPhotos} borderRadius={10} onPress ={(pic) => { this.selectPic(pic) }} />
+                </View>
+            );
+        }
+
+        return (
+            <View style={styles.flex_1}>
                 {this.buildGallery()}
 
                 {this.buildButton()}
             </View>
-        );}
+        );
+    }
+
+    render() {
+        return <View style={{flex: 1}}>{this.buildScreen()}</View>
     }
 }
 
 const Tab = TabNavigator({
-    Home: {
+    General: {
         screen: GeneralScreen,
     },
     Items: {
@@ -375,6 +590,7 @@ const Tab = TabNavigator({
 }, {
     tabBarPosition: 'bottom',
     animationEnabled: true,
+    lazy: true,
     tabBarOptions: {
         iconStyle: {
             width: 40
@@ -394,15 +610,14 @@ const styles = StyleSheet.create({
         borderBottomWidth: .5,
         borderColor: "#aaa",
         borderStyle: "solid",
-        flex: 1,
-        flexDirection: "row",
-        alignItems: "center"
+        flex: 1
     },
 
     list_item_info: {
-        flex: 1,
-        justifyContent: "space-between",
-        flexDirection: "row"
+        marginRight: 100, 
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent:"space-between"
     },
 
     arrow: {
@@ -467,6 +682,10 @@ const styles = StyleSheet.create({
         shadowRadius: 1
     },
 
+    flex_1: {
+        flex:1 
+    },
+
     form_container: {
         flexDirection:'row',
         width: Dimensions.get("window").width,
@@ -497,5 +716,60 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         alignSelf: "center"
+    },
+
+    members_wrapper: {
+        marginBottom: 20
+    },
+
+    members_list_wrapper: {
+        marginTop: 20,
+        flex: 1
+    },
+
+    members_list_item: {
+        height: 50,
+        marginLeft: 30,
+        marginRight: 30,
+        borderBottomColor: "#aaa",
+        borderBottomWidth: .5,
+    },
+
+    btnContainer: {
+        marginTop: 10, 
+        marginBottom: 10,
+        marginLeft: 50,
+        marginRight: 50,
+    },
+    
+    btnStyle: {
+        borderRadius: 5
+    },
+
+    list_item_icon: {
+        flex: 1,
+        position: "absolute",
+        right: 10,
+        top: 15
+    },
+
+    modal_wrapper: {
+        flex: 1, 
+        backgroundColor: "rgba(0, 0, 0, 0.3)"
+    },
+
+    modal_container: {
+        marginTop: 50,
+        alignSelf: "center",
+        backgroundColor: "#fff",
+        minHeight: 200,
+        width: (Dimensions.get("window").width - 50),
+        borderRadius: 10
+    },
+    
+    modal_title: {
+        marginLeft: 20,
+        fontSize: 16,
+        marginTop: 20
     },
 });

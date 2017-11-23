@@ -6,31 +6,30 @@ export default dataFeed = {
         store.get("currencies").then(currs => {
             if (currs == null) {
                 store.save('currencies', [
-                    {id: 1, name: "Eur"},
-                    {id: 2, name: "USD"},
-                    {id: 3, name: "AUD"},
-                    {id: 4, name: "GBP"},
+                    {id: 1, name: "Eur", symbol: "€"},
+                    {id: 2, name: "USD", symbol: "$"},
+                    {id: 3, name: "AUD", symbol: "$"},
+                    {id: 4, name: "GBP", symbol: "£"},
                 ]);
             }
         });
     },
 
-    expenseType() {
-        store.get("expenseType").then(type => {
+    spitType() {
+        store.get("splitType").then(type => {
             if (type == null) {
-                store.save('expenseType', [
+                store.save('splitType', [
                     {id: 1, name: "Split even"},
-                    {id: 2, name: "To each his own"},
-                    {id: 3, name: "Free choice"},
+                    {id: 2, name: "Free choice"},
                 ]);
             }
         });
     },
 
     categories() {
-        store.get("cats").then(cats => {
+        store.get("categories").then(cats => {
             if (cats == null) {
-                store.save('cats', [
+                store.save('categories', [
                     {id: 1, name: "Restaurant"},
                     {id: 2, name: "Transport"},
                     {id: 3, name: "Groceries"},

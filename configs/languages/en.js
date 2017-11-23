@@ -10,24 +10,29 @@ export default {
         new_member: "New member",
         new_member_title: "Add new member",
         remove_title: "Remove member",
-        remove_text: "Are you sure you want to remove this category?",
+        remove_text: "Are you sure you want to remove this member?",
     },
 
     expense: {
         title: "Expenses",
-        no_expenses: "You've no expenses yet! Tap the \"+\" button to create your first!",        
+        details: "Expense details",
+        no_expenses: "You've no expenses yet! Tap the \"+\" button to create your first!",
+        no_items: "You've no items yet! Tap the \"+\" button to create your first!",
         receiver: "Receiver",
         types: "Types",
         date: "Date",
         location: "Location",
         members: "Members",
         notes: "Notes",
-        new_item: "Add new item",
+        new_item_title: "Add new item",
         no_img: "You've added no images yet! Tap the \"+\" button to add your first!",
         items: "Items",
         galary: "Gallery",
         item_name: "Name",
-        item_price: "Price"
+        item_price: "Price",
+        cost: "Cost",
+        remove_title: "Remove item",
+        remove_text: "Are you sure you want to remove this item?",
     },
 
     home: {
@@ -43,10 +48,6 @@ export default {
         new_item: "Add new category",
         remove_title: "Remove Category",
         remove_text: "Are you sure you want to remove this category?",
-    },
-
-    setting: {
-        title: "Settings"
     },
 
     misc: {

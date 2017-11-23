@@ -1,14 +1,13 @@
 import React from 'react';
-import { Button, Text, View, ScrollView, StatusBar } from 'react-native';
-import { Icon } from 'react-native-elements'
-import { StackNavigator, DrawerNavigator, DrawerItems } from 'react-navigation';
-import Screens from "./screens/Screens";
-import lang from "./configs/languages/lang";
 import { Font } from 'expo';
+import { StatusBar } from 'react-native';
 import store from 'react-native-simple-store';
+import { StackNavigator, DrawerNavigator, DrawerItems } from 'react-navigation';
 import dataFeed from './data/data_feed';
 import resetStorage from './data/reset_storage';
 import Loader from './components/Loader';
+import Navigation from './components/Navigation';
+import lang from "./configs/languages/lang";
 
 export default class App extends React.Component {
     constructor(props){
@@ -26,7 +25,7 @@ export default class App extends React.Component {
         // resetStorage.expenses();
         // resetStorage.categories();
         dataFeed.currencies();
-        dataFeed.expenseType();
+        dataFeed.spitType();
         dataFeed.categories();
 
         await Expo.Font.loadAsync({
@@ -60,68 +59,6 @@ export default class App extends React.Component {
     render(){
         StatusBar.setHidden(true);
 
-        return (this.state.fontLoaded && this.state.langLoaded) ? <Menu screenProps={this.state.lang} /> : <Loader />;
+        return (this.state.fontLoaded && this.state.langLoaded) ? <Navigation screenProps={this.state.lang} /> : <Loader />;
     }
 };
-
-
-
-const StackNav =  StackNavigator({
-    Trips: {
-        screen: Screens.TripsList,
-    },
-    TripsItem: {
-        screen: Screens.Trips,
-        path: 'trips/:derp',
-    },
-    Expenses: {
-        screen: Screens.ExpensesList,
-    },
-    ExpensesItem: {
-        screen: Screens.Expenses,
-    },
-    Settings: {
-        screen: Screens.Settings,
-    },
-    Categories: {
-        screen: Screens.Categories,
-    },
-}, {
-    navigationOptions: ({navigation}) => ({
-        headerMode: "float",
-        headerRight: <Icon name='menu' size={48} color="#fff" onPress={() => navigation.navigate("DrawerOpen") } />,
-        headerStyle: {
-            backgroundColor: '#4C3E54',
-            overflow: "visible"
-        },
-        headerTitleStyle: {
-            color: "#fff"
-        },
-        cardStyle: {
-            color: "#fff"
-        },
-        headerBackTitleStyle: {
-            color: "#fff"
-        },
-        headerTintColor: "#fff"
-    })
-});
-
-const Menu = DrawerNavigator({
-    Trips: {
-        screen: StackNav,
-    },
-    Expenses: {
-        screen: StackNav,
-    },
-    Settings: {
-        screen: StackNav,
-    },
-    Categories: {
-        screen: StackNav,
-    },
-},{
-    drawerPosition: "right",
-    drawerWidth: 200,
-    contentComponent: props => <ScrollView><DrawerItems {...props}/></ScrollView>,
-});
