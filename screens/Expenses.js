@@ -25,7 +25,7 @@ export default class Expenses extends React.Component {
         this.setState({ gallary: gallary });
     }
 
-    _updateItems(items){
+    updateItems(items){
         this.setState({ 
             items: items 
         });
@@ -38,6 +38,7 @@ export default class Expenses extends React.Component {
                 var neww = this.props.navigation.state.params.new;
                 var id = this.props.navigation.state.params.id;
                 var expense = {};
+                
                 if (!neww)
                 {
                     expenses.find((e) => {
@@ -50,8 +51,8 @@ export default class Expenses extends React.Component {
 
                 this.setState({ 
                     new: neww,
-                    gallery: expense.gallery || {},
-                    items: expense.items || {},
+                    gallery: expense.gallery || [],
+                    items: expense.items || [],
                     info: Object.keys(expense).length != 0 ? {
                         receiver: expense.receiver,
                         type: expense.type,
@@ -78,11 +79,11 @@ export default class Expenses extends React.Component {
                 new: this.props.navigation.state.params.new,
                 info: this.state.info,
                 items: this.state.items,
-                summaries: this.state.summaries
+                gallary: this.state.gallary
             },
             updateExpenses: this.props.screenProps.updateExpenses,
             updateGallary: this.updateGallary,
-            updateItems: this._updateItems,
+            updateItems: this.updateItems,
         }} /> : <Loader/>;
     }
 }
@@ -101,9 +102,6 @@ class GeneralScreen extends React.Component {
             id: this.props.screenProps.params.info.id,
             errReceiver: false,
             errCost: false,
-            catLoaded: false,
-            currLoaded: false,
-            typeLoaded: false,
             cost: ""
         }
         

@@ -86,12 +86,6 @@ export default class Navigation extends React.Component{
                     title: this.state.lang.trip.title
                 }
             },
-            Expenses: {
-                screen: stack,
-                navigationOptions: {
-                    title: this.state.lang.expense.title
-                }
-            },
             Settings: {
                 screen: stack,
                 navigationOptions: {

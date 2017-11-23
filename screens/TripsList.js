@@ -11,7 +11,7 @@ export default class TripsList extends React.Component{
         super(props);
     
         this.state = {
-            trips: null,
+            trips: [],
             loaded: false,
             lang: this.props.screenProps
         }
@@ -20,7 +20,7 @@ export default class TripsList extends React.Component{
     async componentWillMount(){
         store.get("trips").then(
             trips => this.setState({
-                trips : trips,
+                trips : trips == null ? [] : trips,
                 loaded: true
             })
         );
@@ -36,36 +36,42 @@ export default class TripsList extends React.Component{
             </View>
         }
 
-        trips.map((item) =>  {
-            items.push( 
-                <TouchableNativeFeedback 
-                    key={item.id} 
-                    onPress={() => {
-                        navigation.navigate('TripsItem', {trip_id: item.id, new: false});
-                    }}
-                >
-                    <View style={styles.list_item}>
-                        <View style={styles.list_item_info}>
-                            <Text>{formatDate(item.date)}</Text>
-                            <Text>{item.location}</Text>
-                            <Text>{item.numPeople}</Text>
-                            <Text>{item.category}</Text>
+        return <ScrollView>
+                {trips.map((item) =>  {
+                    return <TouchableNativeFeedback 
+                        key={item.id} 
+                        onPress={() => {
+                            navigation.navigate('TripsItem', {id: item.id, new: false});
+                        }}
+                    >
+                        <View style={styles.list_item}>
+                            <View style={styles.list_item_info}>
+                                <Text style={styles.marg_bottom_10} >{item.location}</Text>
+                                <Text>{formatDate(item.date)}</Text>
+                            </View>
+                            <View style={styles.arrow}>
+                                <Icon name='chevron-right' size={40.0}/>
+                            </View>
                         </View>
-                        <View style={styles.arrow}>
-                            <Icon name='chevron-right' size={40.0}/>
-                        </View>
-                    </View>
-                </TouchableNativeFeedback >                
-            );
-        });
+                    </TouchableNativeFeedback >
+                })
+            }
+        </ScrollView>
+    }
 
-        return <ScrollView>{items}</ScrollView>
+    updateTrips(trip){
+        this.setState(prevState => ({
+            trips: [
+                ...prevState.trips,
+                trip
+            ]
+        }));
     }
 
     buildButton(navigation){
         return <View style={styles.button}>
             <Icon name='add-circle' size={64.0} onPress={() => {
-                navigation.navigate('TripsItem', {new: false})
+                navigation.navigate('TripsItem', {new: true, id: this.state.trips.length + 1})
             }} />
         </View>
     }
@@ -83,7 +89,10 @@ export default class TripsList extends React.Component{
 
 const styles = StyleSheet.create({
     wrapper: {
-        backgroundColor: "#fff",
+        flex: 1
+    },
+
+    flex_1: {
         flex: 1
     },
 
@@ -96,8 +105,12 @@ const styles = StyleSheet.create({
         alignSelf: "center"
     },
 
+    marg_bottom_10: {
+        marginBottom: 10
+    },
+
     list_item: {
-        height: 120,
+        height: 90,
         padding: 10,
         borderBottomWidth: .5,
         borderColor: "#aaa",
@@ -108,7 +121,8 @@ const styles = StyleSheet.create({
     },
 
     list_item_info: {
-        flex: 1
+        flex: 1,
+        justifyContent: "space-between",
     },
 
     arrow: {

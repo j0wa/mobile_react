@@ -15,7 +15,7 @@ export default class ExpensesList extends React.Component{
             lang: this.props.screenProps.lang || this.props.screenProps,
             // this will tell us if we're showing this screen on the trip menu
             // if we are, we'll have to get all expenses associated with the trip with the this.state.trip (which is an ID)
-            trip_id: this.props.screenProps.params ? this.props.screenProps.params.trip_id : null,
+            trip_id: this.props.screenProps.params.info.id,
         }
 
         this.updateList = this.updateList.bind(this);
@@ -24,7 +24,7 @@ export default class ExpensesList extends React.Component{
     async componentWillMount() {
         store.get("expenses").then(
             expenses => {
-                if (this.state.trip_id != undefined && this.state.trip_id != null && this.state.trip_id != ""){
+                if (!this.props.screenProps.params.new){
                     expenses.filter((e) => {
                         return e.trip_id = this.props.trip_id;
                     });
@@ -39,34 +39,33 @@ export default class ExpensesList extends React.Component{
     }
 
     updateList(e) {
-        console.log(this.state);
         this.setState(prevState => ({
-            expense: {
+            expenses: [
                 ...prevState.expenses,
                 e
-            }
+            ]
         }));
     }
 
     buildList(navigate) {
         var items = [];
         var expenses = this.state.expenses;
-
-        if (expenses == null || expenses == ""){
+        
+        if (expenses == null || expenses == "" || expenses == undefined){
             return <View style={styles.empty}>
                 <Text style={styles.empty_text}>{this.state.lang.expense.no_expenses}</Text>
             </View>
         }
-
+        
         return <ScrollView>{
             expenses.map((item) =>  {
                 return <TouchableNativeFeedback 
                     key={item.id} 
-                    onPress={() => navigate('ExpensesItem', {id: item.id, new: false, updateExpenses: this.updateList})}
+                    onPress={() => this.props.screenProps.navigation.navigate('ExpensesItem', {id: item.id, new: false, updateExpenses: this.updateList})}
                 >
                     <View style={styles.list_item} >
                         <View style={styles.list_item_info}>
-                            <Text>{item.receiver}</Text>
+                            <Text style={styles.marg_bottom_10}>{item.receiver}</Text>
                             <Text>{formatDate(item.date)}</Text>
                         </View>
                         <View style={styles.arrow}>
@@ -80,7 +79,7 @@ export default class ExpensesList extends React.Component{
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => { navigate('ExpensesItem', {id: (this.state.expenses.length + 1), new: true, updateExpenses: this.updateList})}}/>
+            <Icon name='add-circle' size={64.0} onPress={() => { this.props.screenProps.navigation.navigate('ExpensesItem', {id: (this.state.expenses.length + 1), new: true, updateExpenses: this.updateList})}}/>
         </View>
     }
 
@@ -98,7 +97,6 @@ export default class ExpensesList extends React.Component{
 
 const styles = StyleSheet.create({
     wrapper: {
-        backgroundColor: "#fff",
         flex: 1
     },
 
@@ -143,5 +141,9 @@ const styles = StyleSheet.create({
         flex: 1,
         marginLeft: 30,
         marginRight: 30
-    }
+    },
+
+    marg_bottom_10: {
+        marginBottom: 10
+    },
 });

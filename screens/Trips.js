@@ -1,22 +1,81 @@
 import React from 'react';
-import { Icon, Divider, Badge, Button, FormValidationMessage, FormInput, FormLabel } from 'react-native-elements'
+import { Icon, Button, FormValidationMessage, FormInput, FormLabel } from 'react-native-elements'
 import { TabNavigator } from 'react-navigation';
-import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform, TouchableNativeFeedback, TouchableHighlight, Dimensions, Modal } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback, Dimensions, Modal, Alert, TouchableHighlight } from "react-native";
 import DatePicker from 'react-native-datepicker';
 import ExpensesList from "./ExpensesList";
 import Loader from '../components/Loader';
+import { ComboBox, ComboBoxItem } from '../components/ComboBox';
+import Required from '../components/Required';
 import store from 'react-native-simple-store';
 
 export default class Trips extends React.Component {
     constructor(props){
         super(props);
+
+        this.state = {
+            loaded: false,
+        }
+    
+        this.updateExpenses = this.updateExpenses.bind(this);
+    }
+
+    updateExpenses(exp){
+        this.setState({ expenses: exp });        
+    }
+
+    // faz o async aqui e depois manda os items por params para os ecrãs
+    async componentWillMount(){
+        store.get("trips").then(
+            trips => {
+                var neww = this.props.navigation.state.params.new;
+                var id = this.props.navigation.state.params.id;
+                var trip = {};
+                
+                if (!neww)
+                {
+                    trips.find((t) => {
+                        
+                        if (t.id == id){
+                            trip = t;
+                            return;
+                        }
+                    });
+                }
+
+                this.setState({ 
+                    new: neww,
+                    expenses: trip.expenses || {},
+                    summaries: trip.summaries || {},
+                    info: Object.keys(trip).length != 0 ? {
+                        location: this.state.location,
+                        date: this.state.date,
+                        curr: this.state.curr,
+                        members: this.state.members,
+                        desc: this.state.desc,
+                        id: id                        
+                    } : {
+                        id: id
+                    },
+                    loaded: true,
+                });
+            }
+        )
     }
 
     render(){
-        return <Tab screenProps={{
+        return this.state.loaded ? <Tab screenProps={{
+            navigation: this.props.navigation,
             lang: this.props.screenProps, 
-            params: this.props.navigation.state.params
-        }} />;
+            params: {
+                new: this.props.navigation.state.params.new,
+                info: this.state.info,
+                expenses: this.state.expenses,
+                summaries: this.state.summaries
+            },
+            updateTrips: this.props.screenProps.updateTrips,
+            updateExpenses: this.updateExpenses,
+        }} /> : <Loader/>;
     }
 }
 
@@ -32,7 +91,12 @@ class TripScreen extends React.Component {
             errDesc: false,
             errMemberName: false,
             memberName: "",
-            new: this.props.screenProps.params.new
+            new: this.props.screenProps.params.new,
+            trip: this.props.screenProps.params.info,
+            expenses: this.props.screenProps.params.expenses,
+            summaries: this.props.screenProps.params.summaries,
+            lang: this.props.screenProps.lang,
+            id: this.props.screenProps.params.info.id,
         }
 
         this._submit_new_member = this._submit_new_member.bind(this)
@@ -43,36 +107,17 @@ class TripScreen extends React.Component {
     async componentWillMount(){
         store.get("currencies").then(
             (currs) => {
+                var trip = this.state.trip; 
+                
                 this.setState({ 
-                    currs: currs 
-                });
-            }
-        );
-
-        store.get("trips").then(
-            trips => {
-                var trip = {};
-                var id = this.props.screenProps.params.trip_id;
-
-                if (!this.state.new)
-                {
-                    trips.find((t) => {
-                        if (t.id == id){
-                            trip = t;
-                            return;
-                        }
-                    });
-                }
-
-                this.setState({
-                    trip : trip,
-                    loaded: true,
-                    id: (trips != null) ? (trips.length + 1) : id,
-                    location: trip.location || "",
+                    currs: currs,
                     date: trip.date || new Date(),
                     members: trip.members || [],
                     curr: trip.curr || 1,
-                    lang: this.props.screenProps.lang
+                    loaded: true,
+                    location: trip.location || "",
+                    date: trip.date || new Date(),
+                    id: this.props.screenProps.params.info.id
                 });
             }
         );
@@ -103,14 +148,21 @@ class TripScreen extends React.Component {
         }
 
         if (err === -1){
-            store.push("trips", {
+            var t = {
                 id: this.state.id,
                 location: this.state.location,
                 date: this.state.date,
                 curr: this.state.curr,
                 members: this.state.members,
                 desc: this.state.desc,
-            }).then(() => {alert('yuuup'); this.props.navigation.goBack()});
+            };
+            
+            store.push("trips", t).then(() => {
+                if (this.state.new)
+                    this.props.screenProps.navigation.state.params.updateTrips(t);
+                
+                this.props.screenProps.navigation.goBack()
+            });
         }        
     }
 
@@ -135,14 +187,17 @@ class TripScreen extends React.Component {
 
     _delete_member(index){
         Alert.alert(
-            lang.trip.remove_title,
-            lang.trip.remove_text,
+            this.state.lang.trip.remove_title,
+            this.state.lang.trip.remove_text,
             [
-                {text: lang.misc.remove_no, style: 'cancel'},
-                {text: lang.misc.remove_yes, onPress: () => { 
-                    this.setState(prevState => ({
-                        members: [prevState.members.splice(index, 1)]
-                    }));
+                {text: this.state.lang.misc.remove_no, style: 'cancel'},
+                {text: this.state.lang.misc.remove_yes, onPress: () => { 
+                    var members = this.state.members;
+                    members.splice(0, 1);
+                    
+                    this.setState({
+                        members: members
+                    });
                 }},
             ],
         );
@@ -153,32 +208,20 @@ class TripScreen extends React.Component {
     }
 
     buildCurrencies(){
-        var items = [];
-
-        this.state.currs.map((item) => {
-            items.push(
-                <Picker.Item label={item.name} value={item.id} key={item.id}/>
-            );
-        })
-
-        if (Platform.OS === "ios"){
-            return <PickerIOS selectedValue={this.state.curr}
-                onValueChange={(value) => this.setState({curr: value})}>
-                {items}
-            </PickerIOS>
-        }
-        else {
-            return <Picker selectedValue={this.state.curr}
-                onValueChange={(value) => this.setState({curr: value})}>
-                {items}
-            </Picker>
-        }
+        return <ComboBox 
+                selectedValue={this.state.curr}
+                onValueChange={(value) => { this.setState({curr: value}); }}
+            >
+                {this.state.currs.map(item => {
+                    return <ComboBoxItem label={item.name} value={item.id} key={item.id}/>
+                })}
+            </ComboBox>
     }
 
     buildMembersList(){
         return (
             <View style={styles.members_wrapper}>
-                <FormLabel>{this.state.lang.trip.members}</FormLabel>
+                <FormLabel>{this.state.lang.trip.members} <Required /></FormLabel>
                 
                 <TouchableNativeFeedback onPress={() => { this.setModalVisible(true) }} >
                     <FormLabel containerStyle={styles.new_member}>{this.state.lang.trip.new_member}</FormLabel>
@@ -192,6 +235,8 @@ class TripScreen extends React.Component {
                         </View>
                     })}
                 </ScrollView>
+
+                {this.state.errMembers && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
             </View>
         );
     }
@@ -243,12 +288,13 @@ class TripScreen extends React.Component {
                     />
                 </View>
 
-                <FormLabel>{this.state.lang.trip.location}</FormLabel>
+                <FormLabel>{this.state.lang.trip.location} <Required /></FormLabel>
                 <FormInput
                     autoCapitalize="sentences"
                     editable={this.props.new}
                     style={styles.input}
-                    value={this.state.name}
+                    value={this.state.location}
+                    returnKeyType="next"                    
                     onChangeText={(location) => {this.state.loaded && this.setState({location: location})}}
                 />
                 {this.state.errLocation && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
@@ -259,14 +305,12 @@ class TripScreen extends React.Component {
                     editable={this.props.new}
                     multiline={true}
                     autoGrow={true}
-                    value={this.state.desc}                    
+                    value={this.state.desc}
                     onChangeText={(desc) => {this.state.loaded && this.setState({desc: desc})}}
                     style={StyleSheet.flatten([styles.input, styles.input_textarea])}
                 />
-                {this.state.errDesc && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                 {this.buildMembersList()}
-                {this.state.errMembers && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                 {this.props.id == null && <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit} />}
             </ScrollView>
@@ -292,22 +336,6 @@ class SummariesScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    title: {
-        alignItems:"center",
-        justifyContent:"center",
-    },
-
-    title_font: {
-        fontSize: 24
-    },
-
-    divider: {
-        backgroundColor: '#4db8ff',
-        marginLeft: 10,
-        marginRight: 10,
-        marginTop: 20
-    },
-
     curr: {
         marginLeft: 20,
         marginRight: 20,
