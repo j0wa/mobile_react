@@ -8,6 +8,7 @@ import Loader from '../components/Loader';
 import { ComboBox, ComboBoxItem } from '../components/ComboBox';
 import Required from '../components/Required';
 import formatDate from '../utils/date_format';
+import updateStorage from '../utils/update_storage';
 
 export default class Expenses extends React.Component {
     constructor(props){
@@ -71,6 +72,7 @@ export default class Expenses extends React.Component {
         )
     }
 
+    
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
@@ -79,10 +81,10 @@ export default class Expenses extends React.Component {
             info: this.state.info,
             items: this.state.items,
             gallary: this.state.gallary,
-            trip_id: this.props.navigation.state.params.trip_id,
             updateExpenses: this.props.screenProps.updateExpenses,
             updateGallary: this.updateGallary,
             updateItems: this.updateItems,
+            members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true} }), 
         }} /> : <Loader/>;
     }
 }
@@ -90,7 +92,7 @@ export default class Expenses extends React.Component {
 class GeneralScreen extends React.Component {
     constructor(props){
         super(props);
-
+        
         this.state = {
             loaded: false,
             new: this.props.screenProps.new,
@@ -99,15 +101,18 @@ class GeneralScreen extends React.Component {
             gallary: this.props.screenProps.gallary,
             lang: this.props.screenProps.lang,
             id: this.props.screenProps.info.id,
+            trip_id: this.props.screenProps.info.trip_id,
+            members: this.props.screenProps.members,
             errReceiver: false,
             errCost: false,
             cost: ""
         }
-        
+
         this._submit = this._submit.bind(this)
+        this.updateValues = this.updateValues.bind(this)
     }
 
-    async componentWillMount(){
+    componentWillMount(){
         store.get("currencies").then(
             (currs) => {  
                 this.setState({ 
@@ -123,15 +128,14 @@ class GeneralScreen extends React.Component {
                 });
             }
         );
-
+        
         store.get("categories").then(
             (cats) => {
                 var exp = this.state.exp; 
-
+                
                 this.setState({ 
                     cats: cats,
                     date: exp.date || new Date(),
-                    members: exp.members || [],
                     curr: exp.curr || 1,
                     type: exp.type || 1,
                     cat: exp.cat || 1,
@@ -174,14 +178,13 @@ class GeneralScreen extends React.Component {
                 notes: this.state.notes,
                 items: this.state.items,
                 gallary: this.state.gallary,
+                trip_id: this.state.trip_id,
             };
-            
-            store.push("expenses", e).then(() => {
-                if (this.state.new)
-                    this.props.screenProps.navigation.state.params.updateExpenses(e);
-                    
-                this.props.screenProps.navigation.goBack()} 
-            );
+
+            updateStorage("expenses", e, this.state.new, () => {
+                this.props.screenProps.updateExpenses(e);
+                this.props.screenProps.navigation.goBack()
+            });
         }
     }
 
@@ -199,10 +202,10 @@ class GeneralScreen extends React.Component {
             });
 
             var value = cost / len;
-
-            members.map((m, index) => {
+            
+            members.map((m) => {
                 if (m.selected)
-                    return {name: m.name, cost: value, selected: m.selected}
+                    m.cost = value;
             });
             
             this.setState({
@@ -252,10 +255,23 @@ class GeneralScreen extends React.Component {
                 <FormLabel>{this.state.lang.trip.members}</FormLabel>
                 
                 <ScrollView style={styles.members_list_wrapper}>
-                    {this.state.members != "" && this.state.members.map((item, index) => {
-                        return <View key={index} style={styles.members_list_item}>
-                            <CheckBox onPress={this.memberSelection(index)} checked={itenm.selected} title={item} />
-                            <FormInput keyboardType="numeric" value={item.cost} />
+                    {this.state.members.map((item) => {
+                        return <View key={item.id} style={styles.members_list_item}>
+                            <CheckBox 
+                                containerStyle={styles.members_list_ckbox_container} 
+                                checked={item.selected} 
+                                onPress={() => { this.memberSelection(item.id) }} 
+                                title={item.name} 
+                                textStyle={styles.members_list_ckbox_text}
+                            />
+                            <FormInput 
+                                containerStyle={styles.members_list_text_container} 
+                                keyboardType="numeric"
+                                value={String(item.cost)}
+                                style={styles.members_list_text} 
+                                underlineColorAndroid="transparent"
+                                editable={false}
+                            />
                         </View>
                     })}
                 </ScrollView>
@@ -272,7 +288,7 @@ class GeneralScreen extends React.Component {
                     <FormInput
                         autoCapitalize="sentences"
                         value={this.state.receiver}
-                        editable={this.props.new}
+                        editable={this.state.new}
                         style={styles.input}
                         returnKeyType="next"
                         onChangeText={(receiver) => this.setState({receiver: receiver})}
@@ -308,7 +324,7 @@ class GeneralScreen extends React.Component {
                     {/* cost */}
                     <FormLabel>{this.state.lang.expense.cost} <Required /></FormLabel>
                     <FormInput
-                        editable={this.props.new}                        
+                        editable={this.state.new}                        
                         style={styles.input}
                         value={String(this.state.cost)}
                         keyboardType="numeric"
@@ -324,7 +340,7 @@ class GeneralScreen extends React.Component {
                     <FormLabel>{this.state.lang.expense.notes}</FormLabel>
                     <FormInput
                         autoCapitalize="sentences"
-                        editable={this.props.new}
+                        editable={this.state.new}
                         multiline={true}
                         autoGrow={true}
                         value={this.state.notes}
@@ -544,7 +560,6 @@ class GalaryScreen extends React.Component {
     selectPic(pic){
         var len = this.state.gallary.lenght + 1;
 
-        console.log(pic);
         
         this.setState(prevState => ({
             gallary: [...prevState.gallary, {id: len, url: "something"}]
@@ -730,6 +745,30 @@ const styles = StyleSheet.create({
         marginRight: 30,
         borderBottomColor: "#aaa",
         borderBottomWidth: .5,
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+
+    members_list_ckbox_container: {
+        backgroundColor: "transparent",
+    },
+            
+    members_list_ckbox_text: {
+        fontSize: 16
+    },
+    
+    members_list_text_container: {
+        flex: 1,
+        right: 10,
+        bottom: 6,
+        position: "absolute",
+    },
+    
+    members_list_text: {
+        alignSelf: "center", 
+        textAlign:"center", 
+        fontSize: 20
     },
 
     btnContainer: {

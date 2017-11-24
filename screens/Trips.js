@@ -28,8 +28,6 @@ export default class Trips extends React.Component {
     // faz o async aqui e depois manda os items por params para os ecrãs
     async componentWillMount(){
         store.get("trips").then(trips => {
-            console.log(trips);
-
             var neww = this.props.navigation.state.params.new;
             var id = this.props.navigation.state.params.id;
             var trip = {};
@@ -63,6 +61,7 @@ export default class Trips extends React.Component {
             });
         })
     }
+
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
