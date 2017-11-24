@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon, Divider, Badge, Button, FormValidationMessage, FormInput, FormLabel } from 'react-native-elements'
 import { TabNavigator } from 'react-navigation';
-import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform, TouchableNativeFeedback, TouchableHighlight, Dimensions, Modal } from "react-native";
+import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform, TouchableNativeFeedback, TouchableHighlight, Dimensions, Modal, Alert } from "react-native";
 import DatePicker from 'react-native-datepicker';
 import ExpensesList from "./ExpensesList";
 import Loader from '../components/Loader';
@@ -14,7 +14,7 @@ export default class Trips extends React.Component {
 
     render(){
         return <Tab screenProps={{
-            lang: this.props.screenProps, 
+            lang: this.props.screenProps,
             params: this.props.navigation.state.params
         }} />;
     }
@@ -43,8 +43,8 @@ class TripScreen extends React.Component {
     async componentWillMount(){
         store.get("currencies").then(
             (currs) => {
-                this.setState({ 
-                    currs: currs 
+                this.setState({
+                    currs: currs
                 });
             }
         );
@@ -56,6 +56,7 @@ class TripScreen extends React.Component {
 
                 if (!this.state.new)
                 {
+                    console.log(trips);
                     trips.find((t) => {
                         if (t.id == id){
                             trip = t;
@@ -111,7 +112,7 @@ class TripScreen extends React.Component {
                 members: this.state.members,
                 desc: this.state.desc,
             }).then(() => {alert('yuuup'); this.props.navigation.goBack()});
-        }        
+        }
     }
 
     _submit_new_member() {
@@ -135,11 +136,11 @@ class TripScreen extends React.Component {
 
     _delete_member(index){
         Alert.alert(
-            lang.trip.remove_title,
-            lang.trip.remove_text,
+            this.state.lang.trip.remove_title,
+            this.state.lang.trip.remove_text,
             [
-                {text: lang.misc.remove_no, style: 'cancel'},
-                {text: lang.misc.remove_yes, onPress: () => { 
+                {text: this.state.lang.misc.remove_no, style: 'cancel'},
+                {text: this.state.lang.misc.remove_yes, onPress: () => {
                     this.setState(prevState => ({
                         members: [prevState.members.splice(index, 1)]
                     }));
@@ -179,11 +180,7 @@ class TripScreen extends React.Component {
         return (
             <View style={styles.members_wrapper}>
                 <FormLabel>{this.state.lang.trip.members}</FormLabel>
-                
-                <TouchableNativeFeedback onPress={() => { this.setModalVisible(true) }} >
-                    <FormLabel containerStyle={styles.new_member}>{this.state.lang.trip.new_member}</FormLabel>
-                </TouchableNativeFeedback>
-
+                <Button title={this.state.lang.trip.new_member} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={() => { this.setModalVisible(true) }} />
                 <ScrollView style={styles.members_list_wrapper}>
                     {this.state.members != "" && this.state.members.map((item, index) => {
                         return <View key={index} style={styles.list_item}>
@@ -207,7 +204,7 @@ class TripScreen extends React.Component {
                     <Text style={styles.modal_title}>{this.state.lang.trip.new_member_title}</Text>
 
                     <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
-                    <FormInput 
+                    <FormInput
                         autoCapitalize="sentences"
                         onChangeText={(name) => this.setState({memberName: name})}
                         style={styles.input}
@@ -259,7 +256,7 @@ class TripScreen extends React.Component {
                     editable={this.props.new}
                     multiline={true}
                     autoGrow={true}
-                    value={this.state.desc}                    
+                    value={this.state.desc}
                     onChangeText={(desc) => {this.state.loaded && this.setState({desc: desc})}}
                     style={StyleSheet.flatten([styles.input, styles.input_textarea])}
                 />
@@ -274,11 +271,11 @@ class TripScreen extends React.Component {
     }
 
     render(){
-        return (this.state.loaded) ? 
-            <View style={styles.flex_1}> 
-                {this.buildForm()} 
-                {this.buildModal()} 
-            </View> : 
+        return (this.state.loaded) ?
+            <View style={styles.flex_1}>
+                {this.buildForm()}
+                {this.buildModal()}
+            </View> :
             <Loader />
     }
 }
@@ -335,12 +332,12 @@ const styles = StyleSheet.create({
     },
 
     btnContainer: {
-        marginTop: 10, 
+        marginTop: 10,
         marginBottom: 10,
         marginLeft: 50,
         marginRight: 50,
     },
-    
+
     btnStyle: {
         borderRadius: 5
     },
@@ -352,10 +349,10 @@ const styles = StyleSheet.create({
     },
 
     new_member: {
-        position: "absolute", 
+        position: "absolute",
         right: 15,
         paddingBottom: 15,
-        borderWidth: 1, 
+        borderWidth: 1,
         borderColor: "#000",
         borderStyle: "dashed",
         borderRadius: 5,
@@ -363,6 +360,14 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         top: 8,
         height: 30
+    },
+    new_member_ios: {
+        margin: 15,
+        borderWidth: 1,
+        borderColor: "#000",
+        borderStyle: "dashed",
+        borderRadius: 5,
+        height: 50,
     },
 
     date_input: {
@@ -372,7 +377,7 @@ const styles = StyleSheet.create({
     },
 
     modal_wrapper: {
-        flex: 1, 
+        flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.3)"
     },
 
@@ -416,7 +421,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingLeft: 30,
         marginTop: 10,
-        fontSize: 18  
+        fontSize: 18
     },
 
     list_item_icon: {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback, TouchableHighlight } from "react-native";
 import { NavigationActions } from 'react-navigation'
 import { Icon } from 'react-native-elements';
 import store from 'react-native-simple-store';
@@ -9,7 +9,7 @@ import formatDate from '../utils/date_format';
 export default class TripsList extends React.Component{
     constructor(props){
         super(props);
-    
+
         this.state = {
             trips: null,
             loaded: false,
@@ -29,7 +29,7 @@ export default class TripsList extends React.Component{
     buildList(navigation){
         var items = [];
         var trips = this.state.trips;
-        
+
         if (trips == null || trips == ""){
             return <View style={styles.empty}>
                 <Text style={styles.empty_text}>{this.state.lang.trip.no_trips}</Text>
@@ -37,9 +37,30 @@ export default class TripsList extends React.Component{
         }
 
         trips.map((item) =>  {
-            items.push( 
-                <TouchableNativeFeedback 
-                    key={item.id} 
+            items.push(
+                <TouchableHighlight
+                    activeOpacity={0.99}
+                    key={item.id}
+                    onPress={() => {
+                        navigation.navigate('TripsItem', {trip_id: item.id, new: false});
+                    }}
+                >
+                    <View style={styles.list_item}>
+                        <View style={styles.list_item_info}>
+                            <Text>{formatDate(item.date)}</Text>
+                            <Text>{item.location}</Text>
+                            <Text>{item.numPeople}</Text>
+                            <Text>{item.category}</Text>
+                            <Text>{item.id}</Text>
+                        </View>
+                        <View style={styles.arrow}>
+                            <Icon name='chevron-right' size={40.0}/>
+                        </View>
+                    </View>
+                </TouchableHighlight >
+                /*
+                <TouchableNativeFeedback
+                    key={item.id}
                     onPress={() => {
                         navigation.navigate('TripsItem', {trip_id: item.id, new: false});
                     }}
@@ -55,7 +76,8 @@ export default class TripsList extends React.Component{
                             <Icon name='chevron-right' size={40.0}/>
                         </View>
                     </View>
-                </TouchableNativeFeedback >                
+                </TouchableNativeFeedback >
+                */
             );
         });
 
@@ -65,7 +87,7 @@ export default class TripsList extends React.Component{
     buildButton(navigation){
         return <View style={styles.button}>
             <Icon name='add-circle' size={64.0} onPress={() => {
-                navigation.navigate('TripsItem', {new: false})
+                navigation.navigate('TripsItem', {new: true})
             }} />
         </View>
     }
@@ -76,7 +98,7 @@ export default class TripsList extends React.Component{
                 {this.buildList(this.props.navigation)}
                 {this.buildButton(this.props.navigation)}
             </View>
-        ) : 
+        ) :
         <Loader />
     }
 }
@@ -104,7 +126,7 @@ const styles = StyleSheet.create({
         borderStyle: "solid",
         flex: 1,
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
     },
 
     list_item_info: {
