@@ -15,6 +15,8 @@ export default class TripsList extends React.Component{
             loaded: false,
             lang: this.props.screenProps
         }
+
+        this.updateTrips = this.updateTrips.bind(this);
     }
 
     async componentWillMount(){
@@ -41,7 +43,7 @@ export default class TripsList extends React.Component{
                     return <TouchableNativeFeedback 
                         key={item.id} 
                         onPress={() => {
-                            navigation.navigate('TripsItem', {id: item.id, new: false});
+                            navigation.navigate('TripsItem', {id: item.id, new: false, updateTrips: this.updateTrips});
                         }}
                     >
                         <View style={styles.list_item}>
@@ -71,7 +73,7 @@ export default class TripsList extends React.Component{
     buildButton(navigation){
         return <View style={styles.button}>
             <Icon name='add-circle' size={64.0} onPress={() => {
-                navigation.navigate('TripsItem', {new: true, id: this.state.trips.length + 1})
+                navigation.navigate('TripsItem', {new: true, id: this.state.trips.length + 1, updateTrips: this.updateTrips})
             }} />
         </View>
     }

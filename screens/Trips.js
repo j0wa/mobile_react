@@ -7,6 +7,7 @@ import ExpensesList from "./ExpensesList";
 import Loader from '../components/Loader';
 import { ComboBox, ComboBoxItem } from '../components/ComboBox';
 import Required from '../components/Required';
+import updateStorage from '../utils/update_storage';
 import store from 'react-native-simple-store';
 
 export default class Trips extends React.Component {
@@ -26,54 +27,50 @@ export default class Trips extends React.Component {
 
     // faz o async aqui e depois manda os items por params para os ecrãs
     async componentWillMount(){
-        store.get("trips").then(
-            trips => {
-                var neww = this.props.navigation.state.params.new;
-                var id = this.props.navigation.state.params.id;
-                var trip = {};
-                
-                if (!neww)
-                {
-                    trips.find((t) => {
-                        
-                        if (t.id == id){
-                            trip = t;
-                            return;
-                        }
-                    });
-                }
+        store.get("trips").then(trips => {
+            console.log(trips);
 
-                this.setState({ 
-                    new: neww,
-                    expenses: trip.expenses || {},
-                    summaries: trip.summaries || {},
-                    info: Object.keys(trip).length != 0 ? {
-                        location: this.state.location,
-                        date: this.state.date,
-                        curr: this.state.curr,
-                        members: this.state.members,
-                        desc: this.state.desc,
-                        id: id                        
-                    } : {
-                        id: id
-                    },
-                    loaded: true,
+            var neww = this.props.navigation.state.params.new;
+            var id = this.props.navigation.state.params.id;
+            var trip = {};
+            
+            if (!neww)
+            {
+                trips.find((t) => {
+                    
+                    if (t.id == id){
+                        trip = t;
+                        return;
+                    }
                 });
             }
-        )
-    }
 
+            this.setState({ 
+                new: neww,
+                expenses: trip.expenses || {},
+                summaries: trip.summaries || {},
+                info: Object.keys(trip).length != 0 ? {
+                    location: trip.location,
+                    date: trip.date,
+                    curr: trip.curr,
+                    members: trip.members,
+                    desc: trip.desc,
+                    id: id                        
+                } : {
+                    id: id
+                },
+                loaded: true,
+            });
+        })
+    }
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
-            lang: this.props.screenProps, 
-            params: {
-                new: this.props.navigation.state.params.new,
-                info: this.state.info,
-                expenses: this.state.expenses,
-                summaries: this.state.summaries
-            },
-            updateTrips: this.props.screenProps.updateTrips,
+            lang: this.props.screenProps,
+            new: this.props.navigation.state.params.new,
+            info: this.state.info,
+            summaries: this.state.summaries,
+            updateTrips: this.props.navigation.state.params.updateTrips,
             updateExpenses: this.updateExpenses,
         }} /> : <Loader/>;
     }
@@ -91,12 +88,12 @@ class TripScreen extends React.Component {
             errDesc: false,
             errMemberName: false,
             memberName: "",
-            new: this.props.screenProps.params.new,
-            trip: this.props.screenProps.params.info,
-            expenses: this.props.screenProps.params.expenses,
-            summaries: this.props.screenProps.params.summaries,
+            new: this.props.screenProps.new,
+            trip: this.props.screenProps.info,
+            expenses: this.props.screenProps.expenses,
+            summaries: this.props.screenProps.summaries,
             lang: this.props.screenProps.lang,
-            id: this.props.screenProps.params.info.id,
+            id: this.props.screenProps.info.id,
         }
 
         this._submit_new_member = this._submit_new_member.bind(this)
@@ -117,7 +114,7 @@ class TripScreen extends React.Component {
                     loaded: true,
                     location: trip.location || "",
                     date: trip.date || new Date(),
-                    id: this.props.screenProps.params.info.id
+                    id: this.props.screenProps.info.id
                 });
             }
         );
@@ -146,7 +143,7 @@ class TripScreen extends React.Component {
         } else {
             this.setState({ errDesc: false });
         }
-
+        
         if (err === -1){
             var t = {
                 id: this.state.id,
@@ -156,14 +153,12 @@ class TripScreen extends React.Component {
                 members: this.state.members,
                 desc: this.state.desc,
             };
-            
-            store.push("trips", t).then(() => {
-                if (this.state.new)
-                    this.props.screenProps.navigation.state.params.updateTrips(t);
-                
+
+            updateStorage("trips", t, this.state.new, () => {
+                this.props.screenProps.updateTrips(t);  
                 this.props.screenProps.navigation.goBack()
             });
-        }        
+        }
     }
 
     _submit_new_member() {

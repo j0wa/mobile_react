@@ -17,7 +17,7 @@ export default class Expenses extends React.Component {
             loaded: false,
         }
 
-        this._updateItems = this._updateItems.bind(this);
+        this.updateItems = this.updateItems.bind(this);
         this.updateGallary = this.updateGallary.bind(this);
     }
 
@@ -74,13 +74,12 @@ export default class Expenses extends React.Component {
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
-            lang: this.props.screenProps, 
-            params: {
-                new: this.props.navigation.state.params.new,
-                info: this.state.info,
-                items: this.state.items,
-                gallary: this.state.gallary
-            },
+            lang: this.props.screenProps,
+            new: this.props.navigation.state.params.new,
+            info: this.state.info,
+            items: this.state.items,
+            gallary: this.state.gallary,
+            trip_id: this.props.navigation.state.params.trip_id,
             updateExpenses: this.props.screenProps.updateExpenses,
             updateGallary: this.updateGallary,
             updateItems: this.updateItems,
@@ -94,12 +93,12 @@ class GeneralScreen extends React.Component {
 
         this.state = {
             loaded: false,
-            new: this.props.screenProps.params.new,
-            exp: this.props.screenProps.params.info,
-            items: this.props.screenProps.params.items,
-            gallary: this.props.screenProps.params.gallary,
+            new: this.props.screenProps.new,
+            exp: this.props.screenProps.info,
+            items: this.props.screenProps.items,
+            gallary: this.props.screenProps.gallary,
             lang: this.props.screenProps.lang,
-            id: this.props.screenProps.params.info.id,
+            id: this.props.screenProps.info.id,
             errReceiver: false,
             errCost: false,
             cost: ""
@@ -353,7 +352,7 @@ class ItemsScreen extends React.Component {
         
         this.state = {
             lang: this.props.screenProps.lang,
-            items: this.props.screenProps.params.items,
+            items: this.props.screenProps.items,
             modalVisible: false,
             errItemName: false,
             errItemPrice: false,
@@ -504,7 +503,7 @@ class GalaryScreen extends React.Component {
 
         this.state = {
             lang: this.props.screenProps.lang,
-            gallary: this.props.screenProps.params.gallary,
+            gallary: this.props.screenProps.gallary,
             showPhotoGallery: false,
             cameraPhotos: "" 
         }
