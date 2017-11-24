@@ -15,6 +15,8 @@ export default class App extends React.Component {
         }
     }
 
+
+
     async componentDidMount() {
         await Expo.Font.loadAsync({
             'Material Icons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
@@ -35,23 +37,57 @@ export default class App extends React.Component {
             }
 
         })
+        await store.delete('trip_list')
+        const trip1 = {
+            id:1,
+            name:'trip1',
+            currency: 'eu',
+            location:'ddc',
+            date:'17-11-17',
+            members:[
+                {
+                    id:1,
+                    name:'Jean Kul',
+                },
+                {
+                    id:2,
+                    name:'Jean Merde',
+                }
+            ],
+            description:'this is a trip',
+            category:'food',
+        }
+        const trip2 = {
+            id:2,
+            name:'trip1',
+            currency: 'eu',
+            location:'ddc',
+            date:'17-11-17',
+            members:[
+                {
+                    id:1,
+                    name:'Jean Kul',
+                },
+                {
+                    id:2,
+                    name:'Jean Merde',
+                }
+            ],
+            description:'this is a trip',
+            category:'food',
+        }
+        await store.push('trip_list',trip1);
+        await store.push('trip_list',trip2);
         this.setState({
             fontLoaded: true,
             lang: infoLang,
-        });
+        })
+
     }
 
     render(){
         StatusBar.setHidden(true);
-        /*var testVar = [this.state.lang]
-        console.log(testVar);*/
-        const screenProps = {
-                user: {
-                name: 'John Doe',
-                username: 'johndoe123',
-                email: 'john@doe.com',
-            },
-        }
+
 
         return (this.state.fontLoaded) ? <Menu screenProps={this.state.lang} /> : <AppLoading/>;
     }

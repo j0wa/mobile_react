@@ -4,17 +4,48 @@ import { TabNavigator } from 'react-navigation';
 import { View, Text, StyleSheet, Picker, PickerIOS, ScrollView, Platform,ActivityIndicator } from "react-native";
 import DatePicker from 'react-native-datepicker';
 import lang from "../configs/languages/lang";
+import store from 'react-native-simple-store';
 
 export default class Trips extends React.Component {
     constructor(props){
         super(props);
+    }
+    componentWillMount(){
+        this.setState({
+            isLoading: true,
+        });
+    }
 
+    async componentDidMount(){
+        var listContent = await store.get("trip_list").then(tripList => {
+            if(tripList == null){
+                return false;
+            }else{
+                return tripList;
+            }
+        })
+        var affichedId = this.props.navigation.state.params.id;
+        var content
+        for (var i = 0; i < listContent.length; i++) {
+            if (listContent[i]["id"] == affichedId) {
+                content = listContent[i];
+            }
+        }
+        console.log(content);
+        var infoLang = this.props.screenProps
+        this.setState({isLoading: false,lang: infoLang,content:content})
     }
 
     render(){
+        if(this.state.isLoading){
+            return (
+                <View style={{flex: 1, paddingTop: 20}}>
+                    <ActivityIndicator />
+                </View>
+            );
+        }else{
             return (<Tab screenProps={this.props.screenProps}/>)
-
-
+        }
     }
 }
 
@@ -168,7 +199,7 @@ class TripScreen extends React.Component {
                     />
                     {this.state.errDesc && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
-                    <Button title={this.state.lang.misc.btn} style={styles.btn} onPress={this._submit.bind(this)} />
+                    <Button title={this.state.lang.misc.btn} /*style={styles.btn}*/ onPress={this._submit.bind(this)} />
                 </View>
             </ScrollView>
             );

@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView,ActivityIndicator } from "react-native";
 import { Icon } from 'react-native-elements';
 import lang from "../configs/languages/lang";
-
+import store from 'react-native-simple-store';
+/*
 const trips = [
     { id: 1, date: "10/10/2000", location: "algures", numPeople: 5, category: "cool cat man"},
     { id: 2, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
@@ -16,32 +17,49 @@ const trips = [
     { id: 10, date: "10/03/2000", location: "algures", numPeople: 2, category: "cool cat man"},
     { id: 11, date: "10/10/2010", location: "algures", numPeople: 3, category: "cool cat man"}
 ]
-
+*/
 export default class TripsList extends React.Component{
     constructor(props){
         super(props);
+        this.state = {
+            isLoading: true,
+        }
+    }
+
+    async componentDidMount(){
+        var infoLang = this.props.screenProps
+        var listContent = await store.get("trip_list").then(tripList => {
+            if(tripList == null){
+                return false;
+            }else{
+                return tripList;
+            }
+        })
+        this.setState({isLoading: false,lang: infoLang,content: listContent});
+
+
     }
 
     buildList(navigate){
         var items = [];
 
+        /*
         if (trips == null || trips == ""){
             return <View style={styles.empty}>
                 <Text style={styles.empty_text}>{lang.trip.no_trips}</Text>
             </View>
-        }
+        }*/
 
-        trips.map((item) =>  {
+        this.state.content.map((item) =>  {
             items.push(
                 <View key={item.id} style={styles.list_item}>
                     <View style={styles.list_item_info}>
                         <Text>{item.date}</Text>
                         <Text>{item.location}</Text>
-                        <Text>{item.numPeople}</Text>
                         <Text>{item.category}</Text>
                     </View>
                     <View style={styles.arrow}>
-                        <Icon name='chevron-right' onPress={() => navigate('Trips', {new : false, id: item.id, lang: this.props.lang})} size={40.0}/>
+                        <Icon name='chevron-right' onPress={() => navigate('Trips', {new : false, id: item.id})} size={40.0}/>
                     </View>
                 </View>
             );
@@ -52,19 +70,33 @@ export default class TripsList extends React.Component{
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => navigate('Trips', {new : false, lang: this.props.lang})}/>
+            <Icon name='add-circle' size={64.0} onPress={() => navigate('Trips', {new : false})}/>
         </View>
     }
 
     render(){
         const { navigate } = this.props.navigation;
 
-        return (
+        if(this.state.isLoading){
+            return (
+                <View style={{flex: 1, paddingTop: 20}}>
+                    <ActivityIndicator />
+                </View>
+            );
+        }else if (!this.state.content) {
+            return (
+                <View style={{flex: 1, paddingTop: 20}}>
+                    <Text>{this.state.lang.trip.no_trips}</Text>
+                    {this.buildButton(navigate)}
+                </View>
+            );
+        }else{
+            return (
             <View style={styles.wrapper}>
                 {this.buildList(navigate)}
                 {this.buildButton(navigate)}
             </View>
-        );
+        );}
     }
 }
 
