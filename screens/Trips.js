@@ -52,6 +52,7 @@ class TripScreen extends React.Component {
         store.get("trips").then(
             trips => {
                 var trip = {};
+                var id = this.props.screenProps.params.trip_id;
 
                 if (!this.state.new)
                 {
