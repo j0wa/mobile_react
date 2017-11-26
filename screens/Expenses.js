@@ -110,6 +110,7 @@ class GeneralScreen extends React.Component {
 
         this._submit = this._submit.bind(this)
         this.updateValues = this.updateValues.bind(this)
+        this.updateMemberCost = this.updateMemberCost.bind(this)
     }
 
     componentWillMount(){
@@ -190,11 +191,11 @@ class GeneralScreen extends React.Component {
 
     updateValues(){
         var type = this.state.type;
-
+        
         if (type == 1) {
-            var cost = this.state.cost;
             var members = this.state.members;
             var len = 0;
+            var cost = this.state.cost;
 
             members.map(m => {
                 if (m.selected)
@@ -249,6 +250,36 @@ class GeneralScreen extends React.Component {
         </ComboBox>
     }
 
+    removeLeadingZeros(val){
+        if (typeof val == "string"){
+            var index = 0;
+            for (var i = 0; i < val.length; i++){
+                if (val[i] == "0")
+                    index++;
+                else
+                    break;
+            }
+    
+            if (index != -1){
+                return val.substr(index);
+            }
+    
+            return val;
+        }
+    }
+
+    updateMemberCost(id, val){
+        var tmp = this.state.members;
+        tmp.map((m) => {
+            if (id == m.id){
+                m.cost = this.removeLeadingZeros(val);
+                return;
+            }
+
+            this.setState({ members: tmp });
+        });
+    }
+
     buildPaymentList() {
         return (
             <View style={styles.members_wrapper}>
@@ -267,10 +298,11 @@ class GeneralScreen extends React.Component {
                             <FormInput 
                                 containerStyle={styles.members_list_text_container} 
                                 keyboardType="numeric"
-                                value={String(item.cost)}
                                 style={styles.members_list_text} 
                                 underlineColorAndroid="transparent"
-                                editable={false}
+                                editable={this.state.new && this.state.type != 1}
+                                onChangeText={(val) => this.updateMemberCost(item.id, val)}
+                                value={String(item.cost)}
                             />
                         </View>
                     })}
@@ -329,10 +361,8 @@ class GeneralScreen extends React.Component {
                         value={String(this.state.cost)}
                         keyboardType="numeric"
                         returnKeyType="next"
-                        onChangeText={(cost) => { 
-                            this.setState({cost: cost});
-                            this.updateValues();
-                        }}
+                        onEndEditing={cost => this.updateValues() }
+                        onChangeText={cost => this.setState({cost: this.removeLeadingZeros(cost)}) }
                     />
                     {this.state.errCost && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }                    
 
@@ -342,7 +372,7 @@ class GeneralScreen extends React.Component {
                         autoCapitalize="sentences"
                         editable={this.state.new}
                         multiline={true}
-                        autoGrow={true}
+                        autoGrow={true} 
                         value={this.state.notes}
                         onChangeText={(notes) => this.setState({notes: notes})}
                         style={StyleSheet.flatten([styles.input, styles.input_textarea])}
@@ -755,14 +785,15 @@ const styles = StyleSheet.create({
     },
             
     members_list_ckbox_text: {
-        fontSize: 16
+        fontSize: 16,
+        flex: 1
     },
     
     members_list_text_container: {
-        flex: 1,
         right: 10,
         bottom: 6,
         position: "absolute",
+        flex: 1
     },
     
     members_list_text: {
