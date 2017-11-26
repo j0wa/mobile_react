@@ -8,7 +8,7 @@ import formatDate from '../utils/date_format';
 export default class ExpensesList extends React.Component{
     constructor(props){
         super(props);
-        
+
         this.state = {
             expenses: [],
             loaded: false,
@@ -22,7 +22,7 @@ export default class ExpensesList extends React.Component{
 
         this.updateList = this.updateList.bind(this);
     }
- 
+
     async componentWillMount() {
         store.get("expenses").then(
             expenses => {
@@ -60,7 +60,7 @@ export default class ExpensesList extends React.Component{
         
         return <ScrollView>{
             expenses.map((item) =>  {
-                return <TouchableNativeFeedback 
+                return <TouchableHighlight 
                     key={item.id} 
                     onPress={() => 
                         this.props.screenProps.navigation.navigate('ExpensesItem', {
@@ -82,7 +82,7 @@ export default class ExpensesList extends React.Component{
                             <Icon name='chevron-right' size={40.0}/>
                         </View>
                     </View>
-                </TouchableNativeFeedback>
+                </TouchableHighlight>
             })
         }</ScrollView>
     }

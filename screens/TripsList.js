@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback, TouchableHighlight } from "react-native";
 import { NavigationActions } from 'react-navigation'
 import { Icon } from 'react-native-elements';
 import store from 'react-native-simple-store';
@@ -9,7 +9,7 @@ import formatDate from '../utils/date_format';
 export default class TripsList extends React.Component{
     constructor(props){
         super(props);
-    
+
         this.state = {
             trips: [],
             loaded: false,
@@ -31,7 +31,7 @@ export default class TripsList extends React.Component{
     buildList(navigation){
         var items = [];
         var trips = this.state.trips;
-        
+
         if (trips == null || trips == ""){
             return <View style={styles.empty}>
                 <Text style={styles.empty_text}>{this.state.lang.trip.no_trips}</Text>
@@ -84,7 +84,7 @@ export default class TripsList extends React.Component{
                 {this.buildList(this.props.navigation)}
                 {this.buildButton(this.props.navigation)}
             </View>
-        ) : 
+        ) :
         <Loader />
     }
 }
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
         borderStyle: "solid",
         flex: 1,
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
     },
 
     list_item_info: {

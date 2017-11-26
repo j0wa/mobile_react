@@ -246,7 +246,7 @@ class TripScreen extends React.Component {
                     <Text style={styles.modal_title}>{this.state.lang.trip.new_member_title}</Text>
 
                     <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
-                    <FormInput 
+                    <FormInput
                         autoCapitalize="sentences"
                         onChangeText={(name) => this.setState({memberName: name})}
                         style={styles.input}
@@ -312,11 +312,11 @@ class TripScreen extends React.Component {
     }
 
     render(){
-        return (this.state.loaded) ? 
-            <View style={styles.flex_1}> 
-                {this.buildForm()} 
-                {this.buildModal()} 
-            </View> : 
+        return (this.state.loaded) ?
+            <View style={styles.flex_1}>
+                {this.buildForm()}
+                {this.buildModal()}
+            </View> :
             <Loader />
     }
 }
@@ -357,12 +357,12 @@ const styles = StyleSheet.create({
     },
 
     btnContainer: {
-        marginTop: 10, 
+        marginTop: 10,
         marginBottom: 10,
         marginLeft: 50,
         marginRight: 50,
     },
-    
+
     btnStyle: {
         borderRadius: 5
     },
@@ -374,10 +374,10 @@ const styles = StyleSheet.create({
     },
 
     new_member: {
-        position: "absolute", 
+        position: "absolute",
         right: 15,
         paddingBottom: 15,
-        borderWidth: 1, 
+        borderWidth: 1,
         borderColor: "#000",
         borderStyle: "dashed",
         borderRadius: 5,
@@ -385,6 +385,14 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         top: 8,
         height: 30
+    },
+    new_member_ios: {
+        margin: 15,
+        borderWidth: 1,
+        borderColor: "#000",
+        borderStyle: "dashed",
+        borderRadius: 5,
+        height: 50,
     },
 
     date_input: {
@@ -394,7 +402,7 @@ const styles = StyleSheet.create({
     },
 
     modal_wrapper: {
-        flex: 1, 
+        flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.3)"
     },
 
@@ -438,7 +446,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingLeft: 30,
         marginTop: 10,
-        fontSize: 18  
+        fontSize: 18
     },
 
     list_item_icon: {

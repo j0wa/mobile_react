@@ -29,7 +29,7 @@ export default class App extends React.Component {
         dataFeed.categories();
 
         await Expo.Font.loadAsync({
-            'MaterialIcons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
+            'Material Icons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
             'SimpleLineIcons': require('./node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf'),
             'FontAwesome': require('./node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf'),
             'Ionicons': require('./node_modules/react-native-vector-icons/Fonts/Ionicons.ttf'),
@@ -43,11 +43,19 @@ export default class App extends React.Component {
                         infoLang = item.content;
                         return;
                     }
-                }) 
+                })
             } else {
                 infoLang = lang[0]["content"]
             }
         })
+
+        await store.get("expenses").then(
+            expenses => {
+                if(expenses == null){
+                    store.push("expenses",[]);
+                }
+            }
+        )
 
         this.setState({
             fontLoaded: true,

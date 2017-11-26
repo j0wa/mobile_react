@@ -42,7 +42,7 @@ export default {
     account: {
         title: "Account"
     },
-    
+
     cat: {
         title: "Categories",
         new_item: "Add new category",
@@ -65,7 +65,8 @@ export default {
 
     setting: {
         title: "Settings",
-        lang_select: "Preffered language"
+        lang_select: "Preffered language",
+        delete_everything: "Delete all data",
     },
 
     summaries: {
