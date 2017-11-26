@@ -49,6 +49,17 @@ export default class Settings extends React.Component {
             </Picker>
         }
     }
+
+    delEverything(){
+        store.delete("expenses");
+        store.delete("currencies");
+        store.delete("splitType");
+        store.delete("categories");
+        store.delete("pref_lang");
+        store.delete("trips");
+        console.log("everythong deleted");
+    }
+
     render(){
             if (this.state.isLoading) {
                 return (
@@ -64,7 +75,7 @@ export default class Settings extends React.Component {
                             <View style={styles.combobox}>
                                 {this.getComboBox(lang, "type")}
                             </View>
-                            <Text>{this.state.pref_lang}</Text>
+                            <Button title={this.state.lang.setting.delete_everything} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={() => { this.delEverything() }} />
                         </View>
                     </ScrollView>
                 )
@@ -74,6 +85,18 @@ export default class Settings extends React.Component {
 }
 
 const styles = StyleSheet.create({
+
+    btnContainer: {
+        marginTop: 10,
+        marginBottom: 10,
+        marginLeft: 50,
+        marginRight: 50,
+    },
+
+    btnStyle: {
+        borderRadius: 5
+    },
+
     list_item: {
         padding: 25,
         borderBottomWidth: .5,

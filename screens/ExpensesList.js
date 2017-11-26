@@ -8,7 +8,7 @@ import formatDate from '../utils/date_format';
 export default class ExpensesList extends React.Component{
     constructor(props){
         super(props);
-        
+
         this.state = {
             expenses: [],
             loaded: false,
@@ -20,7 +20,7 @@ export default class ExpensesList extends React.Component{
 
         this.updateList = this.updateList.bind(this);
     }
- 
+
     async componentWillMount() {
         store.get("expenses").then(
             expenses => {
@@ -60,8 +60,8 @@ export default class ExpensesList extends React.Component{
 
         return <ScrollView>{
             expenses.map((item) =>  {
-                return <TouchableNativeFeedback 
-                    key={item.id} 
+                return <TouchableHighlight
+                    key={item.id}
                     onPress={() => navigate('ExpensesItem', {id: item.id, new: false, updateExpenses: this.updateList})}
                 >
                     <View style={styles.list_item} >
@@ -73,14 +73,15 @@ export default class ExpensesList extends React.Component{
                             <Icon name='chevron-right' size={40.0}/>
                         </View>
                     </View>
-                </TouchableNativeFeedback>
+                </TouchableHighlight>
             })
         }</ScrollView>
     }
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => { navigate('ExpensesItem', {id: (this.state.expenses.length + 1), new: true, updateExpenses: this.updateList})}}/>
+
+            <Icon name='add-circle' size={64.0} onPress={() =>  { navigate('ExpensesItem', {id: (this.state.expenses.length + 1), new: true, updateExpenses: this.updateList}) } }  />
         </View>
     }
 

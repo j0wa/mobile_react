@@ -52,7 +52,6 @@ class TripScreen extends React.Component {
         store.get("trips").then(
             trips => {
                 var trip = {};
-                var id = this.props.screenProps.params.trip_id;
 
                 if (!this.state.new)
                 {
@@ -68,7 +67,7 @@ class TripScreen extends React.Component {
                 this.setState({
                     trip : trip,
                     loaded: true,
-                    id: (trips != null) ? (trips.length + 1) : id,
+                    id: (trips != null) ? (trips.length + 1) : 1,
                     location: trip.location || "",
                     date: trip.date || new Date(),
                     members: trip.members || [],

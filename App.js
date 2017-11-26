@@ -49,6 +49,14 @@ export default class App extends React.Component {
             }
         })
 
+        await store.get("expenses").then(
+            expenses => {
+                if(expenses == null){
+                    store.push("expenses",[]);
+                }
+            }
+        )
+
         this.setState({
             fontLoaded: true,
             langLoaded: true,

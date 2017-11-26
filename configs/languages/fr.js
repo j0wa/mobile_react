@@ -65,7 +65,8 @@ export default {
 
     setting: {
         title: "Parramètre",
-        lang_select: "Langue préférée"
+        lang_select: "Langue préférée",
+        delete_everything: "supprimer toute les données",
     },
 
     summaries: {

@@ -12,7 +12,6 @@ import formatDate from '../utils/date_format';
 export default class Expenses extends React.Component {
     constructor(props){
         super(props);
-
         this.state = {
             loaded: false,
         }
@@ -26,8 +25,8 @@ export default class Expenses extends React.Component {
     }
 
     _updateItems(items){
-        this.setState({ 
-            items: items 
+        this.setState({
+            items: items
         });
     }
 
@@ -48,7 +47,7 @@ export default class Expenses extends React.Component {
                     });
                 }
 
-                this.setState({ 
+                this.setState({
                     new: neww,
                     gallery: expense.gallery || {},
                     items: expense.items || {},
@@ -61,7 +60,7 @@ export default class Expenses extends React.Component {
                         cost: expense.cost,
                         notes: expense.notes,
                         id: id
-                    } : { 
+                    } : {
                         id: id
                     },
                     loaded: true,
@@ -73,7 +72,7 @@ export default class Expenses extends React.Component {
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
-            lang: this.props.screenProps, 
+            lang: this.props.screenProps,
             params: {
                 new: this.props.navigation.state.params.new,
                 info: this.state.info,
@@ -106,32 +105,32 @@ class GeneralScreen extends React.Component {
             typeLoaded: false,
             cost: ""
         }
-        
+
         this._submit = this._submit.bind(this)
     }
 
     async componentWillMount(){
         store.get("currencies").then(
-            (currs) => {  
-                this.setState({ 
-                    currs: currs 
+            (currs) => {
+                this.setState({
+                    currs: currs
                 });
             }
         );
 
         store.get("splitType").then(
             (types) => {
-                this.setState({ 
-                    types: types 
+                this.setState({
+                    types: types
                 });
             }
         );
 
         store.get("categories").then(
             (cats) => {
-                var exp = this.state.exp; 
+                var exp = this.state.exp;
 
-                this.setState({ 
+                this.setState({
                     cats: cats,
                     date: exp.date || new Date(),
                     members: exp.members || [],
@@ -178,12 +177,12 @@ class GeneralScreen extends React.Component {
                 items: this.state.items,
                 gallary: this.state.gallary,
             };
-            
+
             store.push("expenses", e).then(() => {
                 if (this.state.new)
                     this.props.screenProps.navigation.state.params.updateExpenses(e);
-                    
-                this.props.screenProps.navigation.goBack()} 
+
+                this.props.screenProps.navigation.goBack()}
             );
         }
     }
@@ -207,7 +206,7 @@ class GeneralScreen extends React.Component {
                 if (m.selected)
                     return {name: m.name, cost: value, selected: m.selected}
             });
-            
+
             this.setState({
                 members: members
             })
@@ -228,13 +227,13 @@ class GeneralScreen extends React.Component {
 
     getComboBox(collection, stateItem){
         var items = [];
-        
-        if (!collection || collection == "" || collection == [] || collection == null) 
+
+        if (!collection || collection == "" || collection == [] || collection == null)
             return;
-        
-        return <ComboBox 
+
+        return <ComboBox
                 selectedValue={this.state[stateItem]}
-                onValueChange={(value) => { 
+                onValueChange={(value) => {
                     if (stateItem == "type")
                         this.setState({type: value});
                     else if (stateItem == "curr")
@@ -253,7 +252,7 @@ class GeneralScreen extends React.Component {
         return (
             <View style={styles.members_wrapper}>
                 <FormLabel>{this.state.lang.trip.members}</FormLabel>
-                
+
                 <ScrollView style={styles.members_list_wrapper}>
                     {this.state.members != "" && this.state.members.map((item, index) => {
                         return <View key={index} style={styles.members_list_item}>
@@ -307,21 +306,21 @@ class GeneralScreen extends React.Component {
                         value={formatDate(this.state.date.getTime())}
                         style={styles.input}
                     />
-                    
+
                     {/* cost */}
                     <FormLabel>{this.state.lang.expense.cost} <Required /></FormLabel>
                     <FormInput
-                        editable={this.props.new}                        
+                        editable={this.props.new}
                         style={styles.input}
                         value={String(this.state.cost)}
                         keyboardType="numeric"
                         returnKeyType="next"
-                        onChangeText={(cost) => { 
+                        onChangeText={(cost) => {
                             this.setState({cost: cost});
                             this.updateValues();
                         }}
                     />
-                    {this.state.errCost && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }                    
+                    {this.state.errCost && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     {/* notes */}
                     <FormLabel>{this.state.lang.expense.notes}</FormLabel>
@@ -337,7 +336,7 @@ class GeneralScreen extends React.Component {
 
                     {/* payments */}
                     {this.buildPaymentList()}
-                    
+
                     <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit} />
                 </View>
             </ScrollView>
@@ -352,7 +351,7 @@ class GeneralScreen extends React.Component {
 class ItemsScreen extends React.Component {
     constructor(props){
         super(props);
-        
+
         this.state = {
             lang: this.props.screenProps.lang,
             items: this.props.screenProps.params.items,
@@ -373,14 +372,14 @@ class ItemsScreen extends React.Component {
             this.state.lang.expense.remove_text,
             [
                 {text: this.state.lang.misc.remove_no, style: 'cancel'},
-                {text: this.state.lang.misc.remove_yes, onPress: () => { 
+                {text: this.state.lang.misc.remove_yes, onPress: () => {
                     var items = this.state.items;
                     items.splice(0, 1);
-                    
+
                     this.setState({
                         items: items
                     });
-                    
+
                     this.props.screenProps.updateItems(this.state.items);
                 }},
             ],
@@ -406,7 +405,7 @@ class ItemsScreen extends React.Component {
 
         if (err === -1) {
             var items =  [
-                ...this.state.items, 
+                ...this.state.items,
                 {name: this.state.itemName, price: this.state.itemPrice}
             ];
 
@@ -463,7 +462,7 @@ class ItemsScreen extends React.Component {
                     <Text style={styles.modal_title}>{this.state.lang.expense.new_item_title}</Text>
 
                     <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
-                    <FormInput 
+                    <FormInput
                         autoCapitalize="sentences"
                         onChangeText={(name) => this.setState({itemName: name})}
                         style={styles.input}
@@ -471,7 +470,7 @@ class ItemsScreen extends React.Component {
                     { this.state.errItemName && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     <FormLabel>{this.state.lang.expense.item_price}</FormLabel>
-                    <FormInput 
+                    <FormInput
                         autoCapitalize="sentences"
                         keyboardType="numeric"
                         onChangeText={(price) => this.setState({itemPrice: price})}
@@ -492,9 +491,9 @@ class ItemsScreen extends React.Component {
     }
 
     render(){
-        return <View style={styles.flex_1}> 
-            {this.buildModal()} 
-            {this.buildList()} 
+        return <View style={styles.flex_1}>
+            {this.buildModal()}
+            {this.buildList()}
             {this.buildButton()}
         </View>
     }
@@ -508,7 +507,7 @@ class GalaryScreen extends React.Component {
             lang: this.props.screenProps.lang,
             gallary: this.props.screenProps.params.gallary,
             showPhotoGallery: false,
-            cameraPhotos: "" 
+            cameraPhotos: ""
         }
     }
 
@@ -521,7 +520,7 @@ class GalaryScreen extends React.Component {
                 </View>
             );
         }
-        
+
         return (
             <ScrollView>
                 <PhotoGrid PhotosList={this.state.gallary} borderRadius={10}/>
@@ -531,8 +530,8 @@ class GalaryScreen extends React.Component {
 
     getPhotos(){
         CameraRoll.getPhotos({ first: 1000000 }).then(pics => {
-            this.setState({ 
-                showPhotoGallery: true, 
+            this.setState({
+                showPhotoGallery: true,
                 cameraPhotos: pics.edges
             })
         });
@@ -548,7 +547,7 @@ class GalaryScreen extends React.Component {
         var len = this.state.gallary.lenght + 1;
 
         console.log(pic);
-        
+
         this.setState(prevState => ({
             gallary: [...prevState.gallary, {id: len, url: "something"}]
         }));
@@ -614,7 +613,7 @@ const styles = StyleSheet.create({
     },
 
     list_item_info: {
-        marginRight: 100, 
+        marginRight: 100,
         flexDirection: "row",
         alignItems: "center",
         justifyContent:"space-between"
@@ -683,7 +682,7 @@ const styles = StyleSheet.create({
     },
 
     flex_1: {
-        flex:1 
+        flex:1
     },
 
     form_container: {
@@ -736,12 +735,12 @@ const styles = StyleSheet.create({
     },
 
     btnContainer: {
-        marginTop: 10, 
+        marginTop: 10,
         marginBottom: 10,
         marginLeft: 50,
         marginRight: 50,
     },
-    
+
     btnStyle: {
         borderRadius: 5
     },
@@ -754,7 +753,7 @@ const styles = StyleSheet.create({
     },
 
     modal_wrapper: {
-        flex: 1, 
+        flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.3)"
     },
 
@@ -766,7 +765,7 @@ const styles = StyleSheet.create({
         width: (Dimensions.get("window").width - 50),
         borderRadius: 10
     },
-    
+
     modal_title: {
         marginLeft: 20,
         fontSize: 16,
