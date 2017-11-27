@@ -15,6 +15,8 @@ export default class Categories extends React.Component{
             errName: false,
             name: "",
             loaded: false,
+            lang: this.props.screenProps,
+            cats: [],
         }
     }
 
@@ -22,7 +24,6 @@ export default class Categories extends React.Component{
         store.get("cats").then(cats => {
             this.setState({ 
                 cats: cats,
-                lang: this.props.screenProps,
                 loaded: true
             });
         })
@@ -31,15 +32,16 @@ export default class Categories extends React.Component{
     buildList(){
         return <ScrollView>{
             this.state.cats.map((item, index) =>  {
-                return 
-                    <View key={index} style={styles.list_item}>
+                return (
+                    <View key={item.id} style={styles.list_item}>
                         <View style={styles.list_item_info}>
                             <Text>{item.name}</Text>
                         </View>
                         <View style={styles.arrow}>
-                            <Icon name='delete-forever' onPress={() => { this._delete(index) }} size={32.0}/>
+                            <Icon name='delete-forever' onPress={() => { this._delete(item.id) }} size={32.0}/>
                         </View>
                     </View>
+                );
             })
         }</ScrollView>
     }
@@ -67,15 +69,25 @@ export default class Categories extends React.Component{
 
         if (this.state.name == ""){
             this.setState({errName: true});
-            err = -1;
+            err = 1;
         }
         else {
-            this.setState({errName: true});
+            this.setState({errName: false});
             err = -1;
         }
 
         if (err == -1)
-            updateStorage("cats", {name: this.state.name}, true, null);
+        {
+            var c = {id: this.state.id, name: this.state.name}
+            updateStorage("cats", c, true, null);
+            this.setState(prevState => ({
+                modalVisible: false,
+                cats: [
+                    ...this.state.cats,
+                    c
+                ]
+            }))
+        }
 
     }
 
@@ -115,7 +127,7 @@ export default class Categories extends React.Component{
 
     render(){
         return (
-            <View>
+            <View style={{flex: 1}}>
                 {this.buildModal()}
                 {this.buildList()}
                 {this.buildButton()}
