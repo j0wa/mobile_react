@@ -1,19 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Modal, TouchableHighlight, Platform, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Dimensions, Modal, TouchableHighlight, Alert } from "react-native";
 import { Icon, Button, FormValidationMessage, FormInput, FormLabel } from 'react-native-elements'
-import lang from "../configs/languages/lang";
-
-const cats = [
-    { id: 2, name: "tag fixolas"},
-    { id: 3, name: "tag fixolas"},
-    { id: 1, name: "tag fixolas"},
-    { id: 4, name: "tag fixolas"},
-    { id: 5, name: "tag fixolas"},
-    { id: 6, name: "tag fixolas"},
-    { id: 7, name: "tag fixolas"},
-    { id: 8, name: "tag fixolas"},
-    { id: 9, name: "tag fixolas"},
-]
+import Required from '../components/Required';
+import updateStorage from '../utils/update_storage';
+import store from 'react-native-simple-store';
+import Loader from '../components/Loader';
 
 export default class Categories extends React.Component{
     constructor(props){
@@ -23,49 +14,50 @@ export default class Categories extends React.Component{
             modalVisible: false,
             errName: false,
             name: "",
+            loaded: false,
         }
     }
 
-    componentWillMount(){
-        this.setState({
-            errName: false,
-            name: "",
-            modalVisible: false
+    async componentWillMount(){
+        store.get("cats").then(cats => {
+            this.setState({ 
+                cats: cats,
+                lang: this.props.screenProps,
+                loaded: true
+            });
         })
     }
 
     buildList(){
-        var items = [];
-        
-        if (cats == null || cats == ""){
-            return <View style={styles.empty}>
-                <Text style={styles.empty_text}>{lang.cat.cats}</Text>
-            </View>
-        }
-
-        cats.map((item) =>  {
-            items.push( 
-                <View key={item.id} style={styles.list_item}>
-                    <View style={styles.list_item_info}>
-                        <Text>{item.name}</Text>
+        return <ScrollView>{
+            this.state.cats.map((item, index) =>  {
+                return 
+                    <View key={index} style={styles.list_item}>
+                        <View style={styles.list_item_info}>
+                            <Text>{item.name}</Text>
+                        </View>
+                        <View style={styles.arrow}>
+                            <Icon name='delete-forever' onPress={() => { this._delete(index) }} size={32.0}/>
+                        </View>
                     </View>
-                    <View style={styles.arrow}>
-                        <Icon name='delete-forever' onPress={() => { this._delete(item.id) }} size={32.0}/>
-                    </View>
-                </View>
-            );
-        });
-        
-        return <ScrollView>{items}</ScrollView>
+            })
+        }</ScrollView>
     }
     
-    _delete(id){
+    _delete(index) {
         Alert.alert(
-            lang.cat.remove_title,
-            lang.cat.remove_text,
+            this.state.lang.cat.remove_title,
+            this.state.lang.cat.remove_text,
             [
-                {text: lang.misc.remove_no, style: 'cancel'},
-                {text: lang.misc.remove_yes, onPress: () => { alert("item removed") } },
+                {text: this.state.lang.misc.remove_no, style: 'cancel'},
+                {text: this.state.lang.misc.remove_yes, onPress: () => { 
+                    var cats = this.state.cats;
+                    cats.splice(index, 1);
+                    
+                    this.setState({
+                        cats: cats
+                    });
+                }},
             ],
         );
     }
@@ -82,9 +74,9 @@ export default class Categories extends React.Component{
             err = -1;
         }
 
-        if (err == -1){
-            // insert 
-        }
+        if (err == -1)
+            updateStorage("cats", {name: this.state.name}, true, null);
+
     }
 
     setModalVisible(visible) {
@@ -105,17 +97,17 @@ export default class Categories extends React.Component{
         >
             <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.setModalVisible(false) }}>
                 <View style={styles.modal_container}>
-                    <Text style={styles.new_item}>{lang.cat.new_item}</Text>
+                    <Text style={styles.new_item}>{this.state.lang.cat.new_item}</Text>
 
-                    <FormLabel>{lang.expense.item_name}</FormLabel>
+                    <FormLabel>{this.state.lang.expense.item_name}</FormLabel>
                     <FormInput 
                         autoCapitalize="sentences"
                         onChangeText={(name) => this.setState({name: name})}
                         style={styles.input}
                     />
-                    { this.state.errName && <FormValidationMessage>{lang.err.required}</FormValidationMessage> }
+                    { this.state.errName && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
-                    <Button title={lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit.bind(this)} />
+                    <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit.bind(this)} />
                 </View>
             </TouchableHighlight>
         </Modal>

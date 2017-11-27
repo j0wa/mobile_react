@@ -20,7 +20,7 @@ export default function updateStorage(collection, item, creating, callback) {
     
     }).then(() => {
         store.delete(collection).then(() => {
-            store.save(collection, tmp).then(() => { callback() });
+            store.save(collection, tmp).then(() => { callback && callback() });
         });
     });
 }

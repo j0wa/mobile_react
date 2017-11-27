@@ -11,7 +11,7 @@ import updateStorage from '../utils/update_storage';
 import store from 'react-native-simple-store';
 
 export default class Trips extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {
@@ -187,7 +187,7 @@ class TripScreen extends React.Component {
                 {text: this.state.lang.misc.remove_no, style: 'cancel'},
                 {text: this.state.lang.misc.remove_yes, onPress: () => { 
                     var members = this.state.members;
-                    members.splice(0, 1);
+                    members.splice(index, 1);
                     
                     this.setState({
                         members: members
