@@ -40,8 +40,8 @@ export default class TripsList extends React.Component{
 
         return <ScrollView>
                 {trips.map((item) =>  {
-                    return <TouchableNativeFeedback 
-                        key={item.id} 
+                    return <TouchableHighlight
+                        key={item.id}
                         onPress={() => {
                             navigation.navigate('TripsItem', {id: item.id, new: false, updateTrips: this.updateTrips});
                         }}
@@ -55,7 +55,7 @@ export default class TripsList extends React.Component{
                                 <Icon name='chevron-right' size={40.0}/>
                             </View>
                         </View>
-                    </TouchableNativeFeedback >
+                    </TouchableHighlight >
                 })
             }
         </ScrollView>

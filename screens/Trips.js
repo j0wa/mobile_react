@@ -17,12 +17,12 @@ export default class Trips extends React.Component {
         this.state = {
             loaded: false,
         }
-    
+
         this.updateExpenses = this.updateExpenses.bind(this);
     }
 
     updateExpenses(exp){
-        this.setState({ expenses: exp });        
+        this.setState({ expenses: exp });
     }
 
     // faz o async aqui e depois manda os items por params para os ecrãs
@@ -31,11 +31,11 @@ export default class Trips extends React.Component {
             var neww = this.props.navigation.state.params.new;
             var id = this.props.navigation.state.params.id;
             var trip = {};
-            
+
             if (!neww)
             {
                 trips.find((t) => {
-                    
+
                     if (t.id == id){
                         trip = t;
                         return;
@@ -43,7 +43,7 @@ export default class Trips extends React.Component {
                 });
             }
 
-            this.setState({ 
+            this.setState({
                 new: neww,
                 expenses: trip.expenses || {},
                 summaries: trip.summaries || {},
@@ -53,7 +53,7 @@ export default class Trips extends React.Component {
                     curr: trip.curr,
                     members: trip.members,
                     desc: trip.desc,
-                    id: id                        
+                    id: id
                 } : {
                     id: id
                 },
@@ -103,9 +103,9 @@ class TripScreen extends React.Component {
     async componentWillMount(){
         store.get("currencies").then(
             (currs) => {
-                var trip = this.state.trip; 
-                
-                this.setState({ 
+                var trip = this.state.trip;
+
+                this.setState({
                     currs: currs,
                     date: trip.date || new Date(),
                     members: trip.members || [],
@@ -142,7 +142,7 @@ class TripScreen extends React.Component {
         } else {
             this.setState({ errDesc: false });
         }
-        
+
         if (err === -1){
             var t = {
                 id: this.state.id,
@@ -154,7 +154,7 @@ class TripScreen extends React.Component {
             };
 
             updateStorage("trips", t, this.state.new, () => {
-                this.props.screenProps.updateTrips(t);  
+                this.props.screenProps.updateTrips(t);
                 this.props.screenProps.navigation.goBack()
             });
         }
@@ -185,10 +185,10 @@ class TripScreen extends React.Component {
             this.state.lang.trip.remove_text,
             [
                 {text: this.state.lang.misc.remove_no, style: 'cancel'},
-                {text: this.state.lang.misc.remove_yes, onPress: () => { 
+                {text: this.state.lang.misc.remove_yes, onPress: () => {
                     var members = this.state.members;
                     members.splice(index, 1);
-                    
+
                     this.setState({
                         members: members
                     });
@@ -202,7 +202,7 @@ class TripScreen extends React.Component {
     }
 
     buildCurrencies(){
-        return <ComboBox 
+        return <ComboBox
                 selectedValue={this.state.curr}
                 onValueChange={(value) => { this.setState({curr: value}); }}
             >
@@ -216,11 +216,7 @@ class TripScreen extends React.Component {
         return (
             <View style={styles.members_wrapper}>
                 <FormLabel>{this.state.lang.trip.members} <Required /></FormLabel>
-                
-                <TouchableNativeFeedback onPress={() => { this.setModalVisible(true) }} >
-                    <FormLabel containerStyle={styles.new_member}>{this.state.lang.trip.new_member}</FormLabel>
-                </TouchableNativeFeedback>
-
+                <Button title={this.state.lang.trip.new_member} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={() => { this.setModalVisible(true) }} />
                 <ScrollView style={styles.members_list_wrapper}>
                     {this.state.members != "" && this.state.members.map((item, index) => {
                         return <View key={index} style={styles.list_item}>
@@ -288,7 +284,7 @@ class TripScreen extends React.Component {
                     editable={this.props.new}
                     style={styles.input}
                     value={this.state.location}
-                    returnKeyType="next"                    
+                    returnKeyType="next"
                     onChangeText={(location) => {this.state.loaded && this.setState({location: location})}}
                 />
                 {this.state.errLocation && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
