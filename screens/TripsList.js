@@ -32,6 +32,9 @@ export default class TripsList extends React.Component{
         var items = [];
         var trips = this.state.trips;
 
+        console.log("buildList trips :");
+        console.log(trips);
+
         if (trips == null || trips == ""){
             return <View style={styles.empty}>
                 <Text style={styles.empty_text}>{this.state.lang.trip.no_trips}</Text>
@@ -61,13 +64,9 @@ export default class TripsList extends React.Component{
         </ScrollView>
     }
 
+    //fixed to avoid duplicates keys
     updateTrips(trip){
-        this.setState(prevState => ({
-            trips: [
-                ...prevState.trips,
-                trip
-            ]
-        }));
+        store.get("trips").then((value) => this.setState({trips : value}));
     }
 
     buildButton(navigation){

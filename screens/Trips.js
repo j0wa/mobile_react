@@ -113,7 +113,8 @@ class TripScreen extends React.Component {
                     loaded: true,
                     location: trip.location || "",
                     date: trip.date || new Date(),
-                    id: this.props.screenProps.info.id
+                    id: this.props.screenProps.info.id,
+                    desc: trip.desc || "",
                 });
             }
         );
@@ -318,10 +319,44 @@ class TripScreen extends React.Component {
 }
 
 class SummariesScreen extends React.Component {
-    render() {
+    constructor(props){
+        super(props);
+
+        this.state = {
+            loaded: false,
+            new: this.props.screenProps.new,
+            trip: this.props.screenProps.info,
+            expenses: this.props.screenProps.expenses,
+            summaries: this.props.screenProps.summaries,
+            lang: this.props.screenProps.lang,
+            id: this.props.screenProps.info.id,
+        }
+
+    }
+    componentDidMount(){
+        this.setState({loaded: true})
+    }
+    buildSplitData(){
+
         return (
-            <View><Text>THE SUMMARIES WILL BE DISPLAYED HERE</Text></View>
+            <View style={styles.members_wrapper}>
+                <FormLabel>{this.state.lang.trip.members}</FormLabel>
+                <ScrollView>
+                    {this.state.trip.members !== undefined && this.state.trip.members.map((item, index) => {
+                        return <View key={index} style={styles.list_item}>
+                            <Text key={index} style={styles.list_item_text}>{item}</Text>
+                        </View>
+                    })}
+                </ScrollView>
+            </View>
         );
+    }
+    render() {
+        return (this.state.loaded) ?
+            <View style={styles.flex_1}>
+                {this.buildSplitData()}
+            </View> :
+            <Loader />
     }
 }
 
