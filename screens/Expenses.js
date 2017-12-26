@@ -9,6 +9,7 @@ import { ComboBox, ComboBoxItem } from '../components/ComboBox';
 import Required from '../components/Required';
 import formatDate from '../utils/date_format';
 import updateStorage from '../utils/update_storage';
+import {DeviceEventEmitter} from 'react-native'
 
 export default class Expenses extends React.Component {
     constructor(props){
@@ -26,8 +27,8 @@ export default class Expenses extends React.Component {
     }
 
     updateItems(items){
-        this.setState({ 
-            items: items 
+        this.setState({
+            items: items
         });
     }
 
@@ -38,7 +39,7 @@ export default class Expenses extends React.Component {
                 var neww = this.props.navigation.state.params.new;
                 var id = this.props.navigation.state.params.id;
                 var expense = {};
-                
+
                 if (!neww)
                 {
                     expenses.find((e) => {
@@ -71,7 +72,7 @@ export default class Expenses extends React.Component {
         )
     }
 
-    
+
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
@@ -80,10 +81,10 @@ export default class Expenses extends React.Component {
             info: this.state.info,
             items: this.state.items,
             gallary: this.state.gallary,
-            updateExpenses: this.props.screenProps.updateExpenses,
+            //updateExpenses: this.props.screenProps.updateExpenses,
             updateGallary: this.updateGallary,
             updateItems: this.updateItems,
-            members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true} }), 
+            members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true} }),
         }} /> : <Loader/>;
     }
 }
@@ -91,7 +92,7 @@ export default class Expenses extends React.Component {
 class GeneralScreen extends React.Component {
     constructor(props){
         super(props);
-        
+
         this.state = {
             loaded: false,
             new: this.props.screenProps.new,
@@ -128,12 +129,12 @@ class GeneralScreen extends React.Component {
                 });
             }
         );
-        
+
         store.get("categories").then(
             (cats) => {
-                var exp = this.state.exp; 
-                
-                this.setState({ 
+                var exp = this.state.exp;
+
+                this.setState({
                     cats: cats,
                     date: exp.date || new Date(),
                     curr: exp.curr || 1,
@@ -182,15 +183,17 @@ class GeneralScreen extends React.Component {
             };
 
             updateStorage("expenses", e, this.state.new, () => {
-                this.props.screenProps.updateExpenses(e);
-                this.props.screenProps.navigation.goBack()
+                //this.props.navigation.state.params.updateExpenses(e);
+                this.props.screenProps.navigation.goBack();
+                DeviceEventEmitter.emit('goBackFromExpense', e );
+
             });
         }
     }
 
     updateValues(){
         var type = this.state.type;
-        
+
         if (type == 1) {
             var members = this.state.members;
             var len = 0;
@@ -202,7 +205,7 @@ class GeneralScreen extends React.Component {
             });
 
             var value = cost / len;
-            
+
             members.map((m) => {
                 if (m.selected)
                     m.cost = value;
@@ -258,11 +261,11 @@ class GeneralScreen extends React.Component {
                 else
                     break;
             }
-    
+
             if (index != -1){
                 return val.substr(index);
             }
-    
+
             return val;
         }
     }
@@ -287,17 +290,17 @@ class GeneralScreen extends React.Component {
                 <ScrollView style={styles.members_list_wrapper}>
                     {this.state.members.map((item) => {
                         return <View key={item.id} style={styles.members_list_item}>
-                            <CheckBox 
-                                containerStyle={styles.members_list_ckbox_container} 
-                                checked={item.selected} 
-                                onPress={() => { this.memberSelection(item.id) }} 
-                                title={item.name} 
+                            <CheckBox
+                                containerStyle={styles.members_list_ckbox_container}
+                                checked={item.selected}
+                                onPress={() => { this.memberSelection(item.id) }}
+                                title={item.name}
                                 textStyle={styles.members_list_ckbox_text}
                             />
-                            <FormInput 
-                                containerStyle={styles.members_list_text_container} 
+                            <FormInput
+                                containerStyle={styles.members_list_text_container}
                                 keyboardType="numeric"
-                                style={styles.members_list_text} 
+                                style={styles.members_list_text}
                                 underlineColorAndroid="transparent"
                                 editable={this.state.new && this.state.type != 1}
                                 onChangeText={(val) => this.updateMemberCost(item.id, val)}
@@ -355,7 +358,7 @@ class GeneralScreen extends React.Component {
                     {/* cost */}
                     <FormLabel>{this.state.lang.expense.cost} <Required /></FormLabel>
                     <FormInput
-                        editable={this.state.new}                        
+                        editable={this.state.new}
                         style={styles.input}
                         value={String(this.state.cost)}
                         keyboardType="numeric"
@@ -371,7 +374,7 @@ class GeneralScreen extends React.Component {
                         autoCapitalize="sentences"
                         editable={this.state.new}
                         multiline={true}
-                        autoGrow={true} 
+                        autoGrow={true}
                         value={this.state.notes}
                         onChangeText={(notes) => this.setState({notes: notes})}
                         style={StyleSheet.flatten([styles.input, styles.input_textarea])}
@@ -783,22 +786,22 @@ const styles = StyleSheet.create({
     members_list_ckbox_container: {
         backgroundColor: "transparent",
     },
-            
+
     members_list_ckbox_text: {
         fontSize: 16,
         flex: 1
     },
-    
+
     members_list_text_container: {
         right: 10,
         bottom: 6,
         position: "absolute",
         flex: 1
     },
-    
+
     members_list_text: {
-        alignSelf: "center", 
-        textAlign:"center", 
+        alignSelf: "center",
+        textAlign:"center",
         fontSize: 20
     },
 

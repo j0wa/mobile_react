@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback, TouchableHighlight } from "react-native";
 import { Icon } from 'react-native-elements';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
@@ -21,6 +21,7 @@ export default class ExpensesList extends React.Component{
         }
 
         this.updateList = this.updateList.bind(this);
+        this.updateExpenses = this.updateExpenses.bind(this);
     }
 
     async componentWillMount() {
@@ -35,9 +36,13 @@ export default class ExpensesList extends React.Component{
                     });
                 }
                 else
-                    this.setState({ loaded: true });                    
+                    this.setState({ loaded: true });
             }
         );
+    }
+
+    updateExpenses(exp){
+        this.setState({ expenses: exp });
     }
 
     updateList(e) {
@@ -51,25 +56,26 @@ export default class ExpensesList extends React.Component{
 
     buildList(navigate) {
         var expenses = this.state.expenses;
-        
+
         if (expenses == null || expenses == "" || expenses == undefined){
             return <View style={styles.empty}>
                 <Text style={styles.empty_text}>{this.state.lang.expense.no_expenses}</Text>
             </View>
         }
-        
+
         return <ScrollView>{
             expenses.map((item) =>  {
-                return <TouchableHighlight 
-                    key={item.id} 
-                    onPress={() => 
+                return <TouchableHighlight
+                    key={item.id}
+                    onPress={() =>
                         this.props.screenProps.navigation.navigate('ExpensesItem', {
-                            id: item.id, 
+                            id: item.id,
                             new: false,
                             updateExpenses: this.updateList,
                             trip_id: this.state.trip_id,
                             members: this.state.members,
-                            curr: this.state.curr
+                            curr: this.state.curr,
+                            updateExpenses: this.updateExpenses,
                         })
                     }
                 >
@@ -89,7 +95,7 @@ export default class ExpensesList extends React.Component{
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => { 
+            <Icon name='add-circle' size={64.0} onPress={() => {
                 this.props.screenProps.navigation.navigate('ExpensesItem', {
                     id: (this.state.expenses.length + 1),
                     new: true,
@@ -97,6 +103,7 @@ export default class ExpensesList extends React.Component{
                     trip_id: this.state.trip_id,
                     curr: this.state.curr,
                     members: this.state.members,
+
                 })
             }}/>
         </View>

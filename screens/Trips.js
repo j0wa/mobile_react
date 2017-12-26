@@ -9,6 +9,7 @@ import { ComboBox, ComboBoxItem } from '../components/ComboBox';
 import Required from '../components/Required';
 import updateStorage from '../utils/update_storage';
 import store from 'react-native-simple-store';
+import {DeviceEventEmitter} from 'react-native'
 
 export default class Trips extends React.Component {
     constructor(props) {
@@ -18,7 +19,8 @@ export default class Trips extends React.Component {
             loaded: false,
         }
 
-        this.updateExpenses = this.updateExpenses.bind(this);
+        //this.updateExpenses = this.updateExpenses.bind(this);
+        
     }
 
     updateExpenses(exp){
@@ -27,6 +29,7 @@ export default class Trips extends React.Component {
 
     // faz o async aqui e depois manda os items por params para os ecrãs
     async componentWillMount(){
+        DeviceEventEmitter.addListener('goBackFromExpense', (e)=>{this.updateExpenses(e)})
         store.get("trips").then(trips => {
             var neww = this.props.navigation.state.params.new;
             var id = this.props.navigation.state.params.id;
@@ -70,7 +73,7 @@ export default class Trips extends React.Component {
             info: this.state.info,
             summaries: this.state.summaries,
             updateTrips: this.props.navigation.state.params.updateTrips,
-            updateExpenses: this.updateExpenses,
+            //updateExpenses: this.updateExpenses,
         }} /> : <Loader/>;
     }
 }
@@ -338,7 +341,11 @@ class SummariesScreen extends React.Component {
     }
     buildSplitData(){
 
-        return (
+        if(this.state.trip.members == undefined){
+            <View>
+                <Text>{this.state.lang.trip.members}</Text>
+            </View>
+        }else{return (
             <View style={styles.members_wrapper}>
                 <FormLabel>{this.state.lang.trip.members}</FormLabel>
                 <ScrollView>
@@ -349,7 +356,7 @@ class SummariesScreen extends React.Component {
                     })}
                 </ScrollView>
             </View>
-        );
+        );}
     }
     render() {
         return (this.state.loaded) ?
