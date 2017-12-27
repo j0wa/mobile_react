@@ -20,7 +20,7 @@ export default class Trips extends React.Component {
         }
 
         //this.updateExpenses = this.updateExpenses.bind(this);
-        
+
     }
 
     updateExpenses(exp){
@@ -336,8 +336,37 @@ class SummariesScreen extends React.Component {
         }
 
     }
-    componentDidMount(){
-        this.setState({loaded: true})
+    async componentDidMount(){
+        store.get("expenses").then(
+            expenses => {
+                if (!this.props.screenProps.new && expenses != null){
+                    expenses.filter(e => e.trip_id == this.props.trip_id);
+
+                    this.setState({
+                        expenses: expenses,
+                        loaded: true
+                    });
+                }
+                else
+                    this.setState({ loaded: true });
+            }
+        );
+    }
+    totalExpensesOfTrip(){
+        if(this.state.new){
+            return
+        }
+        var total = 0;
+        this.state.expenses.map((item) => {
+            console.log("i am a cost");
+            console.log(item.cost);
+            total += item.cost;
+        })
+        console.log("i am the total");
+        console.log(total);
+        return( <View>
+                    <Text>{total}</Text>
+                </View>)
     }
     buildSplitData(){
 
@@ -362,6 +391,7 @@ class SummariesScreen extends React.Component {
         return (this.state.loaded) ?
             <View style={styles.flex_1}>
                 {this.buildSplitData()}
+                {this.totalExpensesOfTrip()}
             </View> :
             <Loader />
     }
