@@ -33,6 +33,8 @@ export default class Trips extends React.Component {
         store.get("trips").then(trips => {
             var neww = this.props.navigation.state.params.new;
             var id = this.props.navigation.state.params.id;
+            //console.log("id in trip componentWillMount");
+            //console.log(id);
             var trip = {};
 
             if (!neww)
@@ -97,6 +99,7 @@ class TripScreen extends React.Component {
             lang: this.props.screenProps.lang,
             id: this.props.screenProps.info.id,
         }
+
 
         this._submit_new_member = this._submit_new_member.bind(this)
         this._delete_member = this._delete_member.bind(this)
@@ -339,11 +342,16 @@ class SummariesScreen extends React.Component {
     async componentDidMount(){
         store.get("expenses").then(
             expenses => {
-                if (!this.props.screenProps.new && expenses != null){
-                    expenses.filter(e => e.trip_id == this.props.trip_id);
+                var ar1 = [];
+                var ar2 = [ar1];
+                if (!this.props.screenProps.new && expenses != null && JSON.stringify(expenses)!=JSON.stringify(ar2)){
+                    var filteredExp = expenses.filter(e => e.trip_id == this.props.screenProps.info.id);
 
+                    //console.log("checkiking the filterring");
+                    //console.log(this.props.trip_id);
+                    //console.log(expenses);
                     this.setState({
-                        expenses: expenses,
+                        expenses: filteredExp,
                         loaded: true
                     });
                 }
@@ -353,17 +361,17 @@ class SummariesScreen extends React.Component {
         );
     }
     totalExpensesOfTrip(){
-        if(this.state.new){
+        if(this.state.new || this.state.expenses == null){
             return
         }
         var total = 0;
         this.state.expenses.map((item) => {
-            console.log("i am a cost");
-            console.log(item.cost);
+            //console.log("i am a cost");
+            //console.log(item.cost);
             total += item.cost;
         })
-        console.log("i am the total");
-        console.log(total);
+        //console.log("i am the total");
+        //console.log(total);
         return( <View>
                     <Text>{total}</Text>
                 </View>)

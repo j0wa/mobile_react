@@ -39,7 +39,6 @@ export default class Expenses extends React.Component {
                 var neww = this.props.navigation.state.params.new;
                 var id = this.props.navigation.state.params.id;
                 var expense = {};
-
                 if (!neww)
                 {
                     expenses.find((e) => {
@@ -72,9 +71,9 @@ export default class Expenses extends React.Component {
         )
     }
 
-
     render(){
         return this.state.loaded ? <Tab screenProps={{
+            trip_id: this.props.navigation.state.params.trip_id,
             navigation: this.props.navigation,
             lang: this.props.screenProps,
             new: this.props.navigation.state.params.new,
@@ -101,7 +100,7 @@ class GeneralScreen extends React.Component {
             gallary: this.props.screenProps.gallary,
             lang: this.props.screenProps.lang,
             id: this.props.screenProps.info.id,
-            trip_id: this.props.screenProps.info.trip_id,
+            trip_id: this.props.screenProps.trip_id,
             members: this.props.screenProps.members,
             errReceiver: false,
             errCost: false,

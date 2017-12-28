@@ -20,6 +20,9 @@ export default class ExpensesList extends React.Component{
             curr:  this.props.screenProps.info.curr,
         }
 
+        //console.log("ID in expenseList");
+        //console.log(this.props.screenProps.info.id);
+
         this.updateList = this.updateList.bind(this);
         this.updateExpenses = this.updateExpenses.bind(this);
     }
@@ -27,13 +30,23 @@ export default class ExpensesList extends React.Component{
     async componentWillMount() {
         store.get("expenses").then(
             expenses => {
-                if (!this.props.screenProps.new && expenses != null){
-                    expenses.filter(e => e.trip_id == this.props.trip_id);
+                var ar1 = [];
+                var ar2 = [ar1];
+                //added the value[0] != null because the storage sometime retreive a empty arrays in place of null...
+                if (!this.props.screenProps.new && expenses != null && JSON.stringify(expenses)!=JSON.stringify(ar2)){
+                    var filteredExp = expenses.filter(e => e.trip_id == this.props.screenProps.info.id);
+
+                    //console.log("checkiking the filterring");
+                    //console.log(this.props.screenProps.info.id);
+                    //console.log(expenses);
+                    //console.log(filteredExp);
 
                     this.setState({
-                        expenses: expenses,
-                        loaded: true
+                        expenses: filteredExp,
+                        loaded: true,
+
                     });
+                    //console.log(this.state);
                 }
                 else
                     this.setState({ loaded: true });
@@ -97,6 +110,7 @@ export default class ExpensesList extends React.Component{
         return <View style={styles.button}>
             <Icon name='add-circle' size={64.0} onPress={() => {
                 this.props.screenProps.navigation.navigate('ExpensesItem', {
+
                     id: (this.state.expenses.length + 1),
                     new: true,
                     updateExpenses: this.updateList,
