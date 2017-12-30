@@ -21,11 +21,11 @@ export default function updateStorage(collection, item, creating, callback) {
         //added the value[0] != null because the storage sometime retreive a empty arrays in place of null...
         var ar1 = [];
         var ar2 = [ar1];
-        console.log("val of ar2");
-        console.log(ar2);
-        console.log(JSON.stringify(values)==JSON.stringify(ar2));
+        //console.log("val of ar2");
+        //console.log(ar2);
+        //console.log(JSON.stringify(values)==JSON.stringify(ar2));
         if (values != null && JSON.stringify(values)!=JSON.stringify(ar2)){
-            console.log("in the if");
+            //console.log("in the if");
             values.map(v => {
 
                 if (!creating && v.id == item.id) {

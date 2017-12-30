@@ -11,6 +11,8 @@ export default {
         new_member_title: "Add new member",
         remove_title: "Remove member",
         remove_text: "Are you sure you want to remove this member?",
+        paidBy: "Paid By",
+        paidFor: "Paid For",
     },
 
     expense: {

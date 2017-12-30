@@ -30,6 +30,7 @@ export default class ExpensesList extends React.Component{
     async componentWillMount() {
         store.get("expenses").then(
             expenses => {
+
                 var ar1 = [];
                 var ar2 = [ar1];
                 //added the value[0] != null because the storage sometime retreive a empty arrays in place of null...
@@ -69,7 +70,8 @@ export default class ExpensesList extends React.Component{
 
     buildList(navigate) {
         var expenses = this.state.expenses;
-
+        console.log("buildList expenses :");
+        console.log(expenses);
         if (expenses == null || expenses == "" || expenses == undefined){
             return <View style={styles.empty}>
                 <Text style={styles.empty_text}>{this.state.lang.expense.no_expenses}</Text>

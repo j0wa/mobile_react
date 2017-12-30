@@ -20,6 +20,7 @@ export default class Expenses extends React.Component {
 
         this.updateItems = this.updateItems.bind(this);
         this.updateGallary = this.updateGallary.bind(this);
+        this.connectCostData = this.connectCostData.bind(this);
     }
 
     updateGallary(gallary){
@@ -48,11 +49,73 @@ export default class Expenses extends React.Component {
                         }
                     });
                 }
+                //console.log("exp in comwillmount");
+                //console.log(expense.membersPaidBy);
+
+                var membersPaidByTMP = [];
+                var tmp;
+                var i =0;
+                //console.log("coucou");
+                //console.log(expense.membersPaidBy);
+                //Building the list of poeple who paid
+                this.props.navigation.state.params.members.forEach(function(element) {
+                    expense.membersPaidBy.forEach(function(elementPaidBy){
+                        if(elementPaidBy.name == element){
+                            //console.log("in the if");
+                            //console.log(elementPaidBy.name == element);
+                            tmp = elementPaidBy;
+                            return;
+                        }
+                    })
+
+
+                    if(tmp != null){
+                        //console.log("tmp not null");
+                        //console.log(tmp);
+                        //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                        membersPaidByTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                    }else{
+                        //console.log("tmp null");
+                        //console.log({id: i, name: element, cost: 0, selected: 0 });
+                        membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
+                    }
+                    tmp = null;
+                    i++;
+                });
+
+                i = 0;
+                var membersPaidForTMP = [];
+                this.props.navigation.state.params.members.forEach(function(element) {
+                    expense.membersPaidFor.forEach(function(elementPaidFor){
+                        if(elementPaidFor.name == element){
+                            //console.log("in the if");
+                            //console.log(elementPaidFor.name == element);
+                            tmp = elementPaidFor;
+                            return;
+                        }
+                    })
+
+
+                    if(tmp != null){
+                        //console.log("tmp not null");
+                        //console.log(tmp);
+                        //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                        membersPaidForTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                    }else{
+                        //console.log("tmp null");
+                        //console.log({id: i, name: element, cost: 0, selected: 0 });
+                        membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
+                    }
+                    tmp = null;
+                    i++;
+                });
 
                 this.setState({
                     new: neww,
                     gallery: expense.gallery || [],
                     items: expense.items || [],
+                    membersPaidBy: membersPaidByTMP || [],
+                    membersPaidFor: membersPaidForTMP || [],
                     info: Object.keys(expense).length != 0 ? {
                         receiver: expense.receiver,
                         type: expense.type,
@@ -71,7 +134,20 @@ export default class Expenses extends React.Component {
         )
     }
 
+    connectCostData(nameOfEl){
+        return function(element){
+            if(element.name == nameOfEl) return element.cost
+        };
+    }
+
+    connectSelectedData(nameOfEl){
+        return function(element){
+            if(element.name == nameOfEl) return element.cost
+        };
+    }
+
     render(){
+
         return this.state.loaded ? <Tab screenProps={{
             trip_id: this.props.navigation.state.params.trip_id,
             navigation: this.props.navigation,
@@ -84,6 +160,8 @@ export default class Expenses extends React.Component {
             updateGallary: this.updateGallary,
             updateItems: this.updateItems,
             members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true} }),
+            membersPaidBy: this.state.membersPaidBy,
+            membersPaidFor: this.state.membersPaidFor,
         }} /> : <Loader/>;
     }
 }
@@ -102,10 +180,20 @@ class GeneralScreen extends React.Component {
             id: this.props.screenProps.info.id,
             trip_id: this.props.screenProps.trip_id,
             members: this.props.screenProps.members,
+            membersPaidBy: this.props.screenProps.membersPaidBy,
+            membersPaidFor: this.props.screenProps.membersPaidFor,
             errReceiver: false,
             errCost: false,
             cost: ""
         }
+
+        console.log("test members");
+        console.log(this.props.screenProps.members);
+        console.log("test membersPaidBy");
+        console.log(this.state.membersPaidBy);
+        console.log("test membersPaidFor");
+        console.log(this.props.screenProps.membersPaidFor);
+
 
         this._submit = this._submit.bind(this)
         this.updateValues = this.updateValues.bind(this)
@@ -174,6 +262,8 @@ class GeneralScreen extends React.Component {
                 type: this.state.type,
                 cat: this.state.cat,
                 members: this.state.members,
+                membersPaidBy: this.state.membersPaidBy,
+                membersPaidFor: this.state.membersPaidFor,
                 cost: this.state.cost,
                 notes: this.state.notes,
                 items: this.state.items,
@@ -221,8 +311,41 @@ class GeneralScreen extends React.Component {
 
         members[index].selected = !members[index].selected;
 
+        console.log("into members selection");
+        console.log(members);
+
         this.setState({
             members: members
+        });
+
+        this.updateValues();
+    }
+
+    memberPaidBySelection(index){
+        var members = this.state.membersPaidBy;
+
+        members[index].selected = !members[index].selected;
+
+        console.log("into membersPaidBy selection");
+        console.log(members);
+
+        this.setState({
+            membersPaidBy: members
+        });
+
+        this.updateValues();
+    }
+
+    memberPaidForSelection(index){
+        var members = this.state.membersPaidFor;
+
+        members[index].selected = !members[index].selected;
+
+        console.log("into membersPaidFor selection");
+        console.log(members);
+
+        this.setState({
+            membersPaidFor: members
         });
 
         this.updateValues();
@@ -269,8 +392,7 @@ class GeneralScreen extends React.Component {
         }
     }
 
-    updateMemberCost(id, val){
-        var tmp = this.state.members;
+    updateMemberCost(id, val, tmp){
         tmp.map((m) => {
             if (id == m.id){
                 m.cost = this.removeLeadingZeros(val);
@@ -282,12 +404,16 @@ class GeneralScreen extends React.Component {
     }
 
     buildPaymentList() {
+        console.log("members in buildPaymentList");
+        console.log(this.state.members);
         return (
             <View style={styles.members_wrapper}>
                 <FormLabel>{this.state.lang.trip.members}</FormLabel>
 
                 <ScrollView style={styles.members_list_wrapper}>
                     {this.state.members.map((item) => {
+                        console.log("item checkbox");
+                        console.log(item);
                         return <View key={item.id} style={styles.members_list_item}>
                             <CheckBox
                                 containerStyle={styles.members_list_ckbox_container}
@@ -299,10 +425,69 @@ class GeneralScreen extends React.Component {
                             <FormInput
                                 containerStyle={styles.members_list_text_container}
                                 keyboardType="numeric"
-                                style={styles.members_list_text}
                                 underlineColorAndroid="transparent"
-                                editable={this.state.new && this.state.type != 1}
-                                onChangeText={(val) => this.updateMemberCost(item.id, val)}
+                                editable={this.state.new }
+                                onChangeText={(val) => this.updateMemberCost(item.id, val,this.state.members)}
+                                value={String(item.cost)}
+                            />
+                        </View>
+                    })}
+                </ScrollView>
+            </View>
+        );
+    }
+
+    buildPaidByList() {
+        return (
+            <View style={styles.members_wrapper}>
+                <FormLabel>{this.state.lang.trip.paidBy}</FormLabel>
+
+                <ScrollView style={styles.members_list_wrapper}>
+                    {this.state.membersPaidBy.map((item) => {
+                        return <View key={item.id} style={styles.members_list_item}>
+                            <CheckBox
+                                containerStyle={styles.members_list_ckbox_container}
+                                checked={item.selected}
+                                onPress={() => { this.memberPaidBySelection(item.id) }}
+                                title={item.name}
+                                textStyle={styles.members_list_ckbox_text}
+                            />
+                            <FormInput
+                                containerStyle={styles.members_list_text_container}
+                                keyboardType="numeric"
+                                underlineColorAndroid="transparent"
+                                editable={this.state.new }
+                                onChangeText={(val) => this.updateMemberCost(item.id, val,this.state.membersPaidBy)}
+                                value={String(item.cost)}
+                            />
+                        </View>
+                    })}
+                </ScrollView>
+            </View>
+        );
+    }
+
+    buildPaidForList() {
+        return (
+            <View style={styles.members_wrapper}>
+                <FormLabel>{this.state.lang.trip.paidFor}</FormLabel>
+
+                <ScrollView style={styles.members_list_wrapper}>
+                    {this.state.membersPaidFor.map((item) => {
+                        return <View key={item.id} style={styles.members_list_item}>
+                            <CheckBox
+                                containerStyle={styles.members_list_ckbox_container}
+                                checked={item.selected}
+                                onPress={() => { this.memberPaidForSelection(item.id) }}
+                                title={item.name}
+                                textStyle={styles.members_list_ckbox_text}
+                            />
+                            <FormInput
+                                containerStyle={styles.members_list_text_container}
+                                keyboardType="numeric"
+                                underlineColorAndroid="transparent"
+                                editable={this.state.new }
+                                onChangeText={(val) => this.updateMemberCost(item.id, val,this.state.membersPaidFor)}
                                 value={String(item.cost)}
                             />
                         </View>
@@ -328,18 +513,6 @@ class GeneralScreen extends React.Component {
                     />
                     {this.state.errReceiver && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
-                    {/* split type */}
-                    <FormLabel>{this.state.lang.expense.types}</FormLabel>
-                    <View style={styles.combobox}>
-                        {this.getComboBox(this.state.types, "type")}
-                    </View>
-
-                    {/* currencies */}
-                    <FormLabel>{this.state.lang.misc.curr}</FormLabel>
-                    <View style={styles.combobox}>
-                        {this.getComboBox(this.state.currs, "curr")}
-                    </View>
-
                     {/* category */}
                     <FormLabel>{this.state.lang.cat.title}</FormLabel>
                     <View style={styles.combobox}>
@@ -354,6 +527,24 @@ class GeneralScreen extends React.Component {
                         style={styles.input}
                     />
 
+                    {/* notes */}
+                    <FormLabel>{this.state.lang.expense.notes}</FormLabel>
+                    <FormInput
+                        autoCapitalize="sentences"
+                        editable={this.state.new}
+                        multiline={true}
+                        autoGrow={true}
+                        value={this.state.notes}
+                        onChangeText={(notes) => this.setState({notes: notes})}
+                        style={StyleSheet.flatten([styles.input, styles.input_textarea])}
+                    />
+
+                    {/* currencies */}
+                    <FormLabel>{this.state.lang.misc.curr}</FormLabel>
+                    <View style={styles.combobox}>
+                        {this.getComboBox(this.state.currs, "curr")}
+                    </View>
+
                     {/* cost */}
                     <FormLabel>{this.state.lang.expense.cost} <Required /></FormLabel>
                     <FormInput
@@ -367,20 +558,17 @@ class GeneralScreen extends React.Component {
                     />
                     {this.state.errCost && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
-                    {/* notes */}
-                    <FormLabel>{this.state.lang.expense.notes}</FormLabel>
-                    <FormInput
-                        autoCapitalize="sentences"
-                        editable={this.state.new}
-                        multiline={true}
-                        autoGrow={true}
-                        value={this.state.notes}
-                        onChangeText={(notes) => this.setState({notes: notes})}
-                        style={StyleSheet.flatten([styles.input, styles.input_textarea])}
-                    />
+                    {/* split type */}
+                    <FormLabel>{this.state.lang.expense.types}</FormLabel>
+                    <View style={styles.combobox}>
+                        {this.getComboBox(this.state.types, "type")}
+                    </View>
 
-                    {/* payments */}
-                    {this.buildPaymentList()}
+                    {/* paid by list */}
+                    {this.buildPaidByList()}
+
+                    {/* paid for list*/}
+                    {this.buildPaidForList()}
 
                     <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit} />
                 </View>
@@ -792,10 +980,9 @@ const styles = StyleSheet.create({
     },
 
     members_list_text_container: {
-        right: 10,
-        bottom: 6,
-        position: "absolute",
-        flex: 1
+
+        flex: 1,
+        backgroundColor: "white",
     },
 
     members_list_text: {
