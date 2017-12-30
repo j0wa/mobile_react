@@ -20,7 +20,6 @@ export default class Expenses extends React.Component {
 
         this.updateItems = this.updateItems.bind(this);
         this.updateGallary = this.updateGallary.bind(this);
-        this.connectCostData = this.connectCostData.bind(this);
     }
 
     updateGallary(gallary){
@@ -134,18 +133,6 @@ export default class Expenses extends React.Component {
         )
     }
 
-    connectCostData(nameOfEl){
-        return function(element){
-            if(element.name == nameOfEl) return element.cost
-        };
-    }
-
-    connectSelectedData(nameOfEl){
-        return function(element){
-            if(element.name == nameOfEl) return element.cost
-        };
-    }
-
     render(){
 
         return this.state.loaded ? <Tab screenProps={{
@@ -198,6 +185,8 @@ class GeneralScreen extends React.Component {
         this._submit = this._submit.bind(this)
         this.updateValues = this.updateValues.bind(this)
         this.updateMemberCost = this.updateMemberCost.bind(this)
+        this.splitCostPaidBy = this.splitCostPaidBy.bind(this)
+        this.splitCostPaidFor = this.splitCostPaidFor.bind(this)
     }
 
     componentWillMount(){
@@ -437,6 +426,62 @@ class GeneralScreen extends React.Component {
         );
     }
 
+    splitCostPaidBy(){
+        console.log("splitCostPaidBy");
+        var tmpArray = [];
+        var countOfSelected = 0;
+        this.state.membersPaidBy.forEach(function(element){
+            if(element.selected){
+                countOfSelected++
+            }
+        });
+        var part = this.state.cost / countOfSelected;
+        console.log("evenpart");
+        console.log(this.state.cost);
+        console.log(countOfSelected);
+        console.log(part);
+
+        this.state.membersPaidBy.forEach(function(element){
+            if(element.selected){
+                element.cost = part;
+            }else {
+                element.cost = 0
+            }
+            tmpArray.push(element);
+        });
+        this.setState({membersPaidBy: tmpArray});
+        console.log("end of splitCostPaidBy");
+        console.log(tmpArray);
+    }
+
+    splitCostPaidFor(){
+        console.log("splitCostPaidFor");
+        var tmpArray = [];
+        var countOfSelected = 0;
+        this.state.membersPaidFor.forEach(function(element){
+            if(element.selected){
+                countOfSelected++
+            }
+        });
+        var part = this.state.cost / countOfSelected;
+        console.log("evenpart");
+        console.log(this.state.cost);
+        console.log(countOfSelected);
+        console.log(part);
+
+        this.state.membersPaidFor.forEach(function(element){
+            if(element.selected){
+                element.cost = part;
+            }else {
+                element.cost = 0
+            }
+            tmpArray.push(element);
+        });
+        this.setState({membersPaidFor: tmpArray});
+        console.log("end of splitCostPaidFor");
+        console.log(tmpArray);
+    }
+
     buildPaidByList() {
         return (
             <View style={styles.members_wrapper}>
@@ -558,15 +603,18 @@ class GeneralScreen extends React.Component {
                     />
                     {this.state.errCost && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
-                    {/* split type */}
+                    {/* split type
                     <FormLabel>{this.state.lang.expense.types}</FormLabel>
                     <View style={styles.combobox}>
                         {this.getComboBox(this.state.types, "type")}
                     </View>
+                    */}
 
+                    <Button title={this.state.lang.misc.split_even} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this.splitCostPaidBy}/>
                     {/* paid by list */}
                     {this.buildPaidByList()}
 
+                    <Button title={this.state.lang.misc.split_even} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this.splitCostPaidFor} />
                     {/* paid for list*/}
                     {this.buildPaidForList()}
 
