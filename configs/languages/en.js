@@ -74,5 +74,10 @@ export default {
 
     summaries: {
         title: "Summaries",
+        totalCostOfTrip: "Total of all Expences",
+        name: "name",
+        amountDue: "due",
+        amountPayed: "paid",
+        total: "total",
     }
 }

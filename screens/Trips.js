@@ -367,17 +367,17 @@ class SummariesScreen extends React.Component {
         var total = 0;
         this.state.expenses.map((item) => {
             //console.log("i am a cost");
-            //console.log(item.cost);
-            total += item.cost;
+            console.log(item.cost);
+            total += parseInt(item.cost);
         })
         //console.log("i am the total");
         //console.log(total);
         return( <View>
+                    <FormLabel>{this.state.lang.summaries.totalCostOfTrip}</FormLabel>
                     <Text>{total}</Text>
                 </View>)
     }
     buildSplitData(){
-
         if(this.state.trip.members == undefined){
             <View>
                 <Text>{this.state.lang.trip.members}</Text>
@@ -388,17 +388,81 @@ class SummariesScreen extends React.Component {
                 <ScrollView>
                     {this.state.trip.members !== undefined && this.state.trip.members.map((item, index) => {
                         return <View key={index} style={styles.list_item}>
-                            <Text key={index} style={styles.list_item_text}>{item}</Text>
+                            <Text key={index} style={styles.list_item_text}>{item} </Text>
                         </View>
                     })}
                 </ScrollView>
             </View>
         );}
     }
+
+
+    buildBlaBla(){
+        var arraySummaries = [];
+        var i =0;
+
+        if(this.state.trip.members == undefined || this.state.expenses == undefined){
+            return
+            <View>
+                <Text>{this.state.lang.trip.members}</Text>
+            </View>
+        }
+        //building the base array
+        this.state.trip.members.forEach(function(member){
+            arraySummaries.push({id : i, name : member , amountPaid : 0, amountDue : 0, total : 0});
+            i++;
+        });
+
+        this.state.expenses.forEach(function(element){
+            element.membersPaidBy.forEach(function(elementPaidBy){
+                if(elementPaidBy.selected){
+                    arraySummaries.forEach(function(mem){
+                        if(elementPaidBy.name == mem.name){
+                            mem.amountPaid += parseInt(elementPaidBy.cost)
+                            return;
+                        }
+                    });
+                }
+            });
+
+            element.membersPaidFor.forEach(function(elementPaidFor){
+                if(elementPaidFor.selected){
+                    arraySummaries.forEach(function(mem){
+                        if(elementPaidFor.name == mem.name){
+                            mem.amountDue += parseInt(elementPaidFor.cost)
+                            return;
+                        }
+                    });
+                }
+            });
+
+            arraySummaries.forEach(function(mem){
+                mem.total += parseInt(mem.amountPaid) - parseInt(mem.amountDue)
+            });
+
+        });
+        console.log("final arraySummaries");
+        console.log(arraySummaries);
+        return (
+            <View style={styles.members_wrapper}>
+                <ScrollView >
+                    {arraySummaries.map((item) => {
+                        return <View key={item.id} style={styles.list_item_flex}>
+                                <Text style={styles.list_item_part}>{item.name} </Text><Text style={styles.list_item_part}>{item.amountPaid} </Text><Text style={styles.list_item_part}>{item.amountDue} </Text><Text style={styles.list_item_part}>{item.total} </Text>
+                            </View>
+                    })}
+                </ScrollView>
+            </View>
+        )
+    }
     render() {
         return (this.state.loaded) ?
-            <View style={styles.flex_1}>
-                {this.buildSplitData()}
+            <View>
+
+                <View style={styles.list_title}>
+                        <Text style={styles.list_item_part}>{this.state.lang.summaries.name} </Text><Text style={styles.list_item_part}>{this.state.lang.summaries.amountPayed}</Text><Text style={styles.list_item_part}>{this.state.lang.summaries.amountDue}</Text><Text style={styles.list_item_part}>{this.state.lang.summaries.total}</Text>
+                </View>
+                {this.buildBlaBla()}
                 {this.totalExpensesOfTrip()}
             </View> :
             <Loader />
@@ -518,12 +582,41 @@ const styles = StyleSheet.create({
         borderBottomWidth: .5,
     },
 
+    list_title: {
+        height: 50,
+        marginLeft: 30,
+        marginRight: 30,
+        flexDirection: 'row',
+    },
+
+    list_item_flex: {
+        height: 50,
+        marginLeft: 30,
+        marginRight: 30,
+        borderBottomColor: "#aaa",
+        borderBottomWidth: .5,
+        flex: 1,
+        flexDirection: 'row',
+    },
+
+    ScrollView: {
+        marginTop: 50,
+    },
+
     list_item_text: {
         flex: 1,
         paddingLeft: 30,
         marginTop: 10,
         fontSize: 18
     },
+
+    list_item_part: {
+        flex: 1,
+        paddingLeft: 30,
+        marginTop: 10,
+        fontSize: 18
+    },
+
 
     list_item_icon: {
         flex: 1,

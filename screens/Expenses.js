@@ -47,66 +47,74 @@ export default class Expenses extends React.Component {
                             return;
                         }
                     });
+                    //console.log("exp in comwillmount");
+                    //console.log(expense.membersPaidBy);
+
+                    var membersPaidByTMP = [];
+                    var tmp;
+                    var i =0;
+                    //console.log("coucou");
+                    //console.log(expense.membersPaidBy);
+                    //Building the list of poeple who paid
+                    this.props.navigation.state.params.members.forEach(function(element) {
+                        expense.membersPaidBy.forEach(function(elementPaidBy){
+                            if(elementPaidBy.name == element){
+                                //console.log("in the if");
+                                //console.log(elementPaidBy.name == element);
+                                tmp = elementPaidBy;
+                                return;
+                            }
+                        })
+
+                        if(tmp != null){
+                            //console.log("tmp not null");
+                            //console.log(tmp);
+                            //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                            membersPaidByTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                        }else{
+                            //console.log("tmp null");
+                            //console.log({id: i, name: element, cost: 0, selected: 0 });
+                            membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
+                        }
+                        tmp = null;
+                        i++;
+                    });
+
+                    i = 0;
+                    var membersPaidForTMP = [];
+                    this.props.navigation.state.params.members.forEach(function(element) {
+                        expense.membersPaidFor.forEach(function(elementPaidFor){
+                            if(elementPaidFor.name == element){
+                                //console.log("in the if");
+                                //console.log(elementPaidFor.name == element);
+                                tmp = elementPaidFor;
+                                return;
+                            }
+                        })
+
+
+                        if(tmp != null){
+                            //console.log("tmp not null");
+                            //console.log(tmp);
+                            //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                            membersPaidForTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                        }else{
+                            //console.log("tmp null");
+                            //console.log({id: i, name: element, cost: 0, selected: 0 });
+                            membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
+                        }
+                        tmp = null;
+                        i++;
+                    });
                 }
-                //console.log("exp in comwillmount");
-                //console.log(expense.membersPaidBy);
 
                 var membersPaidByTMP = [];
-                var tmp;
-                var i =0;
-                //console.log("coucou");
-                //console.log(expense.membersPaidBy);
-                //Building the list of poeple who paid
-                this.props.navigation.state.params.members.forEach(function(element) {
-                    expense.membersPaidBy.forEach(function(elementPaidBy){
-                        if(elementPaidBy.name == element){
-                            //console.log("in the if");
-                            //console.log(elementPaidBy.name == element);
-                            tmp = elementPaidBy;
-                            return;
-                        }
-                    })
-
-
-                    if(tmp != null){
-                        //console.log("tmp not null");
-                        //console.log(tmp);
-                        //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
-                        membersPaidByTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
-                    }else{
-                        //console.log("tmp null");
-                        //console.log({id: i, name: element, cost: 0, selected: 0 });
-                        membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
-                    }
-                    tmp = null;
-                    i++;
-                });
-
-                i = 0;
                 var membersPaidForTMP = [];
-                this.props.navigation.state.params.members.forEach(function(element) {
-                    expense.membersPaidFor.forEach(function(elementPaidFor){
-                        if(elementPaidFor.name == element){
-                            //console.log("in the if");
-                            //console.log(elementPaidFor.name == element);
-                            tmp = elementPaidFor;
-                            return;
-                        }
-                    })
-
-
-                    if(tmp != null){
-                        //console.log("tmp not null");
-                        //console.log(tmp);
-                        //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
-                        membersPaidForTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
-                    }else{
-                        //console.log("tmp null");
-                        //console.log({id: i, name: element, cost: 0, selected: 0 });
-                        membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
-                    }
-                    tmp = null;
-                    i++;
+                var i = 0;
+                this.props.navigation.state.params.members.forEach(function(element){
+                    membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
+                    membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
+                    i++
                 });
 
                 this.setState({
