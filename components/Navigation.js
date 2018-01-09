@@ -1,7 +1,8 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements'
-import { StackNavigator, DrawerNavigator, DrawerItems } from 'react-navigation';
+import { StackNavigator } from 'react-navigation';
+import { MenuProvider, Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 
 import Trips from "../screens/Trips";
 import TripsList from "../screens/TripsList";
@@ -21,7 +22,12 @@ export default class Navigation extends React.Component{
     }
 
     render(){
-        var stack = StackNavigator({
+        var menu_option = {
+            optionWrapper: {
+                margin: 15
+            }
+        }
+        var Stack = StackNavigator({
             Trips: {
                 screen: TripsList,
                 navigationOptions: {
@@ -61,7 +67,24 @@ export default class Navigation extends React.Component{
         }, {
             navigationOptions: ({navigation}) => ({
                 headerMode: "float",
-                headerRight: <Icon name='menu' size={48} color="#fff" onPress={() => navigation.navigate("DrawerOpen") } />,
+                headerRight: <Menu>
+                    <MenuTrigger>
+                        <Icon name='menu' iconStyle={{width: 10, marginRight: 20}} size={48} color="#fff" />
+                    </MenuTrigger>
+                    <MenuOptions>
+                        <MenuOption customStyles={menu_option} onSelect={() => {
+                                if (navigation.state.routeName !== "Categories")
+                                    navigation.navigate("Categories") 
+                            }} text={this.state.lang.cat.title} 
+                        />
+                        <MenuOption customStyles={menu_option} onSelect={() => {
+                                if (navigation.state.routeName !== "Settings")
+                                    navigation.navigate("Settings")
+                            }} text={this.state.lang.setting.title} 
+                        />
+                    </MenuOptions>  
+                </Menu>,
+                
                 headerStyle: {
                     backgroundColor: '#4C3E54',
                     overflow: "visible"
@@ -79,31 +102,8 @@ export default class Navigation extends React.Component{
             })
         });
 
-        var Drawer = DrawerNavigator({
-            Trips: {
-                screen: stack,
-                navigationOptions: {
-                    title: this.state.lang.trip.title
-                }
-            },
-            Settings: {
-                screen: stack,
-                navigationOptions: {
-                    title: this.state.lang.setting.title
-                }
-            },
-            Categories: {
-                screen: stack,
-                navigationOptions: {
-                    title: this.state.lang.cat.title
-                }
-            },
-        },{
-            drawerPosition: "right",
-            drawerWidth: 200,
-            contentComponent: props => <ScrollView><DrawerItems {...props}/></ScrollView>,
-        });
-
-        return <Drawer screenProps={this.state.lang}/>
+        return <MenuProvider>
+            <Stack screenProps={this.state.lang}/>
+        </MenuProvider>
     }
 }
