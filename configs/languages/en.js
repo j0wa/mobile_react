@@ -79,5 +79,6 @@ export default {
         amountDue: "due",
         amountPayed: "paid",
         total: "total",
+        currChoices: "Show values in",
     }
 }

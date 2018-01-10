@@ -351,12 +351,17 @@ class SummariesScreen extends React.Component {
                     //console.log(this.props.trip_id);
                     //console.log(expenses);
                     this.setState({
-                        expenses: filteredExp,
-                        loaded: true
+                        expenses: filteredExp
                     });
                 }
-                else
-                    this.setState({ loaded: true });
+            }
+        );
+        store.get("currencies").then(
+            (currs) => {
+                this.setState({
+                    currs: currs,
+                    loaded: true
+                });
             }
         );
     }
@@ -397,7 +402,7 @@ class SummariesScreen extends React.Component {
     }
 
 
-    buildBlaBla(){
+    buildSheet(){
         var arraySummaries = [];
         var i =0;
 
@@ -455,15 +460,78 @@ class SummariesScreen extends React.Component {
             </View>
         )
     }
+
+    getComboBox(collection, stateItem){
+        var items = [];
+
+        if (!collection || collection == "" || collection == [] || collection == null)
+            return;
+
+        return <ComboBox
+                selectedValue={this.state[stateItem]}
+                onValueChange={(value) => {
+                    if (stateItem == "type")
+                        this.setState({type: value});
+                    else if (stateItem == "curr")
+                        this.setState({curr: value});
+                    else
+                        this.setState({cat: value});
+                }}
+            >
+            {collection.map(item => {
+                return <ComboBoxItem label={item.name} value={item.id} key={item.id}/>
+            })}
+        </ComboBox>
+    }
+
+    changeCurr(changeTo,changeFrom,value){
+        var dollarValue
+        //change to dollar
+        switch (changeFrom) {
+            case 2:
+                dollarValue = value;
+                break;
+            case 3:
+                dollarValue = value*0,783;
+                break;
+            case 4:
+                dollarValue = value*1,352;
+                break;
+            //if nothing it's not initialased but showing 1, so 1 is default
+            default:
+                dollarValue = value*1,194;
+        }
+
+        switch (changeTo) {
+            case 2:
+                return dollarValue;
+                break;
+            case 3:
+                return dollarValue*1,277;
+                break;
+            case 4:
+                return dollarValue*0,741;
+                break;
+            //if nothing it's not initialased but showing 1, so 1 is default
+            default:
+                return dollarValue*0,838;
+        }
+
+    }
+
     render() {
         return (this.state.loaded) ?
             <View>
-
+                <FormLabel>{this.state.lang.summaries.currChoices}</FormLabel>
+                <View style={styles.combobox}>
+                    {this.getComboBox(this.state.currs, "curr")}
+                </View>
                 <View style={styles.list_title}>
                         <Text style={styles.list_item_part}>{this.state.lang.summaries.name} </Text><Text style={styles.list_item_part}>{this.state.lang.summaries.amountPayed}</Text><Text style={styles.list_item_part}>{this.state.lang.summaries.amountDue}</Text><Text style={styles.list_item_part}>{this.state.lang.summaries.total}</Text>
                 </View>
-                {this.buildBlaBla()}
+                {this.buildSheet()}
                 {this.totalExpensesOfTrip()}
+                <Text>{this.state.curr}</Text>
             </View> :
             <Loader />
     }
