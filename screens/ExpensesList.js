@@ -112,7 +112,7 @@ export default class ExpensesList extends React.Component{
                             trip_id: this.state.trip_id,
                             members: this.state.members,
                             curr: this.state.curr,
-                            updateExpenses: this.updateExpenses,
+                            updateExpenses: this.updateExpenses
                         })
                     }
                 >

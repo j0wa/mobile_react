@@ -222,7 +222,7 @@ class GeneralScreen extends React.Component {
                 this.setState({
                     cats: cats,
                     date: exp.date || new Date(),
-                    curr: exp.curr || 1,
+                    curr: exp.curr || this.props.screenProps.curr,
                     type: exp.type || 1,
                     cat: exp.cat || 1,
                     receiver: exp.receiver || "",

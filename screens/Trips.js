@@ -336,6 +336,7 @@ class SummariesScreen extends React.Component {
             summaries: this.props.screenProps.summaries,
             lang: this.props.screenProps.lang,
             id: this.props.screenProps.info.id,
+            curr: this.props.screenProps.info.curr,
         }
 
         this.changeCurr = this.changeCurr.bind(this);
@@ -383,57 +384,11 @@ class SummariesScreen extends React.Component {
             i++;
         });
 
-        /*
-        this.state.expenses.forEach(function(element){
-            element.membersPaidBy.forEach(function(elementPaidBy){
-                if(elementPaidBy.selected){
-                    arraySummaries.forEach(function(mem){
-                        if(elementPaidBy.name == mem.name){
-                            /*
-                            if(this.state.curr == undefined){
-                                var tempVal = this.changeCurr(1,item.curr,elementPaidBy.cost)
-                            }else{
-                                var tempVal = this.changeCurr(this.state.curr,item.curr,elementPaidBy.cost)
-                            }
-
-                            mem.amountPaid += parseInt(elementPaidBy.cost);
-                            return;
-                        }
-                    });
-                }
-            });
-
-            element.membersPaidFor.forEach(function(elementPaidFor){
-                if(elementPaidFor.selected){
-                    arraySummaries.forEach(function(mem){
-                        if(elementPaidFor.name == mem.name){
-                            /*
-                            if(this.state.curr == undefined){
-                                var tempVal = this.changeCurr(1,item.curr,elementPaidFor.cost)
-                            }else{
-                                var tempVal = this.changeCurr(this.state.curr,item.curr,elementPaidFor.cost)
-                            }
-
-                            mem.amountDue += parseInt(elementPaidFor.cost);
-                            return;
-                        }
-                    });
-                }
-            });
-
-            arraySummaries.forEach(function(mem){
-                mem.total += parseInt(mem.amountPaid) - parseInt(mem.amountDue)
-            });
-
-        });
-        */
-
         this.state.expenses.map((element) => {
             element.membersPaidBy.map((elementPaidBy) => {
                 if(elementPaidBy.selected){
                     arraySummaries.map((mem) => {
                         if(elementPaidBy.name == mem.name){
-
                             mem.amountPaid += parseInt(this.changeCurr(this.state.curr,mem.curr,elementPaidBy.cost));
                             return;
                         }
