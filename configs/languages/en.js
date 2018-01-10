@@ -83,10 +83,19 @@ export default {
     summaries: {
         title: "Summaries",
         totalCostOfTrip: "Total of all Expences",
-        name: "name",
-        amountDue: "due",
-        amountPayed: "paid",
-        total: "total",
+        name: "Name",
+        amountDue: "Due",
+        amountPayed: "Paid",
+        total: "Total",
         currChoices: "Show values in",
+    },
+
+    payment: {
+        new_payment: "New Payment",
+        to: "To",
+        from: "From",
+        val: "Value",
+        total_left: "Total left:",
+        payments: "Payments"
     }
 }

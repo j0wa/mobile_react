@@ -1,7 +1,7 @@
 import React from 'react';
 import { TabNavigator } from 'react-navigation';
 import { Icon, Button, FormValidationMessage, FormInput, FormLabel, CheckBox } from 'react-native-elements'
-import { View, Text, StyleSheet, ScrollView, Image, Dimensions, CameraRoll, PermissionsAndroid, Modal, TouchableHighlight, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, Dimensions, CameraRoll, PermissionsAndroid, Modal, TouchableHighlight, Alert, TouchableNativeFeedback } from "react-native";
 import { PhotoGrid } from 'react-native-photo-grid-frame';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
@@ -18,143 +18,86 @@ export default class Expenses extends React.Component {
         }
 
         this.updateItems = this.updateItems.bind(this);
-        this.updateGallery = this.updateGallery.bind(this);
-    }
-
-    updateGallery(gallery){
-        this.setState({ gallery: gallery });
+        this.updatePayment = this.updatePayment.bind(this);
+        this.updateTotalLeft = this.updateTotalLeft.bind(this);
     }
 
     updateItems(items){
-        this.setState({
-            items: items
+        this.setState({ 
+            items: items 
         });
     }
 
+    updatePayment(payments, totalLeft){
+        this.setState({ 
+            payments: payments,
+            totalLeft: totalLeft
+        });
+    }
+
+    updateTotalLeft(totalLeft){
+        var val = totalLeft;
+        
+        if (this.state.payments.length > 0){
+            this.state.payments.map(item => {
+                val -= item.val;
+            });
+        }
+
+        this.setState({totalLeft: totalLeft});
+    }
+
     componentWillMount(){
-        store.get("expenses").then(
-            expenses => {
-                var neww = this.props.navigation.state.params.new;
-                var id = this.props.navigation.state.params.id;
-                var expense = {};
-                if (!neww)
-                {
-                    expenses.find((e) => {
-                        if (e.id == id){
-                            expense = e;
-                            return;
-                        }
-                    });
-                    //console.log("exp in comwillmount");
-                    //console.log(expense.membersPaidBy);
+        if (!this.props.navigation.state.params.new){
+            var expense = this.props.navigation.state.params.expense;
 
-                    var membersPaidByTMP = [];
-                    var tmp;
-                    var i =0;
-                    //console.log("coucou");
-                    //console.log(expense.membersPaidBy);
-                    //Building the list of poeple who paid
-                    this.props.navigation.state.params.members.forEach(function(element) {
-                        expense.membersPaidBy.forEach(function(elementPaidBy){
-                            if(elementPaidBy.name == element){
-                                //console.log("in the if");
-                                //console.log(elementPaidBy.name == element);
-                                tmp = elementPaidBy;
-                                return;
-                            }
-                        })
-
-                        if(tmp != null){
-                            //console.log("tmp not null");
-                            //console.log(tmp);
-                            //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
-                            membersPaidByTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
-                        }else{
-                            //console.log("tmp null");
-                            //console.log({id: i, name: element, cost: 0, selected: 0 });
-                            membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
-                        }
-                        tmp = null;
-                        i++;
-                    });
-
-                    i = 0;
-                    var membersPaidForTMP = [];
-                    this.props.navigation.state.params.members.forEach(function(element) {
-                        expense.membersPaidFor.forEach(function(elementPaidFor){
-                            if(elementPaidFor.name == element){
-                                //console.log("in the if");
-                                //console.log(elementPaidFor.name == element);
-                                tmp = elementPaidFor;
-                                return;
-                            }
-                        })
-
-
-                        if(tmp != null){
-                            //console.log("tmp not null");
-                            //console.log(tmp);
-                            //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
-                            membersPaidForTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
-                        }else{
-                            //console.log("tmp null");
-                            //console.log({id: i, name: element, cost: 0, selected: 0 });
-                            membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
-                        }
-                        tmp = null;
-                        i++;
-                    });
-                }
-
-                var membersPaidByTMP = [];
-                var membersPaidForTMP = [];
-                var i = 0;
-                this.props.navigation.state.params.members.forEach(function(element){
-                    membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
-                    membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
-                    i++
-                });
-
-                this.setState({
-                    new: neww,
-                    gallery: expense.gallery || [],
-                    items: expense.items || [],
-                    membersPaidBy: membersPaidByTMP || [],
-                    membersPaidFor: membersPaidForTMP || [],
-                    info: Object.keys(expense).length != 0 ? {
-                        receiver: expense.receiver,
-                        type: expense.type,
-                        curr: expense.curr,
-                        cat: expense.cat,
-                        date: new Date(expense.date),
-                        cost: expense.cost,
-                        notes: expense.notes,
-                        id: id
-                    } : {
-                        id: id
-                    },
-                    loaded: true,
-                });
-            }
-        )
+            this.setState({
+                new: false,
+                items: expense.items,
+                payments: expense.payments || [],                
+                totalLeft: expense.totalLeft || 0,            
+                info: {
+                    receiver: expense.receiver,
+                    type: expense.type,
+                    curr: expense.curr,
+                    cat: expense.cat,
+                    date: new Date(expense.date),
+                    cost: expense.cost,
+                    notes: expense.notes,
+                    id: expense.id
+                },
+                loaded: true,
+            });
+        } 
+        else {
+            this.setState({
+                info: {
+                    id: this.props.navigation.state.params.id,
+                    curr: this.props.navigation.state.params.curr
+                },
+                items: [],
+                loaded: true,
+                new: true,
+                payments: [],
+                totalLeft: 0     
+            })
+        }
     }
 
     render(){
-
         return this.state.loaded ? <Tab screenProps={{
-            trip_id: this.props.navigation.state.params.trip_id,
             navigation: this.props.navigation,
             lang: this.props.screenProps,
             new: this.state.new,
             info: this.state.info,
             items: this.state.items,
-            gallery: this.state.gallery,
+            payments: this.state.payments,
+            totalLeft: this.state.totalLeft,
             updateExpenses: this.props.navigation.state.params.updateExpenses,
-            updateGallery: this.updateGallery,
             updateItems: this.updateItems,
-            members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true} }),
-            membersPaidBy: this.state.membersPaidBy,
-            membersPaidFor: this.state.membersPaidFor,
+            updatePayment: this.updatePayment,
+            updateTotalLeft: this.updateTotalLeft,
+            members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true} }), 
         }} /> : <Loader/>;
     }
 }
@@ -162,18 +105,15 @@ export default class Expenses extends React.Component {
 class GeneralScreen extends React.Component {
     constructor(props){
         super(props);
-
+        
         this.state = {
             loaded: false,
             new: this.props.screenProps.new,
             exp: this.props.screenProps.info,
             items: this.props.screenProps.items,
-            gallery: this.props.screenProps.gallery,
             lang: this.props.screenProps.lang,
             id: this.props.screenProps.info.id,
             members: this.props.screenProps.members,
-            membersPaidBy: this.props.screenProps.membersPaidBy,
-            membersPaidFor: this.props.screenProps.membersPaidFor,
             errReceiver: false,
             errCost: false,
             cost: this.props.screenProps.cost
@@ -182,8 +122,6 @@ class GeneralScreen extends React.Component {
         this._submit = this._submit.bind(this)
         this.updateValues = this.updateValues.bind(this)
         this.updateMemberCost = this.updateMemberCost.bind(this)
-        this.splitCostPaidBy = this.splitCostPaidBy.bind(this)
-        this.splitCostPaidFor = this.splitCostPaidFor.bind(this)
     }
 
     componentWillMount(){
@@ -202,12 +140,12 @@ class GeneralScreen extends React.Component {
                 });
             }
         );
-
+        
         store.get("categories").then(
             (cats) => {
-                var exp = this.state.exp;
-
-                this.setState({
+                var exp = this.state.exp; 
+                
+                this.setState({ 
                     cats: cats,
                     date: exp.date || new Date(),
                     curr: exp.curr || 1,
@@ -225,7 +163,12 @@ class GeneralScreen extends React.Component {
     _submit(){
         var err = -1;
 
-
+        if (this.state.receiver == "") {
+            this.setState({ errReceiver: true });
+            err = 1;
+        } else {
+            this.setState({ errReceiver: false });
+        }
 
         if (this.state.cost == "") {
             this.setState({ errCost: true });
@@ -243,12 +186,9 @@ class GeneralScreen extends React.Component {
                 type: this.state.type,
                 cat: this.state.cat,
                 members: this.state.members,
-                membersPaidBy: this.state.membersPaidBy,
-                membersPaidFor: this.state.membersPaidFor,
                 cost: this.state.cost,
                 notes: this.state.notes,
                 items: this.state.items,
-                gallery: this.state.gallery
             };
 
             updateStorage("expenses", e, this.state.new, () => {
@@ -260,7 +200,7 @@ class GeneralScreen extends React.Component {
 
     updateValues(){
         var type = this.state.type;
-
+        
         if (type == 1) {
             var members = this.state.members;
             var cost = this.state.cost;
@@ -272,7 +212,7 @@ class GeneralScreen extends React.Component {
             });
 
             var value = cost / len;
-
+            
             members.map((m) => {
                 m.cost = (m.selected) ? value : 0;
             });
@@ -315,30 +255,6 @@ class GeneralScreen extends React.Component {
         this.updateValues();
     }
 
-    memberPaidBySelection(index){
-        var members = this.state.membersPaidBy;
-
-        members[index].selected = !members[index].selected;
-
-        this.setState({
-            membersPaidBy: members
-        });
-
-        this.updateValues();
-    }
-
-    memberPaidForSelection(index){
-        var members = this.state.membersPaidFor;
-
-        members[index].selected = !members[index].selected;
-
-        this.setState({
-            membersPaidFor: members
-        });
-
-        this.updateValues();
-    }
-
     getComboBox(collection, stateItem){
         var items = [];
 
@@ -371,16 +287,17 @@ class GeneralScreen extends React.Component {
                 else
                     break;
             }
-
+    
             if (index != -1){
                 return val.substr(index);
             }
-
+    
             return val;
         }
     }
 
-    updateMemberCost(id, val, tmp){
+    updateMemberCost(id, val){
+        var tmp = this.state.members;
         tmp.map((m) => {
             if (id == m.id){
                 m.cost = this.removeLeadingZeros(val);
@@ -407,12 +324,13 @@ class GeneralScreen extends React.Component {
                                 textStyle={styles.members_list_ckbox_text}
                                 title={item.name}
                             />
-                            <FormInput
-                                containerStyle={styles.members_list_text_container}
+                            <FormInput 
+                                containerStyle={styles.members_list_text_container} 
                                 keyboardType="numeric"
+                                style={styles.members_list_text} 
                                 underlineColorAndroid="transparent"
                                 editable={this.state.new && this.state.type != 1 && this.state.cost != ""}
-                                onChangeText={(val) => this.updateMemberCost(item.id, val,this.state.members)}
+                                onChangeText={(val) => this.updateMemberCost(item.id, val)}
                                 value={String(item.cost)}
                             />
                         </View>
@@ -422,133 +340,38 @@ class GeneralScreen extends React.Component {
         );
     }
 
-    splitCostPaidBy(){
-        //console.log("splitCostPaidBy");
-        var tmpArray = [];
-        var countOfSelected = 0;
-        this.state.membersPaidBy.forEach(function(element){
-            if(element.selected){
-                countOfSelected++
-            }
-        });
-        var part = this.state.cost / countOfSelected;
-        /*
-        console.log("evenpart");
-        console.log(this.state.cost);
-        console.log(countOfSelected);
-        console.log(part);
-        */
-
-        this.state.membersPaidBy.forEach(function(element){
-            if(element.selected){
-                element.cost = part;
-            }else {
-                element.cost = 0
-            }
-            tmpArray.push(element);
-        });
-        this.setState({membersPaidBy: tmpArray});
-        /*
-        console.log("end of splitCostPaidBy");
-        console.log(tmpArray);
-        */
-    }
-
-    splitCostPaidFor(){
-        //console.log("splitCostPaidFor");
-        var tmpArray = [];
-        var countOfSelected = 0;
-        this.state.membersPaidFor.forEach(function(element){
-            if(element.selected){
-                countOfSelected++
-            }
-        });
-        var part = this.state.cost / countOfSelected;
-        /*
-        console.log("evenpart");
-        console.log(this.state.cost);
-        console.log(countOfSelected);
-        console.log(part);
-*/
-        this.state.membersPaidFor.forEach(function(element){
-            if(element.selected){
-                element.cost = part;
-            }else {
-                element.cost = 0
-            }
-            tmpArray.push(element);
-        });
-        this.setState({membersPaidFor: tmpArray});
-        /*
-        console.log("end of splitCostPaidFor");
-        console.log(tmpArray);
-        */
-    }
-
-    buildPaidByList() {
-        return (
-            <View style={styles.members_wrapper}>
-                <FormLabel>{this.state.lang.trip.paidBy}</FormLabel>
-
-                <ScrollView style={styles.members_list_wrapper}>
-                    {this.state.membersPaidBy.map((item) => {
-                        return <View key={item.id} style={styles.members_list_item}>
-                            <CheckBox
-                                containerStyle={styles.members_list_ckbox_container}
-                                checked={item.selected}
-                                onPress={() => { this.memberPaidBySelection(item.id) }}
-                                title={item.name}
-                                textStyle={styles.members_list_ckbox_text}
-                            />
-                            <FormInput
-                                containerStyle={styles.members_list_text_container}
-                                keyboardType="numeric"
-                                underlineColorAndroid="transparent"
-                                editable={this.state.new }
-                                onChangeText={(val) => this.updateMemberCost(item.id, val,this.state.membersPaidBy)}
-                                value={String(item.cost)}
-                            />
-                        </View>
-                    })}
-                </ScrollView>
-            </View>
-        );
-    }
-
-    buildPaidForList() {
-        return (
-            <View style={styles.members_wrapper}>
-                <FormLabel>{this.state.lang.trip.paidFor}</FormLabel>
-
-                <ScrollView style={styles.members_list_wrapper}>
-                    {this.state.membersPaidFor.map((item) => {
-                        return <View key={item.id} style={styles.members_list_item}>
-                            <CheckBox
-                                containerStyle={styles.members_list_ckbox_container}
-                                checked={item.selected}
-                                onPress={() => { this.memberPaidForSelection(item.id) }}
-                                title={item.name}
-                                textStyle={styles.members_list_ckbox_text}
-                            />
-                            <FormInput
-                                containerStyle={styles.members_list_text_container}
-                                keyboardType="numeric"
-                                underlineColorAndroid="transparent"
-                                editable={this.state.new }
-                                onChangeText={(val) => this.updateMemberCost(item.id, val,this.state.membersPaidFor)}
-                                value={String(item.cost)}
-                            />
-                        </View>
-                    })}
-                </ScrollView>
-            </View>
-        );
+    onCostEdit(){
+        this.updateValues();
+        this.props.screenProps.updateTotalLeft(this.state.cost);
     }
 
     buildForm(){
         return (
             <ScrollView style={{paddingBottom: 60}}>
                 <View>
+                    {/* receiver */}
+                    <FormLabel>{this.state.lang.expense.receiver}<Required /></FormLabel>
+                    <FormInput
+                        autoCapitalize="sentences"
+                        value={this.state.receiver}
+                        editable={this.state.new}
+                        style={styles.input}
+                        returnKeyType="next"
+                        onChangeText={(receiver) => this.setState({receiver: receiver})}
+                    />
+                    {this.state.errReceiver && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                    {/* split type */}
+                    <FormLabel>{this.state.lang.expense.types}</FormLabel>
+                    <View style={styles.combobox}>
+                        {this.getComboBox(this.state.types, "type")}
+                    </View>
+
+                    {/* currencies */}
+                    <FormLabel>{this.state.lang.misc.curr}</FormLabel>
+                    <View style={styles.combobox}>
+                        {this.getComboBox(this.state.currs, "curr")}
+                    </View>
 
                     {/* category */}
                     <FormLabel>{this.state.lang.cat.title}</FormLabel>
@@ -564,51 +387,33 @@ class GeneralScreen extends React.Component {
                         style={styles.input}
                     />
 
+                    {/* cost */}
+                    <FormLabel>{this.state.lang.expense.cost} <Required /></FormLabel>
+                    <FormInput
+                        editable={this.state.new}                        
+                        style={styles.input}
+                        value={String(this.state.cost)}
+                        keyboardType="numeric"
+                        returnKeyType="next"
+                        onEndEditing={cost => this.onCostEdit()}
+                        onChangeText={cost => this.setState({cost: this.removeLeadingZeros(cost)})}
+                    />
+                    {this.state.errCost && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
                     {/* notes */}
                     <FormLabel>{this.state.lang.expense.notes}</FormLabel>
                     <FormInput
                         autoCapitalize="sentences"
                         editable={this.state.new}
                         multiline={true}
-                        autoGrow={true}
+                        autoGrow={true} 
                         value={this.state.notes}
                         onChangeText={(notes) => this.setState({notes: notes})}
                         style={StyleSheet.flatten([styles.input, styles.input_textarea])}
                     />
 
-                    {/* currencies */}
-                    <FormLabel>{this.state.lang.misc.curr}</FormLabel>
-                    <View style={styles.combobox}>
-                        {this.getComboBox(this.state.currs, "curr")}
-                    </View>
-
-                    {/* cost */}
-                    <FormLabel>{this.state.lang.expense.cost} <Required /></FormLabel>
-                    <FormInput
-                        editable={this.state.new}
-                        style={styles.input}
-                        value={String(this.state.cost)}
-                        keyboardType="numeric"
-                        returnKeyType="next"
-                        onEndEditing={cost => this.updateValues() }
-                        onChangeText={cost => this.setState({cost: this.removeLeadingZeros(cost)}) }
-                    />
-                    {this.state.errCost && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
-
-                    {/* split type
-                    <FormLabel>{this.state.lang.expense.types}</FormLabel>
-                    <View style={styles.combobox}>
-                        {this.getComboBox(this.state.types, "type")}
-                    </View>
-                    */}
-
-                    <Button title={this.state.lang.misc.split_even} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this.splitCostPaidBy}/>
-                    {/* paid by list */}
-                    {this.buildPaidByList()}
-
-                    <Button title={this.state.lang.misc.split_even} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this.splitCostPaidFor} />
-                    {/* paid for list*/}
-                    {this.buildPaidForList()}
+                    {/* payments */}
+                    {this.buildPaymentList()}
 
                     <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit} />
                 </View>
@@ -717,7 +522,7 @@ class ItemsScreen extends React.Component {
                                 <Text>{item.price}</Text>
                             </View>
                     </View>
-                            <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_item(index) }} size={32.0}/>
+                        <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_item(index) }} size={32.0}/>
                     </View>
                 })}
             </ScrollView>
@@ -772,78 +577,150 @@ class ItemsScreen extends React.Component {
     }
 }
 
-class GalaryScreen extends React.Component {
-    constructor(props){
+class PaymentsScreen extends React.Component {
+    constructor(props) {
         super(props);
 
         this.state = {
             lang: this.props.screenProps.lang,
-            gallery: this.props.screenProps.gallery,
-            showPhotoGallery: false,
-            cameraPhotos: ""
+            members: this.props.screenProps.members,
+            payments: this.props.screenProps.payments,
+            totalLeft:  this.props.screenProps.totalLeft,
+            showModal: false,
+            errFrom: false,  
+            errTo: false,  
+            errVal: false,  
+            from: "",  
+            to: "",  
+            val: "",  
+        }
+    }
+    
+     _submit_payment(){
+        var err = -1;
+
+        if (this.state.from == "") {
+            this.setState({ errFrom: true });
+            err = 1;
+        } else {
+            this.setState({ errFrom: false });
+        }
+
+        if (this.state.to == "") {
+            this.setState({ errTo: true });
+            err = 1;
+        } else {
+            this.setState({ errTo: false });
+        }
+        
+        if (this.state.val == "") {
+            this.setState({ errVal: true });
+            err = 1;
+        } else {
+            this.setState({ errVal: false });
+        }
+
+        if (err == -1){
+            this.setState(prev => ({
+                totalLeft: prev.totalLeft - this.state.val
+            }));
+
+            this.props.screenprops.updatePayment({...this.state.payments, ...{to: this.state.to, from: this.state.from, val: this.state.val}}, this.state.totalLeft)
         }
     }
 
-    buildGallery(){
-        if  (this.state.gallery  == "" || this.state.gallary == null || this.state.gallary == {})
-        {
-            return (
-                <View style={styles.empty}>
-                    <Text style={styles.empty_text}>{this.state.lang.expense.no_img}</Text>
-                </View>
-            );
-        }
-
-        return (
-            <ScrollView>
-                <PhotoGrid PhotosList={this.state.gallary} borderRadius={10}/>
-            </ScrollView>
-        );
-    }
-
-    getPhotos(){
-        CameraRoll.getPhotos({ first: 1000000 }).then(pics => {
-            this.setState({
-                showPhotoGallery: true,
-                cameraPhotos: pics.edges
-            })
-        });
-    }
-
-    buildButton(){
-        return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => {this.getPhotos()}} />
-        </View>
-    }
-
-    selectPic(pie){
-        var len = this.state.gallary.lenght + 1;
-
-        this.setState(prevState => ({
-            gallary: [...prevState.gallary, {id: len, url: "something"}]
+    toggleModal(){
+        this.setState(prev => ({
+            showModal: !prev.showModal
         }));
     }
 
-    buildScreen(){
-        if (this.state.showPhotoGallery){
-            return (
-                <View style={styles.flex_1}>
-                    <PhotoGrid PhotosList={this.state.cameraPhotos} borderRadius={10} onPress ={(pic) => { this.selectPic(pic) }} />
-                </View>
-            );
-        }
-
+    buildModal(){
         return (
-            <View style={styles.flex_1}>
-                {this.buildGallery()}
+            <Modal
+                transparent={true}
+                visible={this.state.showModal}
+                onRequestClose={() => { this.toggleModal(false) }}
+            >
+                <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.toggleModal(false) }}>
+                    <View style={styles.modal_container}>
+                        <Text style={styles.modal_title}>{this.state.lang.payment.new_payment}</Text>
 
-                {this.buildButton()}
-            </View>
+                        <FormLabel>{this.state.lang.payment.from}</FormLabel>
+                        { this.getComboBox(this.state.members, "to") }
+                        { this.state.errFrom && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+                        
+                        <FormLabel>{this.state.lang.payment.to}</FormLabel>
+                        { this.getComboBox(this.state.members, "from") }
+                        { this.state.errTo && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                        <FormLabel>{this.state.lang.payment.val}</FormLabel>
+                        <FormInput
+                            autoCapitalize="sentences"
+                            onChangeText={(val) => this.setState({val: val})}
+                            style={styles.input}
+                        />
+                        { this.state.errVal && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+
+                        <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit_payment} />
+                    </View>
+                </TouchableHighlight>
+            </Modal>
         );
     }
 
+    getComboBox(collection, stateItem){
+        var items = [];
+
+        if (!collection || collection == "" || collection == [] || collection == null)
+            return;
+
+        return <ComboBox
+                selectedValue={this.state[stateItem]}
+                onValueChange={(value) => this.state[stateItem]}
+            >
+            {collection.map((item, index) => {
+                return <ComboBoxItem label={item.name} value={index} key={index}/>
+            })}
+        </ComboBox>
+    }
+
+    buildList(){
+        var color = StyleSheet.flatten(styles.total_left, styles.total_left_none);//((this.state.totalLeft == 0) ? styles.total_left_none : styles.total_left_red));
+
+        return (
+            <View>
+                <Text style={color}>{this.state.lang.payment.total_left} {this.state.totalLeft}</Text>
+                <View style={styles.members_list_wrapper}>
+                    <FormLabel>{this.state.lang.payment.payments}</FormLabel>
+                    { this.state.totalLeft > 0 && 
+                        <TouchableNativeFeedback onPress={() => { this.toggleModal(true) }} >
+                            <FormLabel containerStyle={styles.new_member}>{this.state.lang.payment.new_payment}</FormLabel>
+                        </TouchableNativeFeedback>
+                    }
+                </View>
+
+                <ScrollView style={styles.members_list_wrapper}>
+                    {this.state.payments.map((item) => {
+                        return <View key={item.id} style={styles.members_list_item}>
+                            <Text>{item.from} -----> </Text>
+                            <Text>{item.to} </Text>
+                            <Text>{item.amount} </Text>
+                            <Text>{item.date} </Text>
+                        </View>
+                    })}
+                </ScrollView>
+            </View>
+        )
+    }
+ 
     render() {
-        return <View style={{flex: 1}}>{this.buildScreen()}</View>
+        return (
+            <View style={styles.flex_1}>
+                {this.buildList()}
+                {this.buildModal()}
+            </View>
+        );
     }
 }
 
@@ -854,8 +731,32 @@ const Tab = TabNavigator({
     Items: {
         screen: ItemsScreen,
     },
-    Galary: {
-        screen: GalaryScreen,
+    Payments: {
+        screen: PaymentsScreen,
+    },
+}, {
+    tabBarPosition: 'bottom',
+    animationEnabled: true,
+    lazy: true,
+    tabBarOptions: {
+        iconStyle: {
+            width: 40
+        },
+        showIcon: false,
+        inactiveTintColor: "#CECECE",
+        style: {
+            backgroundColor: "#4C3E54",
+            marginTop: 10
+        }
+    },
+});
+
+const Tab2 = TabNavigator({
+    General: {
+        screen: GeneralScreen,
+    },
+    Items: {
+        screen: ItemsScreen,
     },
 }, {
     tabBarPosition: 'bottom',
@@ -988,6 +889,20 @@ const styles = StyleSheet.create({
         alignSelf: "center"
     },
 
+    new_member: {
+        position: "absolute",
+        right: 15,
+        paddingBottom: 15,
+        borderWidth: 1,
+        borderColor: "#000",
+        borderStyle: "dashed",
+        borderRadius: 5,
+        alignItems: "center",
+        justifyContent: "center",
+        top: 8,
+        height: 30
+    },
+
     members_wrapper: {
         marginBottom: 20
     },
@@ -1012,19 +927,19 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent",
         flex: 1
     },
-
+            
     members_list_ckbox_text: {
         fontSize: 16,
         flex: 1
     },
-
+    
     members_list_text_container: {
         right: 10,
         bottom: 6,
         position: "absolute",
         width: 100
     },
-
+    
     members_list_text: {
         alignSelf: "center", 
         textAlign: "right", 
@@ -1069,4 +984,18 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginTop: 20
     },
+
+    total_left: {
+        fontSize: 20,
+        textAlign: "center",
+        marginTop: 20,
+    },
+
+    total_left_red: {
+        color: "#E51616",
+    },
+
+    total_left_none: {
+        color: "#35AA31"
+    }
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback, TouchableHighlight } from "react-native";
-import { Icon, FormLabel, Button } from 'react-native-elements';
+import { Icon, FormLabel, Button, Divider } from 'react-native-elements';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
 import formatDate from '../utils/date_format';
@@ -152,6 +152,7 @@ export default class ExpensesList extends React.Component{
                         this.updateList();
                         this.setState({cat: value});
                 }}
+                style={styles.combobox}
             >
             {collection.map(item => {
                 return <ComboBoxItem label={item.name} value={item.id} key={item.id}/>
@@ -173,10 +174,13 @@ export default class ExpensesList extends React.Component{
             <View style={styles.wrapper}>
                 {/* category */}
                 <FormLabel>{this.state.lang.cat.title}</FormLabel>
-                <View style={styles.combobox}>
-                    {this.getComboBox(this.state.cats, "cat")}
-                </View>
-                <Button title={this.state.lang.misc.reset_filter} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this.resetCatFilter}/>
+                {this.getComboBox(this.state.cats, "cat")}
+                <TouchableNativeFeedback onPress={() => { this.resetCatFilter() }} >
+                    <FormLabel containerStyle={styles.btn_search}>{this.state.lang.misc.reset_filter}</FormLabel>
+                </TouchableNativeFeedback>
+
+                <Divider style={styles.divider} />
+
                 {this.buildList(navigate)}
                 {this.buildButton(navigate)}
             </View>
@@ -244,4 +248,31 @@ const styles = StyleSheet.create({
     marg_bottom_10: {
         marginBottom: 10
     },
+
+    btn_search: {
+        position: "absolute",
+        right: 15,
+        paddingBottom: 15,
+        borderWidth: 1,
+        borderColor: "#000",
+        borderStyle: "dashed",
+        borderRadius: 5,
+        alignItems: "center",
+        justifyContent: "center",
+        top: 8,
+        height: 30
+    },
+
+    combobox: {
+        marginTop: 10,
+        marginLeft: 20,
+        marginRight: 20,
+        marginBottom: 10
+    },
+
+    divider: { 
+        backgroundColor: '#4C3E54', 
+        marginLeft: 10, 
+        marginRight: 10 
+    }
 });

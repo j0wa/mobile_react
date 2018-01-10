@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon, Button, FormValidationMessage, FormInput, FormLabel } from 'react-native-elements'
 import { TabNavigator } from 'react-navigation';
-import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback, Dimensions, Modal, Alert, TouchableHighlight, DeviceEventEmitter } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback, Dimensions, Modal, Alert, TouchableHighlight } from "react-native";
 import DatePicker from 'react-native-datepicker';
 import ExpensesList from "./ExpensesList";
 import Loader from '../components/Loader';
@@ -56,8 +56,6 @@ export default class Trips extends React.Component {
     }
 
     componentWillMount(){
-        DeviceEventEmitter.addListener('goBackFromExpense', (e) => { this.updateExpenses(e) })
-
         store.get("trips").then(trips => {
             var neww = this.props.navigation.state.params.new;
             var id = this.props.navigation.state.params.id;
@@ -254,7 +252,7 @@ class TripScreen extends React.Component {
     buildMembersList(){
         return (
             <View style={styles.members_wrapper}>
-                <FormLabel>{this.state.lang.trip.members} <Required /></FormLabel>
+                <FormLabel>{this.state.lang.trip.members}</FormLabel>
                 <TouchableNativeFeedback onPress={() => { this.setModalVisible(true) }} >
                     <FormLabel containerStyle={styles.new_member}>{this.state.lang.trip.new_member}</FormLabel>
                 </TouchableNativeFeedback>
@@ -669,6 +667,7 @@ const styles = StyleSheet.create({
         top: 8,
         height: 30
     },
+    
     new_member_ios: {
         margin: 15,
         borderWidth: 1,
@@ -795,24 +794,3 @@ const Tab = TabNavigator({
         }
     }
 );
-
-/*
-buildSplitData(){
-    if(this.state.trip.members == undefined){
-        <View>
-            <Text>{this.state.lang.trip.members}</Text>
-        </View>
-    }else{return (
-        <View style={styles.members_wrapper}>
-            <FormLabel>{this.state.lang.trip.members}</FormLabel>
-            <ScrollView>
-                {this.state.trip.members !== undefined && this.state.trip.members.map((item, index) => {
-                    return <View key={index} style={styles.list_item}>
-                        <Text key={index} style={styles.list_item_text}>{item} </Text>
-                    </View>
-                })}
-            </ScrollView>
-        </View>
-    );}
-}
-*/
