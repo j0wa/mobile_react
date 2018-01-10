@@ -182,13 +182,14 @@ class GeneralScreen extends React.Component {
             cost: ""
         }
 
+        /*
         console.log("test members");
         console.log(this.props.screenProps.members);
         console.log("test membersPaidBy");
         console.log(this.state.membersPaidBy);
         console.log("test membersPaidFor");
         console.log(this.props.screenProps.membersPaidFor);
-
+*/
 
         this._submit = this._submit.bind(this)
         this.updateValues = this.updateValues.bind(this)
@@ -303,9 +304,10 @@ class GeneralScreen extends React.Component {
 
         members[index].selected = !members[index].selected;
 
+/*
         console.log("into members selection");
         console.log(members);
-
+*/
         this.setState({
             members: members
         });
@@ -317,10 +319,10 @@ class GeneralScreen extends React.Component {
         var members = this.state.membersPaidBy;
 
         members[index].selected = !members[index].selected;
-
+/*
         console.log("into membersPaidBy selection");
         console.log(members);
-
+*/
         this.setState({
             membersPaidBy: members
         });
@@ -332,10 +334,10 @@ class GeneralScreen extends React.Component {
         var members = this.state.membersPaidFor;
 
         members[index].selected = !members[index].selected;
-
+/*
         console.log("into membersPaidFor selection");
         console.log(members);
-
+*/
         this.setState({
             membersPaidFor: members
         });
@@ -396,16 +398,20 @@ class GeneralScreen extends React.Component {
     }
 
     buildPaymentList() {
+        /*
         console.log("members in buildPaymentList");
         console.log(this.state.members);
+        */
         return (
             <View style={styles.members_wrapper}>
                 <FormLabel>{this.state.lang.trip.members}</FormLabel>
 
                 <ScrollView style={styles.members_list_wrapper}>
                     {this.state.members.map((item) => {
+                        /*
                         console.log("item checkbox");
                         console.log(item);
+                        */
                         return <View key={item.id} style={styles.members_list_item}>
                             <CheckBox
                                 containerStyle={styles.members_list_ckbox_container}
@@ -430,7 +436,7 @@ class GeneralScreen extends React.Component {
     }
 
     splitCostPaidBy(){
-        console.log("splitCostPaidBy");
+        //console.log("splitCostPaidBy");
         var tmpArray = [];
         var countOfSelected = 0;
         this.state.membersPaidBy.forEach(function(element){
@@ -439,10 +445,12 @@ class GeneralScreen extends React.Component {
             }
         });
         var part = this.state.cost / countOfSelected;
+        /*
         console.log("evenpart");
         console.log(this.state.cost);
         console.log(countOfSelected);
         console.log(part);
+        */
 
         this.state.membersPaidBy.forEach(function(element){
             if(element.selected){
@@ -453,12 +461,14 @@ class GeneralScreen extends React.Component {
             tmpArray.push(element);
         });
         this.setState({membersPaidBy: tmpArray});
+        /*
         console.log("end of splitCostPaidBy");
         console.log(tmpArray);
+        */
     }
 
     splitCostPaidFor(){
-        console.log("splitCostPaidFor");
+        //console.log("splitCostPaidFor");
         var tmpArray = [];
         var countOfSelected = 0;
         this.state.membersPaidFor.forEach(function(element){
@@ -467,11 +477,12 @@ class GeneralScreen extends React.Component {
             }
         });
         var part = this.state.cost / countOfSelected;
+        /*
         console.log("evenpart");
         console.log(this.state.cost);
         console.log(countOfSelected);
         console.log(part);
-
+*/
         this.state.membersPaidFor.forEach(function(element){
             if(element.selected){
                 element.cost = part;
@@ -481,8 +492,10 @@ class GeneralScreen extends React.Component {
             tmpArray.push(element);
         });
         this.setState({membersPaidFor: tmpArray});
+        /*
         console.log("end of splitCostPaidFor");
         console.log(tmpArray);
+        */
     }
 
     buildPaidByList() {
@@ -819,7 +832,7 @@ class GalaryScreen extends React.Component {
     selectPic(pic){
         var len = this.state.gallary.lenght + 1;
 
-        console.log(pic);
+        //console.log(pic);
 
         this.setState(prevState => ({
             gallary: [...prevState.gallary, {id: len, url: "something"}]

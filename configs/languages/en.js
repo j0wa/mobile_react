@@ -60,6 +60,7 @@ export default {
         remove_yes: "Yes",
         remove_no: "No",
         split_even: "Split cost evenly",
+        reset_filter: "reset filter",
     },
 
     err: {

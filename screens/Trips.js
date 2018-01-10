@@ -459,8 +459,10 @@ class SummariesScreen extends React.Component {
             });
 
         })
+        /*
         console.log("final arraySummaries");
         console.log(arraySummaries);
+        */
         return (
             <View style={styles.members_wrapper}>
                 <ScrollView >
@@ -524,20 +526,20 @@ class SummariesScreen extends React.Component {
         //change to dollar
         switch (changeFrom) {
             case 2:
-                console.log("from dollar");
+                //console.log("from dollar");
                 dollarValue = value;
                 break;
             case 3:
-                console.log("from aus");
+                //console.log("from aus");
                 dollarValue = value*0.783;
                 break;
             case 4:
-                console.log("from gpd");
+                //console.log("from gpd");
                 dollarValue = value*1.352;
                 break;
             //if nothing it's not initialased but showing 1, so 1 is default
             default:
-                console.log("from eu");
+                //console.log("from eu");
                 dollarValue = value*1.194;
         }
 
