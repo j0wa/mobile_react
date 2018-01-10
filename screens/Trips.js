@@ -19,6 +19,7 @@ export default class Trips extends React.Component {
         }
 
         this.updateExpenses = this.updateExpenses.bind(this);
+        this.updateNew = this.updateNew.bind(this);
     }
 
     updateExpenses(exp){
@@ -38,7 +39,20 @@ export default class Trips extends React.Component {
                 exp
             ] 
         }));
-        console.log("trips pos-update", this.state.expenses);
+    }
+
+    updateNew(trip){
+        this.setState({
+            new: false,
+            info: {
+                id: trip.id,
+                location: trip.location,
+                date: trip.date,
+                curr: trip.curr,
+                members: trip.members,
+                desc: trip.desc,
+            }
+        })
     }
 
     // faz o async aqui e depois manda os items por params para os ecrãs
@@ -79,18 +93,22 @@ export default class Trips extends React.Component {
     }
 
     render(){
-        console.log("trip load", this.state.expenses);
+        if (this.state.loaded){
+            var props = {
+                navigation: this.props.navigation,
+                lang: this.props.screenProps,
+                new: this.state.new,
+                info: this.state.info,
+                expenses: this.state.expenses,
+                summaries: this.state.summaries,
+                updateTrips: this.props.navigation.state.params.updateTrips,
+                updateExpenses: this.updateExpenses,
+            }
 
-        return this.state.loaded ? <Tab screenProps={{
-            navigation: this.props.navigation,
-            lang: this.props.screenProps,
-            new: this.props.navigation.state.params.new,
-            info: this.state.info,
-            expenses: this.state.expenses,
-            summaries: this.state.summaries,
-            updateTrips: this.props.navigation.state.params.updateTrips,
-            updateExpenses: this.updateExpenses,
-        }} /> : <Loader/>;
+            return this.state.new ? <TripScreen screenProps={{...props, updateNew: this.updateNew}}/> : <Tab screenProps={props} />
+        }
+
+        return <Loader />;
     }
 }
 
@@ -170,7 +188,11 @@ class TripScreen extends React.Component {
 
             updateStorage("trips", t, this.state.new, () => {
                 this.props.screenProps.updateTrips(t);
-                this.props.screenProps.navigation.goBack()
+
+                if (this.state.new)
+                    this.props.screenProps.updateNew(t);
+                else
+                    this.props.screenProps.navigation.goBack()
             });
         }
     }
