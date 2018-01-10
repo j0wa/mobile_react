@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback, TouchableHighlight } from "react-native";
-import { Icon } from 'react-native-elements';
+import { Icon, FormLabel, Button } from 'react-native-elements';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
 import formatDate from '../utils/date_format';
+import { ComboBox, ComboBoxItem } from '../components/ComboBox';
 
 export default class ExpensesList extends React.Component{
     constructor(props){
@@ -14,6 +15,7 @@ export default class ExpensesList extends React.Component{
             lang: this.props.screenProps.lang || this.props.screenProps,
             members: this.props.screenProps.info.members,
             curr:  this.props.screenProps.info.curr,
+
         }
 
         this.updateListing = this.updateListing.bind(this);
@@ -27,7 +29,58 @@ export default class ExpensesList extends React.Component{
                 e
             ]
         }));
+        
         this.props.screenProps.updateExpenses(e);
+        this.resetCatFilter = this.resetCatFilter.bind(this);
+        this.updateList = this.updateList.bind(this);
+        this.updateExpenses = this.updateExpenses.bind(this);
+    }
+
+    async componentWillMount() {
+        store.get("categories").then(
+            (cats) => {
+                this.setState({
+                    cats: cats,
+                })
+            })
+        store.get("expenses").then(
+            expenses => {
+
+                var ar1 = [];
+                var ar2 = [ar1];
+                //added the value[0] != null because the storage sometime retreive a empty arrays in place of null...
+                if (!this.props.screenProps.new && expenses != null && JSON.stringify(expenses)!=JSON.stringify(ar2)){
+                    var filteredExp = expenses.filter(e => e.trip_id == this.props.screenProps.info.id);
+
+                    this.setState({
+                        expenses: filteredExp,
+                        loaded: true,
+
+                    });
+                }
+                else
+                    this.setState({ loaded: true });
+            }
+        );
+    }
+
+    updateExpenses(exp){
+        this.setState({ expenses: exp });
+    }
+
+    updateList() {
+        store.get("expenses").then(
+            expenses => {
+                var filteredExp = expenses.filter(e => e.trip_id == this.props.screenProps.info.id);
+                if(this.state.cat != undefined && this.state.cat != null){
+
+                    var filteredExp = filteredExp.filter(e => e.cat == this.state.cat);
+                }
+                this.setState(prevState => ({
+                    expenses: filteredExp
+                }));
+        })
+
     }
 
     buildList(navigate) {
@@ -38,7 +91,7 @@ export default class ExpensesList extends React.Component{
                 <Text style={styles.empty_text}>{this.state.lang.expense.no_expenses}</Text>
             </View>
         }
-        
+
         return <ScrollView>{
             expenses.map((item) =>  {
                 return <TouchableHighlight
@@ -55,7 +108,7 @@ export default class ExpensesList extends React.Component{
                 >
                     <View style={styles.list_item} >
                         <View style={styles.list_item_info}>
-                            <Text style={styles.marg_bottom_10}>{item.receiver}</Text>
+                            <Text style={styles.marg_bottom_10}>{item.cost}</Text>
                             <Text>{formatDate(item.date)}</Text>
                         </View>
                         <View style={styles.arrow}>
@@ -69,8 +122,9 @@ export default class ExpensesList extends React.Component{
 
     buildButton(navigate){
         return <View style={styles.button}>
-            <Icon name='add-circle' size={64.0} onPress={() => { 
+            <Icon name='add-circle' size={64.0} onPress={() => {
                 this.props.screenProps.navigation.navigate('ExpensesItem', {
+
                     id: (this.state.expenses.length + 1),
                     new: true,
                     curr: this.state.curr,
@@ -81,11 +135,48 @@ export default class ExpensesList extends React.Component{
         </View>
     }
 
+    getComboBox(collection, stateItem){
+        var items = [];
+
+        if (!collection || collection == "" || collection == [] || collection == null)
+            return;
+
+        return <ComboBox
+                selectedValue={this.state[stateItem]}
+                onValueChange={(value) => {
+                    if (stateItem == "type")
+                        this.setState({type: value});
+                    else if (stateItem == "curr")
+                        this.setState({curr: value});
+                    else
+                        this.updateList();
+                        this.setState({cat: value});
+                }}
+            >
+            {collection.map(item => {
+                return <ComboBoxItem label={item.name} value={item.id} key={item.id}/>
+            })}
+        </ComboBox>
+    }
+
+    resetCatFilter(){
+        this.setState({
+            cat : null,
+        });
+        this.updateList();
+    }
+
     render(){
         const { navigate } = this.props.navigation;
 
         return (
             <View style={styles.wrapper}>
+                {/* category */}
+                <FormLabel>{this.state.lang.cat.title}</FormLabel>
+                <View style={styles.combobox}>
+                    {this.getComboBox(this.state.cats, "cat")}
+                </View>
+                <Button title={this.state.lang.misc.reset_filter} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this.resetCatFilter}/>
                 {this.buildList(navigate)}
                 {this.buildButton(navigate)}
             </View>
@@ -129,6 +220,17 @@ const styles = StyleSheet.create({
     empty_text:{
         fontSize: 18,
         textAlign: "center"
+    },
+
+    btnContainer: {
+        marginTop: 10,
+        marginBottom: 10,
+        marginLeft: 50,
+        marginRight: 50,
+    },
+
+    btnStyle: {
+        borderRadius: 5
     },
 
     empty:{

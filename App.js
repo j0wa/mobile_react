@@ -32,6 +32,7 @@ export default class App extends React.Component {
         dataFeed.langs();
 
         await Expo.Font.loadAsync({
+            'Material Icons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
             'MaterialIcons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
             'SimpleLineIcons': require('./node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf'),
             'FontAwesome': require('./node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf'),

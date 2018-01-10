@@ -25,6 +25,7 @@ export default dataFeed = {
             }
         });
     },
+    
 
     categories() {
         store.get("categories").then(cats => {
@@ -33,6 +34,7 @@ export default dataFeed = {
                     {id: 1, name: "Restaurant"},
                     {id: 2, name: "Transport"},
                     {id: 3, name: "Groceries"},
+                    {id: 4, name: "Refund"},
                 ]);
             }
         });

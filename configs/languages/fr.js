@@ -11,6 +11,8 @@ export default {
         new_member_title: "Add new member",
         remove_title: "Remove member",
         remove_text: "Are you sure you want to remove this member?",
+        paidBy: "Payé par",
+        paidFor: "Payé pour",
     },
 
     expense: {
@@ -57,6 +59,8 @@ export default {
         info_title: "General Information",
         remove_yes: "Yes",
         remove_no: "No",
+        split_even: "Split cost evenly",
+        reset_filter: "reset filter",
     },
 
     err: {
@@ -72,5 +76,11 @@ export default {
 
     summaries: {
         title: "Summaries",
+        totalCostOfTrip: "Total of all Expences",
+        name: "nom",
+        amountDue: "du",
+        amountPayed: "payé",
+        total: "total",
+        currChoices: "Montré les valeurs en",
     }
 }
