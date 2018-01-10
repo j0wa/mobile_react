@@ -22,11 +22,27 @@ export default class Trips extends React.Component {
     }
 
     updateExpenses(exp){
-        this.setState({ expenses: exp });
+        updateStorage("trips", {
+            id: this.state.info.id,
+            location: this.state.info.location,
+            date: this.state.info.date,
+            curr: this.state.info.curr,
+            members: this.state.info.members,
+            desc: this.state.info.desc,
+            expenses: [...this.state.expenses, exp]
+        }, false, () => {});
+        
+        this.setState(prev => ({ 
+            expenses: [
+                ...prev.expenses, 
+                exp
+            ] 
+        }));
+        console.log("trips pos-update", this.state.expenses);
     }
 
     // faz o async aqui e depois manda os items por params para os ecrãs
-    async componentWillMount(){
+    componentWillMount(){
         store.get("trips").then(trips => {
             var neww = this.props.navigation.state.params.new;
             var id = this.props.navigation.state.params.id;
@@ -45,8 +61,8 @@ export default class Trips extends React.Component {
 
             this.setState({
                 new: neww,
-                expenses: trip.expenses || {},
-                summaries: trip.summaries || {},
+                expenses: trip.expenses || [],
+                summaries: trip.summaries || [],
                 info: Object.keys(trip).length != 0 ? {
                     location: trip.location,
                     date: trip.date,
@@ -63,11 +79,14 @@ export default class Trips extends React.Component {
     }
 
     render(){
+        console.log("trip load", this.state.expenses);
+
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
             lang: this.props.screenProps,
             new: this.props.navigation.state.params.new,
             info: this.state.info,
+            expenses: this.state.expenses,
             summaries: this.state.summaries,
             updateTrips: this.props.navigation.state.params.updateTrips,
             updateExpenses: this.updateExpenses,

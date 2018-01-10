@@ -22,7 +22,6 @@ export default class App extends React.Component {
     async componentDidMount() {
         /* uncomment when storage reset needed */
         // resetStorage.trips();
-        // resetStorage.expenses();
         // resetStorage.categories();
         // resetStorage.settings();
         // resetStorage.langs();

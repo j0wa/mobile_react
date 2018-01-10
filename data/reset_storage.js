@@ -6,10 +6,6 @@ export default resetStorage = {
         store.delete('trips');
     },
 
-    expenses () {
-        store.delete('expenses');
-    },
-
     categories() {
         store.delete("cats");
     },

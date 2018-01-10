@@ -8,45 +8,26 @@ import formatDate from '../utils/date_format';
 export default class ExpensesList extends React.Component{
     constructor(props){
         super(props);
-
+        
         this.state = {
-            expenses: [],
-            loaded: false,
+            expenses: this.props.screenProps.expenses,
             lang: this.props.screenProps.lang || this.props.screenProps,
-            // this will tell us if we're showing this screen on the trip menu
-            // if we are, we'll have to get all expenses associated with the trip with the this.state.trip (which is an ID)
-            trip_id: this.props.screenProps.info.id,
             members: this.props.screenProps.info.members,
             curr:  this.props.screenProps.info.curr,
         }
 
-        this.updateList = this.updateList.bind(this);
+        this.updateListing = this.updateListing.bind(this);
+        
     }
 
-    async componentWillMount() {
-        store.get("expenses").then(
-            expenses => {
-                if (!this.props.screenProps.new && expenses != null){
-                    expenses.filter(e => e.trip_id == this.props.trip_id);
-
-                    this.setState({
-                        expenses: expenses,
-                        loaded: true
-                    });
-                }
-                else
-                    this.setState({ loaded: true });                    
-            }
-        );
-    }
-
-    updateList(e) {
+    updateListing(e) {
         this.setState(prevState => ({
             expenses: [
                 ...prevState.expenses,
                 e
             ]
         }));
+        this.props.screenProps.updateExpenses(e);
     }
 
     buildList(navigate) {
@@ -60,16 +41,15 @@ export default class ExpensesList extends React.Component{
         
         return <ScrollView>{
             expenses.map((item) =>  {
-                return <TouchableHighlight 
+                return <TouchableHighlight
                     key={item.id}
                     onPress={() => 
                         this.props.screenProps.navigation.navigate('ExpensesItem', {
-                            id: item.id, 
+                            expense: item, 
                             new: false,
-                            updateExpenses: this.updateList,
-                            trip_id: this.state.trip_id,
                             members: this.state.members,
-                            curr: this.state.curr
+                            curr: this.state.curr,
+                            updateExpenses: this.updateListing
                         })
                     }
                 >
@@ -93,10 +73,9 @@ export default class ExpensesList extends React.Component{
                 this.props.screenProps.navigation.navigate('ExpensesItem', {
                     id: (this.state.expenses.length + 1),
                     new: true,
-                    updateExpenses: this.updateList,
-                    trip_id: this.state.trip_id,
                     curr: this.state.curr,
                     members: this.state.members,
+                    updateExpenses: this.updateListing
                 })
             }}/>
         </View>

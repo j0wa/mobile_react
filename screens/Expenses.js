@@ -18,11 +18,11 @@ export default class Expenses extends React.Component {
         }
 
         this.updateItems = this.updateItems.bind(this);
-        this.updateGallary = this.updateGallary.bind(this);
+        this.updateGallery = this.updateGallery.bind(this);
     }
 
-    updateGallary(gallary){
-        this.setState({ gallary: gallary });
+    updateGallery(gallery){
+        this.setState({ gallery: gallery });
     }
 
     updateItems(items){
@@ -32,56 +32,49 @@ export default class Expenses extends React.Component {
     }
 
     // faz o async aqui e depois manda os items por params para os ecrãs
-    async componentWillMount(){
-        store.get("expenses").then(
-            expenses => {
-                var neww = this.props.navigation.state.params.new;
-                var id = this.props.navigation.state.params.id;
-                var expense = {};
-                
-                if (!neww)
-                {
-                    expenses.find((e) => {
-                        if (e.id == id){
-                            expense = e;
-                            return;
-                        }
-                    });
-                }
+    componentWillMount(){
+        if (!this.props.navigation.state.params.new){
+            var expense = this.props.navigation.state.params.expense;
 
-                this.setState({
-                    new: neww,
-                    gallery: expense.gallery || [],
-                    items: expense.items || [],
-                    info: Object.keys(expense).length != 0 ? {
-                        receiver: expense.receiver,
-                        type: expense.type,
-                        curr: expense.curr,
-                        cat: expense.cat,
-                        date: new Date(expense.date),
-                        cost: expense.cost,
-                        notes: expense.notes,
-                        id: id
-                    } : {
-                        id: id,
-                        curr: this.props.navigation.state.params.curr
-                    },
-                    loaded: true,
-                });
-            }
-        )
+            this.setState({
+                new: false,
+                gallery: expense.gallery,
+                items: expense.items,
+                info: {
+                    receiver: expense.receiver,
+                    type: expense.type,
+                    curr: expense.curr,
+                    cat: expense.cat,
+                    date: new Date(expense.date),
+                    cost: expense.cost,
+                    notes: expense.notes,
+                    id: expense.id
+                },
+                loaded: true,
+            });
+        } 
+        else {
+            this.setState({
+                info: {
+                    id: this.props.navigation.state.params.id,
+                    curr: this.props.navigation.state.params.curr
+                },
+                loaded: true,
+                new: true         
+            })
+        }
     }
 
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
             lang: this.props.screenProps,
-            new: this.props.navigation.state.params.new,
+            new: this.state.new,
             info: this.state.info,
             items: this.state.items,
-            gallary: this.state.gallary,
-            updateExpenses: this.props.screenProps.updateExpenses,
-            updateGallary: this.updateGallary,
+            gallery: this.state.gallery,
+            updateExpenses: this.props.navigation.state.params.updateExpenses,
+            updateGallery: this.updateGallery,
             updateItems: this.updateItems,
             members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true} }), 
         }} /> : <Loader/>;
@@ -97,14 +90,13 @@ class GeneralScreen extends React.Component {
             new: this.props.screenProps.new,
             exp: this.props.screenProps.info,
             items: this.props.screenProps.items,
-            gallary: this.props.screenProps.gallary,
+            gallery: this.props.screenProps.gallery,
             lang: this.props.screenProps.lang,
             id: this.props.screenProps.info.id,
-            trip_id: this.props.screenProps.info.trip_id,
             members: this.props.screenProps.members,
             errReceiver: false,
             errCost: false,
-            cost: ""
+            cost: this.props.screenProps.cost
         }
 
         this._submit = this._submit.bind(this)
@@ -177,13 +169,12 @@ class GeneralScreen extends React.Component {
                 cost: this.state.cost,
                 notes: this.state.notes,
                 items: this.state.items,
-                gallary: this.state.gallary,
-                trip_id: this.state.trip_id,
+                gallery: this.state.gallery
             };
 
             updateStorage("expenses", e, this.state.new, () => {
                 this.props.screenProps.updateExpenses(e);
-                this.props.screenProps.navigation.goBack()
+                this.props.screenProps.navigation.goBack();
             });
         }
     }
@@ -568,14 +559,14 @@ class GalaryScreen extends React.Component {
 
         this.state = {
             lang: this.props.screenProps.lang,
-            gallary: this.props.screenProps.gallary,
+            gallery: this.props.screenProps.gallery,
             showPhotoGallery: false,
             cameraPhotos: ""
         }
     }
 
     buildGallery(){
-        if  (this.state.gallary  == "" || this.state.gallary == null || this.state.gallary == {})
+        if  (this.state.gallery  == "" || this.state.gallary == null || this.state.gallary == {})
         {
             return (
                 <View style={styles.empty}>
@@ -606,7 +597,7 @@ class GalaryScreen extends React.Component {
         </View>
     }
 
-    selectPic(pic){
+    selectPic(pie){
         var len = this.state.gallary.lenght + 1;
 
         this.setState(prevState => ({
