@@ -96,7 +96,7 @@ export default class ExpensesList extends React.Component{
                 >
                     <View style={styles.list_item} >
                         <View style={styles.list_item_info}>
-                            <Text style={styles.marg_bottom_10}>{item.receiver}</Text>
+                            <Text style={styles.marg_bottom_10}>{item.cost}</Text>
                             <Text>{formatDate(item.date)}</Text>
                         </View>
                         <View style={styles.arrow}>

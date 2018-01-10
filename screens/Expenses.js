@@ -266,7 +266,7 @@ class GeneralScreen extends React.Component {
             updateStorage("expenses", e, this.state.new, () => {
                 //this.props.navigation.state.params.updateExpenses(e);
                 this.props.screenProps.navigation.goBack();
-                DeviceEventEmitter.emit('goBackFromExpense', e );
+                //DeviceEventEmitter.emit('goBackFromExpense', e );
 
             });
         }
