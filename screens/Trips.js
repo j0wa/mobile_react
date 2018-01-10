@@ -338,6 +338,7 @@ class SummariesScreen extends React.Component {
             id: this.props.screenProps.info.id,
         }
 
+        this.changeCurr = this.changeCurr.bind(this);
     }
     async componentDidMount(){
         store.get("expenses").then(
@@ -365,42 +366,6 @@ class SummariesScreen extends React.Component {
             }
         );
     }
-    totalExpensesOfTrip(){
-        if(this.state.new || this.state.expenses == null){
-            return
-        }
-        var total = 0;
-        this.state.expenses.map((item) => {
-            //console.log("i am a cost");
-            console.log(item.cost);
-            total += parseInt(item.cost);
-        })
-        //console.log("i am the total");
-        //console.log(total);
-        return( <View>
-                    <FormLabel>{this.state.lang.summaries.totalCostOfTrip}</FormLabel>
-                    <Text>{total}</Text>
-                </View>)
-    }
-    buildSplitData(){
-        if(this.state.trip.members == undefined){
-            <View>
-                <Text>{this.state.lang.trip.members}</Text>
-            </View>
-        }else{return (
-            <View style={styles.members_wrapper}>
-                <FormLabel>{this.state.lang.trip.members}</FormLabel>
-                <ScrollView>
-                    {this.state.trip.members !== undefined && this.state.trip.members.map((item, index) => {
-                        return <View key={index} style={styles.list_item}>
-                            <Text key={index} style={styles.list_item_text}>{item} </Text>
-                        </View>
-                    })}
-                </ScrollView>
-            </View>
-        );}
-    }
-
 
     buildSheet(){
         var arraySummaries = [];
@@ -484,22 +449,57 @@ class SummariesScreen extends React.Component {
         </ComboBox>
     }
 
+    totalExpensesOfTrip(){
+        if(this.state.new || this.state.expenses == null){
+            return
+        }
+        var total = 0;
+        this.state.expenses.map((item) => {
+            console.log("i am a cost");
+            console.log(item.cost);
+            valChanged = this.changeCurr(this.state.curr,item.curr,item.cost)
+            console.log("i am the changed cost");
+            console.log(valChanged);
+            total += parseInt(valChanged);
+        })
+        //console.log("i am the total");
+        //console.log(total);
+        return( <View>
+                    <FormLabel>{this.state.lang.summaries.totalCostOfTrip}</FormLabel>
+                    <Text>{total}</Text>
+                </View>)
+    }
+
     changeCurr(changeTo,changeFrom,value){
+        console.log("value in changeCurr");
+        console.log(changeTo);
+        console.log(changeFrom);
+        console.log(value);
+        if(changeTo == changeFrom){
+            return value;
+        }
+        if(changeTo == undefined && changeFrom == 1){
+            return value;
+        }
         var dollarValue
         //change to dollar
         switch (changeFrom) {
             case 2:
+                console.log("from dollar");
                 dollarValue = value;
                 break;
             case 3:
-                dollarValue = value*0,783;
+                console.log("from aus");
+                dollarValue = value*0.783;
                 break;
             case 4:
-                dollarValue = value*1,352;
+                console.log("from gpd");
+                dollarValue = value*1.352;
                 break;
             //if nothing it's not initialased but showing 1, so 1 is default
             default:
-                dollarValue = value*1,194;
+                console.log("from eu");
+                dollarValue = value*1.194;
         }
 
         switch (changeTo) {
@@ -507,14 +507,14 @@ class SummariesScreen extends React.Component {
                 return dollarValue;
                 break;
             case 3:
-                return dollarValue*1,277;
+                return dollarValue*1.277;
                 break;
             case 4:
-                return dollarValue*0,741;
+                return dollarValue*0.741;
                 break;
             //if nothing it's not initialased but showing 1, so 1 is default
             default:
-                return dollarValue*0,838;
+                return dollarValue*0.838;
         }
 
     }
@@ -720,3 +720,24 @@ const Tab = TabNavigator({
         }
     }
 );
+
+/*
+buildSplitData(){
+    if(this.state.trip.members == undefined){
+        <View>
+            <Text>{this.state.lang.trip.members}</Text>
+        </View>
+    }else{return (
+        <View style={styles.members_wrapper}>
+            <FormLabel>{this.state.lang.trip.members}</FormLabel>
+            <ScrollView>
+                {this.state.trip.members !== undefined && this.state.trip.members.map((item, index) => {
+                    return <View key={index} style={styles.list_item}>
+                        <Text key={index} style={styles.list_item_text}>{item} </Text>
+                    </View>
+                })}
+            </ScrollView>
+        </View>
+    );}
+}
+*/
