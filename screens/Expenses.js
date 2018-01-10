@@ -37,10 +37,13 @@ export default class Expenses extends React.Component {
         store.get("expenses").then(
             expenses => {
                 var neww = this.props.navigation.state.params.new;
+                console.log("value of neww");
+                console.log(neww);
                 var id = this.props.navigation.state.params.id;
                 var expense = {};
                 if (!neww)
                 {
+                    console.log("coucou");
                     expenses.find((e) => {
                         if (e.id == id){
                             expense = e;
@@ -106,16 +109,20 @@ export default class Expenses extends React.Component {
                         tmp = null;
                         i++;
                     });
+                }else{
+                    var membersPaidByTMP = [];
+                    var membersPaidForTMP = [];
+                    var i = 0;
+                    //console.log("membersPaidByTMP before");
+                    //console.log(membersPaidByTMP);
+                    this.props.navigation.state.params.members.forEach(function(element){
+                        membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
+                        membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
+                        i++
+                    });
+                    //console.log("membersPaidByTMP after");
+                    //console.log(membersPaidByTMP);
                 }
-
-                var membersPaidByTMP = [];
-                var membersPaidForTMP = [];
-                var i = 0;
-                this.props.navigation.state.params.members.forEach(function(element){
-                    membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
-                    membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
-                    i++
-                });
 
                 this.setState({
                     new: neww,
@@ -182,6 +189,9 @@ class GeneralScreen extends React.Component {
             cost: ""
         }
 
+        console.log("lot");
+        console.log(this.state.membersPaidBy);
+
         /*
         console.log("test members");
         console.log(this.props.screenProps.members);
@@ -222,7 +232,7 @@ class GeneralScreen extends React.Component {
                 this.setState({
                     cats: cats,
                     date: exp.date || new Date(),
-                    curr: exp.curr || this.props.screenProps.curr,
+                    curr: exp.curr || 1,
                     type: exp.type || 1,
                     cat: exp.cat || 1,
                     receiver: exp.receiver || "",
@@ -263,6 +273,8 @@ class GeneralScreen extends React.Component {
                 gallary: this.state.gallary,
                 trip_id: this.state.trip_id,
             };
+
+            console.log(e);
 
             updateStorage("expenses", e, this.state.new, () => {
                 //this.props.navigation.state.params.updateExpenses(e);
@@ -499,6 +511,7 @@ class GeneralScreen extends React.Component {
     }
 
     buildPaidByList() {
+        console.log(this.state.membersPaidBy);
         return (
             <View style={styles.members_wrapper}>
                 <FormLabel>{this.state.lang.trip.paidBy}</FormLabel>
