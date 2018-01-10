@@ -236,12 +236,7 @@ class GeneralScreen extends React.Component {
     _submit(){
         var err = -1;
 
-        if (this.state.receiver == "") {
-            this.setState({ errReceiver: true });
-            err = 1;
-        } else {
-            this.setState({ errReceiver: false });
-        }
+
 
         if (this.state.cost == "") {
             this.setState({ errCost: true });
@@ -554,17 +549,6 @@ class GeneralScreen extends React.Component {
         return (
             <ScrollView style={{paddingBottom: 60}}>
                 <View>
-                    {/* receiver */}
-                    <FormLabel>{this.state.lang.expense.receiver}<Required /></FormLabel>
-                    <FormInput
-                        autoCapitalize="sentences"
-                        value={this.state.receiver}
-                        editable={this.state.new}
-                        style={styles.input}
-                        returnKeyType="next"
-                        onChangeText={(receiver) => this.setState({receiver: receiver})}
-                    />
-                    {this.state.errReceiver && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     {/* category */}
                     <FormLabel>{this.state.lang.cat.title}</FormLabel>

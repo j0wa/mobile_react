@@ -441,6 +441,7 @@ class SummariesScreen extends React.Component {
                 }
             })
 
+
             element.membersPaidFor.map((elementPaidFor) => {
                 if(elementPaidFor.selected){
                     arraySummaries.map((mem) => {
