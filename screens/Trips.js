@@ -65,7 +65,7 @@ export default class Trips extends React.Component {
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
-            lang: this.props.screenProps.lang,
+            lang: this.props.screenProps,
             new: this.props.navigation.state.params.new,
             info: this.state.info,
             summaries: this.state.summaries,
@@ -101,23 +101,25 @@ class TripScreen extends React.Component {
     }
 
     async componentWillMount(){
-        store.get("currencies").then(
-            (currs) => {
-                var trip = this.state.trip;
-
-                this.setState({
-                    currs: currs,
-                    date: trip.date || new Date(),
-                    members: trip.members || [],
-                    curr: trip.curr || 1,
-                    loaded: true,
-                    location: trip.location || "",
-                    date: trip.date || new Date(),
-                    id: this.props.screenProps.info.id,
-                    desc: trip.desc || "",
-                });
-            }
-        );
+        store.get("settings").then((item) => {
+            store.get("currencies").then(
+                (currs) => {
+                    var trip = this.state.trip;
+    
+                    this.setState({
+                        currs: currs,
+                        date: trip.date || new Date(),
+                        members: trip.members || [],
+                        curr: trip.curr || item[0].curr,
+                        loaded: true,
+                        location: trip.location || "",
+                        date: trip.date || new Date(),
+                        id: this.props.screenProps.info.id,
+                        desc: trip.desc || "",
+                    });
+                }
+            );
+        })
     }
 
     _submit() {
@@ -136,14 +138,7 @@ class TripScreen extends React.Component {
         } else {
             this.setState({ errMembers: false });
         }
-
-        if (this.state.desc == "") {
-            this.setState({ errDesc: true });
-            err = 1;
-        } else {
-            this.setState({ errDesc: false });
-        }
-
+        
         if (err === -1){
             var t = {
                 id: this.state.id,
@@ -217,7 +212,9 @@ class TripScreen extends React.Component {
         return (
             <View style={styles.members_wrapper}>
                 <FormLabel>{this.state.lang.trip.members} <Required /></FormLabel>
-                <Button title={this.state.lang.trip.new_member} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={() => { this.setModalVisible(true) }} />
+                <TouchableNativeFeedback onPress={() => { this.setModalVisible(true) }} >
+                    <FormLabel containerStyle={styles.new_member}>{this.state.lang.trip.new_member}</FormLabel>
+                </TouchableNativeFeedback>
                 <ScrollView style={styles.members_list_wrapper}>
                     {this.state.members != "" && this.state.members.map((item, index) => {
                         return <View key={index} style={styles.list_item}>

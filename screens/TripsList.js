@@ -13,7 +13,7 @@ export default class TripsList extends React.Component{
         this.state = {
             trips: [],
             loaded: false,
-            lang: this.props.screenProps.lang
+            lang: this.props.screenProps
         }
 
         this.updateTrips = this.updateTrips.bind(this);

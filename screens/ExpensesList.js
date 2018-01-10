@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableNativeFeedback, TouchableHighlight } from "react-native";
 import { Icon } from 'react-native-elements';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
@@ -61,7 +61,7 @@ export default class ExpensesList extends React.Component{
         return <ScrollView>{
             expenses.map((item) =>  {
                 return <TouchableHighlight 
-                    key={item.id} 
+                    key={item.id}
                     onPress={() => 
                         this.props.screenProps.navigation.navigate('ExpensesItem', {
                             id: item.id, 

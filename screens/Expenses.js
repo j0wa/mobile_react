@@ -63,7 +63,8 @@ export default class Expenses extends React.Component {
                         notes: expense.notes,
                         id: id
                     } : {
-                        id: id
+                        id: id,
+                        curr: this.props.navigation.state.params.curr
                     },
                     loaded: true,
                 });
@@ -71,11 +72,10 @@ export default class Expenses extends React.Component {
         )
     }
 
-    
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
-            lang: this.props.screenProps.lang,
+            lang: this.props.screenProps,
             new: this.props.navigation.state.params.new,
             info: this.state.info,
             items: this.state.items,
@@ -193,8 +193,8 @@ class GeneralScreen extends React.Component {
         
         if (type == 1) {
             var members = this.state.members;
-            var len = 0;
             var cost = this.state.cost;
+            var len = 0;
 
             members.map(m => {
                 if (m.selected)
@@ -204,12 +204,31 @@ class GeneralScreen extends React.Component {
             var value = cost / len;
             
             members.map((m) => {
-                if (m.selected)
-                    m.cost = value;
+                m.cost = (m.selected) ? value : 0;
             });
 
             this.setState({
                 members: members
+            })
+        }
+        else {
+            var members = this.state.members;
+            var cost = this.state.cost;
+            var total = 0;
+
+            members.map(m => {
+                total += total.cost;
+                if (total > this.state.cost){
+                    m.cost = "0";
+
+                    Alert.alert(
+                        this.state.lang.err.title,
+                        this.state.lang.expense.overbudget
+                        [
+                            {text: this.state.lang.setting.updated }
+                        ],
+                    );
+                }
             })
         }
     }
@@ -276,6 +295,7 @@ class GeneralScreen extends React.Component {
             }
 
             this.setState({ members: tmp });
+            this.updateMemberCost();
         });
     }
 
@@ -290,16 +310,16 @@ class GeneralScreen extends React.Component {
                             <CheckBox 
                                 containerStyle={styles.members_list_ckbox_container} 
                                 checked={item.selected} 
-                                onPress={() => { this.memberSelection(item.id) }} 
-                                title={item.name} 
+                                onPress={() => { this.memberSelection(item.id) }}
                                 textStyle={styles.members_list_ckbox_text}
+                                title={item.name}
                             />
                             <FormInput 
                                 containerStyle={styles.members_list_text_container} 
                                 keyboardType="numeric"
                                 style={styles.members_list_text} 
                                 underlineColorAndroid="transparent"
-                                editable={this.state.new && this.state.type != 1}
+                                editable={this.state.new && this.state.type != 1 && this.state.cost != ""}
                                 onChangeText={(val) => this.updateMemberCost(item.id, val)}
                                 value={String(item.cost)}
                             />
@@ -589,8 +609,6 @@ class GalaryScreen extends React.Component {
     selectPic(pic){
         var len = this.state.gallary.lenght + 1;
 
-        console.log(pic);
-
         this.setState(prevState => ({
             gallary: [...prevState.gallary, {id: len, url: "something"}]
         }));
@@ -763,7 +781,7 @@ const styles = StyleSheet.create({
     members_wrapper: {
         marginBottom: 20
     },
-
+    
     members_list_wrapper: {
         marginTop: 20,
         flex: 1
@@ -782,6 +800,7 @@ const styles = StyleSheet.create({
 
     members_list_ckbox_container: {
         backgroundColor: "transparent",
+        flex: 1
     },
             
     members_list_ckbox_text: {
@@ -793,13 +812,14 @@ const styles = StyleSheet.create({
         right: 10,
         bottom: 6,
         position: "absolute",
-        flex: 1
+        width: 100
     },
     
     members_list_text: {
         alignSelf: "center", 
-        textAlign:"center", 
-        fontSize: 20
+        textAlign: "right", 
+        fontSize: 20,
+        width: 100
     },
 
     btnContainer: {

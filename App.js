@@ -17,8 +17,6 @@ export default class App extends React.Component {
             langLoaded: false,
             lang: null
         }
-
-        this.updateLang = this.updateLang.bind(this);
     }
 
     async componentDidMount() {
@@ -42,7 +40,17 @@ export default class App extends React.Component {
         });
 
         await store.get("settings").then(settings => {
-            this.updateLang(settings[0].lang, true);
+            lang.find((item) => {
+                if (item.id == settings[0].lang) {
+                    this.state.lang = item.content;
+                    
+                    this.setState({
+                        langLoaded: true,
+                    });
+                    
+                    return true;
+                }
+            });
         })
 
         await store.get("expenses").then(
@@ -54,27 +62,9 @@ export default class App extends React.Component {
         )
     }
 
-    updateLang(id){
-        this.setState({
-            langLoaded: false
-        });
-
-        lang.find((item) => {
-            if (item.id == id) {
-                this.state.lang = item.content;
-                
-                this.setState({
-                    langLoaded: true,
-                });
-                
-                return true;
-            }
-        });
-    }
-
     render(){
         StatusBar.setHidden(true);
 
-        return (this.state.langLoaded) ? <Navigation screenProps={{lang: this.state.lang, updateLang: this.updateLang}} /> : <Loader />;
+        return (this.state.langLoaded) ? <Navigation screenProps={this.state.lang} /> : <Loader />;
     }
 };

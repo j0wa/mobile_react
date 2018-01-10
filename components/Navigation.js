@@ -17,8 +17,7 @@ export default class Navigation extends React.Component{
         super(props);
         
         this.state = {
-            lang: this.props.screenProps.lang,
-            update: this.props.screenProps.updateLang
+            lang: this.props.screenProps
         }
     }
 
@@ -105,7 +104,7 @@ export default class Navigation extends React.Component{
         });
 
         return <MenuProvider>
-            <Stack screenProps={{lang: this.state.lang, updateLang: this.state.update}} />
+            <Stack screenProps={this.state.lang} />
         </MenuProvider>
     }
 }

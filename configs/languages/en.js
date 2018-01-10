@@ -33,6 +33,7 @@ export default {
         cost: "Cost",
         remove_title: "Remove item",
         remove_text: "Are you sure you want to remove this item?",
+        overbudget: "Total member split higher than total cost!"
     },
 
     home: {
@@ -60,7 +61,8 @@ export default {
     },
 
     err: {
-        required: "This field is required"
+        required: "This field is required",
+        title: "Error"
     },
 
     setting: {
@@ -68,7 +70,8 @@ export default {
         lang_select: "Language",
         delete_everything: "Delete all data",
         updated_title: "Update successful",
-        updated_text: "Restart the app for the new changes to take place",
+        updated_text: "Settings changed successfully",
+        updated_text_restart: "Restart the app for the new changes to take place",
         updated: "Ok",
         curr_select: "Currency"
     },

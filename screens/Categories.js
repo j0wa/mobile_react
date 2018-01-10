@@ -15,7 +15,7 @@ export default class Categories extends React.Component{
             errName: false,
             name: "",
             loaded: false,
-            lang: this.props.screenProps.lang,
+            lang: this.props.screenProps,
             cats: [],
         }
     }
