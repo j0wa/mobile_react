@@ -68,7 +68,7 @@ export default {
         lang_select: "Language",
         delete_everything: "Delete all data",
         updated_title: "Update successful",
-        updated_text: "Restart the app for the new changes to take place",
+        updated_text: "Your settings were updated",
         updated: "Ok",
         curr_select: "Currency"
     },

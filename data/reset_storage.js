@@ -12,14 +12,13 @@ export default resetStorage = {
 
     categories() {
         store.delete("cats");
-        store.get("cats").then(cats => {
-            if (cats == null) {
-                store.save('cats', [
-                    {id: 1, name: "Restaurant"},
-                    {id: 2, name: "Transport"},
-                    {id: 3, name: "Groceries"},
-                ]);
-            }
-        });
+    },
+
+    settings() {
+        store.delete("settings");
+    },
+
+    langs() {
+        store.delete("langs");
     }
 }

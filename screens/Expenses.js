@@ -75,7 +75,7 @@ export default class Expenses extends React.Component {
     render(){
         return this.state.loaded ? <Tab screenProps={{
             navigation: this.props.navigation,
-            lang: this.props.screenProps,
+            lang: this.props.screenProps.lang,
             new: this.props.navigation.state.params.new,
             info: this.state.info,
             items: this.state.items,

@@ -17,16 +17,18 @@ export default class Navigation extends React.Component{
         super(props);
         
         this.state = {
-            lang: this.props.screenProps
+            lang: this.props.screenProps.lang,
+            update: this.props.screenProps.updateLang
         }
     }
 
     render(){
         var menu_option = {
             optionWrapper: {
-                margin: 15
+                padding: 15
             }
         }
+
         var Stack = StackNavigator({
             Trips: {
                 screen: TripsList,
@@ -103,7 +105,7 @@ export default class Navigation extends React.Component{
         });
 
         return <MenuProvider>
-            <Stack screenProps={this.state.lang}/>
+            <Stack screenProps={{lang: this.state.lang, updateLang: this.state.update}} />
         </MenuProvider>
     }
 }

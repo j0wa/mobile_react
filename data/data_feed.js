@@ -36,5 +36,28 @@ export default dataFeed = {
                 ]);
             }
         });
+    },
+
+    settings() {
+        store.get("settings").then(settings => {
+            if (settings == null) {
+                store.save('settings', [{
+                    lang: 1,
+                    curr: 1,
+                }]);
+            }
+        });
+    },
+
+    langs() {
+        store.get("langs").then(settings => {
+            if (settings == null) {
+                store.save('langs', [
+                    {id: 1, name: "English" },
+                    {id: 2, name: "Français" },
+                    {id: 3, name: "Português" },
+                ]);
+            }
+        });
     }
 }

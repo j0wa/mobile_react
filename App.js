@@ -15,8 +15,10 @@ export default class App extends React.Component {
         this.state = {
             fontLoaded: false,
             langLoaded: false,
-            lang: null,
+            lang: null
         }
+
+        this.updateLang = this.updateLang.bind(this);
     }
 
     async componentDidMount() {
@@ -24,9 +26,13 @@ export default class App extends React.Component {
         // resetStorage.trips();
         // resetStorage.expenses();
         // resetStorage.categories();
+        // resetStorage.settings();
+        // resetStorage.langs();
         dataFeed.currencies();
         dataFeed.spitType();
         dataFeed.categories();
+        dataFeed.settings();
+        dataFeed.langs();
 
         await Expo.Font.loadAsync({
             'MaterialIcons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
@@ -35,38 +41,40 @@ export default class App extends React.Component {
             'Ionicons': require('./node_modules/react-native-vector-icons/Fonts/Ionicons.ttf'),
         });
 
-        var infoLang
-        await store.get("pref_lang").then(langObj => {
-            if (langObj != null) {
-                lang.find((item) => {
-                    if (item.id == langObj.langId) {
-                        infoLang = item.content;
-                        return;
-                    }
-                })
-            } else {
-                infoLang = lang[0]["content"]
-            }
+        await store.get("settings").then(settings => {
+            this.updateLang(settings[0].lang, true);
         })
 
         await store.get("expenses").then(
             expenses => {
                 if(expenses == null){
-                    store.push("expenses",[]);
+                    store.push("expenses", []);
                 }
             }
         )
+    }
 
+    updateLang(id){
         this.setState({
-            fontLoaded: true,
-            langLoaded: true,
-            lang: infoLang,
+            langLoaded: false
+        });
+
+        lang.find((item) => {
+            if (item.id == id) {
+                this.state.lang = item.content;
+                
+                this.setState({
+                    langLoaded: true,
+                });
+                
+                return true;
+            }
         });
     }
 
     render(){
         StatusBar.setHidden(true);
 
-        return (this.state.fontLoaded && this.state.langLoaded) ? <Navigation screenProps={this.state.lang} /> : <Loader />;
+        return (this.state.langLoaded) ? <Navigation screenProps={{lang: this.state.lang, updateLang: this.updateLang}} /> : <Loader />;
     }
 };

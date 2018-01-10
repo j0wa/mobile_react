@@ -5,7 +5,10 @@ export default function updateStorage(collection, item, creating, callback) {
     var tmp = [];
 
     store.get(collection).then((values) => {
-        if (values != null){
+        if (values != null && values != undefined){
+            if (values.length == undefined)
+                values = Object.keys(values);
+
             values.map(v => {
                 if (!creating && v.id == item.id) {
                     v = item;
