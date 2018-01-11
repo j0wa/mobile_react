@@ -507,16 +507,11 @@ class SummariesScreen extends React.Component {
         }
         //building the base array
         this.state.trip.members.forEach(function(member){
-<<<<<<< HEAD
             arraySummaries.push({id : i, name : member.name , amountPaid : 0, amountDue : 0, total : 0});
-=======
-            arraySummaries.push({id : i, name : member , amountPaid : 0, amountDue : 0, total : 0});
->>>>>>> b253074add2c47b20051a5f906b5e421c58d383e
             i++;
         });
 
         this.state.expenses.map((element) => {
-<<<<<<< HEAD
             if (element.summaries.membersPaidBy){
                 element.summaries.membersPaidBy.map((elementPaidBy) => {
                     if(elementPaidBy.selected){
@@ -546,41 +541,6 @@ class SummariesScreen extends React.Component {
 
             arraySummaries.forEach(function(mem){
                 mem.total = parseInt(mem.amountPaid) - parseInt(mem.amountDue)
-=======
-            element.summaries.membersPaidBy.map((elementPaidBy) => {
-                if(elementPaidBy.selected){
-                    arraySummaries.map((mem) => {
-                        if(elementPaidBy.name == mem.name){
-                            mem.amountPaid += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidBy.cost));
-                            return;
-                        }
-                    })
-                }
-            })
-
-
-            element.summaries.membersPaidFor.map((elementPaidFor) => {
-                if(elementPaidFor.selected){
-                    arraySummaries.map((mem) => {
-                        if(elementPaidFor.name == mem.name){
-
-                            mem.amountDue += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidFor.cost));
-                            return;
-                        }
-                    })
-                }
-            })
-
-            arraySummaries.forEach(function(mem){
-                console.log("parseInt(mem.amountPaid)");
-                console.log(parseInt(mem.amountPaid));
-                console.log("parseInt(mem.amountDue)");
-                console.log(parseInt(mem.amountDue));
-
-                mem.total = parseInt(mem.amountPaid) - parseInt(mem.amountDue)
-                console.log("mem.total");
-                console.log(mem.total);
->>>>>>> b253074add2c47b20051a5f906b5e421c58d383e
             });
 
         })
@@ -666,7 +626,6 @@ class SummariesScreen extends React.Component {
                     break;
             }
         })
-<<<<<<< HEAD
         
         return( 
             <View style={{flex: 1, marginLeft: 30, marginRight: 30}}>
@@ -688,20 +647,6 @@ class SummariesScreen extends React.Component {
                 </View>
             </View>
         )
-=======
-        //console.log("i am the total");
-        //console.log(total);
-        return( <View>
-                    <FormLabel>{this.state.lang.summaries.totalRest}</FormLabel>
-                    <Text>{totalRest}</Text>
-                    <FormLabel>{this.state.lang.summaries.totalTrans}</FormLabel>
-                    <Text>{totalTrans}</Text>
-                    <FormLabel>{this.state.lang.summaries.totalGroceries}</FormLabel>
-                    <Text>{totalGroceries}</Text>
-                    <FormLabel>{this.state.lang.summaries.totalRefound}</FormLabel>
-                    <Text>{totalRefound}</Text>
-                </View>)
->>>>>>> b253074add2c47b20051a5f906b5e421c58d383e
     }
 
     changeCurr(changeTo,changeFrom,value){

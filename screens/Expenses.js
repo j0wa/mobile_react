@@ -208,10 +208,7 @@ export default class Expenses extends React.Component {
                     new: neww,
                     gallery: expense.gallery || [],
                     items: expense.items || [],
-<<<<<<< HEAD
                     payments: expense.payments || [],
-=======
->>>>>>> b253074add2c47b20051a5f906b5e421c58d383e
                     membersPaidBy: membersPaidByTMP || [],
                     membersPaidFor: membersPaidForTMP || [],
                     info: Object.keys(expense).length != 0 ? {
@@ -325,7 +322,6 @@ class GeneralScreen extends React.Component {
         var err = -1;
 
         var totBy = 0;
-<<<<<<< HEAD
         if (this.state.membersPaidBy){
             this.state.membersPaidBy.map((elby) =>{
                 totBy += elby.cost
@@ -337,22 +333,6 @@ class GeneralScreen extends React.Component {
             this.state.membersPaidFor.map((elfor) =>{
                 totFor += elfor.cost
             })
-=======
-        this.state.membersPaidBy.map((elby) =>{
-            totBy += elby.cost
-        })
-        console.log(totBy);
-
-        var totFor = 0;
-        this.state.membersPaidFor.map((elfor) =>{
-            totFor += elfor.cost
-        })
-        console.log(totFor);
-
-
-        if(totBy != this.state.cost || totFor != this.state.cost){
-            return
->>>>>>> b253074add2c47b20051a5f906b5e421c58d383e
         }
 
         if (this.state.cost == "") {
