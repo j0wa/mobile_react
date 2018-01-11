@@ -410,8 +410,8 @@ class SummariesScreen extends React.Component {
             summaries: this.props.screenProps.summaries,
             lang: this.props.screenProps.lang,
             id: this.props.screenProps.info.id,
+            curr: this.props.screenProps.info.curr,
         }
-
         this.changeCurr = this.changeCurr.bind(this);
     }
     
@@ -419,12 +419,81 @@ class SummariesScreen extends React.Component {
         store.get("currencies").then(
             (currs) => {
                 this.setState({
-                    currs: currs,
+                    currs: currs
+                });
+            }
+        );
+        store.get("categories").then(
+            (cats) => {
+                this.setState({
+                    cats: cats,
                     loaded: true
                 });
             }
         );
     }
+
+/*
+    buildCategoryPersonSheet(){
+        var arraySummaries = [];
+        var i =0;
+
+        if(this.state.trip.members == undefined || this.state.expenses == undefined){
+            return
+            <View>
+                <Text>{this.state.lang.trip.members}</Text>
+            </View>
+        }
+        /*
+        return(
+            <View style={styles.members_wrapper}>
+                <ScrollView >
+                    {this.state.trip.members.map((item) => {
+                        return <View key={item.id} style={styles.list_item_flex}>
+                                {
+                                    this.state.expenses.map((exp) => {
+                                        if()
+                                    })
+                                }
+                            </View>
+                    })}
+                </ScrollView>
+            </View>
+        )
+
+
+        this.state.trip.members.forEach(function(member){
+            arraySummaries.push({id : i, name : member , categories : {}});
+            i++;
+        });
+        var memberName
+        arraySummaries.map((element) => {
+            this.state.cats.forEach(function(cat){
+                element.categories[cat.id] = cat.name;
+            });
+            console.log(element);
+            memberName = element.member;
+            element.categories.map((catEl) => {
+                this.state.expenses.forEach(function(expTmp){
+                    expTmp.elementPaidBy.map((gnagnagna) =>{
+                        if(gnagnagna.selected){
+                            if(gnagnagna.name == memberName && expTmp.cat == catEl.id){
+                                catEl[expTmp.date] = expTmp
+                            }
+                        }
+                    })
+                });
+            })
+        })
+        console.log(arraySummaries);
+        return(
+        <View>
+            <Text>{blabla}</Text>
+        </View>)
+
+    }
+
+    */
 
     buildSheet(){
         var arraySummaries = [];
@@ -437,8 +506,8 @@ class SummariesScreen extends React.Component {
             </View>
         }
         //building the base array
-       /*  this.state.trip.members.forEach(function(member){
-            arraySummaries.push({id : i, name : member.name , amountPaid : 0, amountDue : 0, total : 0});
+        this.state.trip.members.forEach(function(member){
+            arraySummaries.push({id : i, name : member , amountPaid : 0, amountDue : 0, total : 0});
             i++;
         });
 
@@ -447,7 +516,7 @@ class SummariesScreen extends React.Component {
                 if(elementPaidBy.selected){
                     arraySummaries.map((mem) => {
                         if(elementPaidBy.name == mem.name){
-                            mem.amountPaid += parseInt(this.changeCurr(this.state.curr,mem.curr,elementPaidBy.cost));
+                            mem.amountPaid += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidBy.cost));
                             return;
                         }
                     })
@@ -459,7 +528,8 @@ class SummariesScreen extends React.Component {
                 if(elementPaidFor.selected){
                     arraySummaries.map((mem) => {
                         if(elementPaidFor.name == mem.name){
-                            mem.amountDue += parseInt(this.changeCurr(this.state.curr,mem.curr,elementPaidFor.cost));
+
+                            mem.amountDue += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidFor.cost));
                             return;
                         }
                     })
@@ -467,7 +537,14 @@ class SummariesScreen extends React.Component {
             })
 
             arraySummaries.forEach(function(mem){
-                mem.total += parseInt(mem.amountPaid) - parseInt(mem.amountDue)
+                console.log("parseInt(mem.amountPaid)");
+                console.log(parseInt(mem.amountPaid));
+                console.log("parseInt(mem.amountDue)");
+                console.log(parseInt(mem.amountDue));
+
+                mem.total = parseInt(mem.amountPaid) - parseInt(mem.amountDue)
+                console.log("mem.total");
+                console.log(mem.total);
             });
 
         }) */
@@ -528,6 +605,44 @@ class SummariesScreen extends React.Component {
         )
     }
 
+    totalByCat(){
+        if(this.state.new || this.state.expenses == null){
+            return
+        }
+        var totalRest = 0;
+        var totalTrans = 0;
+        var totalGroceries = 0;
+        var totalRefound = 0;
+        this.state.expenses.map((item) => {
+            switch (item.cat) {
+                case 1:
+                    totalRest += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+                case 2:
+                    totalTrans += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+                case 3:
+                    totalGroceries += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+                case 4:
+                    totalRefound += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+            }
+        })
+        //console.log("i am the total");
+        //console.log(total);
+        return( <View>
+                    <FormLabel>{this.state.lang.summaries.totalRest}</FormLabel>
+                    <Text>{totalRest}</Text>
+                    <FormLabel>{this.state.lang.summaries.totalTrans}</FormLabel>
+                    <Text>{totalTrans}</Text>
+                    <FormLabel>{this.state.lang.summaries.totalGroceries}</FormLabel>
+                    <Text>{totalGroceries}</Text>
+                    <FormLabel>{this.state.lang.summaries.totalRefound}</FormLabel>
+                    <Text>{totalRefound}</Text>
+                </View>)
+    }
+
     changeCurr(changeTo,changeFrom,value){
         if(changeTo == changeFrom){
             return value;
@@ -571,7 +686,7 @@ class SummariesScreen extends React.Component {
 
     render() {
         return (this.state.loaded) ?
-            <View>
+            <ScrollView>
                 <FormLabel>{this.state.lang.summaries.currChoices}</FormLabel>
                 <View style={styles.combobox}>
                     {this.getComboBox(this.state.currs, "curr")}
@@ -581,8 +696,8 @@ class SummariesScreen extends React.Component {
                 </View>
                 {this.buildSheet()}
                 {this.totalExpensesOfTrip()}
-                <Text>{this.state.curr}</Text>
-            </View> :
+                {this.totalByCat()}
+            </ScrollView> :
             <Loader />
     }
 }

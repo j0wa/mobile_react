@@ -113,6 +113,121 @@ export default class Expenses extends React.Component {
         this.setState({totalLeft: totalLeft});
     }
 
+    componentWillMount(){
+        store.get("expenses").then(
+            expenses => {
+                var neww = this.props.navigation.state.params.new;
+                console.log("value of neww");
+                console.log(neww);
+                var id = this.props.navigation.state.params.id;
+                var expense = {};
+                if (!neww)
+                {
+                    console.log("coucou");
+                    expenses.find((e) => {
+                        if (e.id == id){
+                            expense = e;
+                            return;
+                        }
+                    });
+                    //console.log("exp in comwillmount");
+                    //console.log(expense.membersPaidBy);
+
+                    var membersPaidByTMP = [];
+                    var tmp;
+                    var i =0;
+                    //console.log("coucou");
+                    //console.log(expense.membersPaidBy);
+                    //Building the list of poeple who paid
+                    this.props.navigation.state.params.members.forEach(function(element) {
+                        expense.membersPaidBy.forEach(function(elementPaidBy){
+                            if(elementPaidBy.name == element){
+                                //console.log("in the if");
+                                //console.log(elementPaidBy.name == element);
+                                tmp = elementPaidBy;
+                                return;
+                            }
+                        })
+
+                        if(tmp != null){
+                            //console.log("tmp not null");
+                            //console.log(tmp);
+                            //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                            membersPaidByTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                        }else{
+                            //console.log("tmp null");
+                            //console.log({id: i, name: element, cost: 0, selected: 0 });
+                            membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
+                        }
+                        tmp = null;
+                        i++;
+                    });
+
+                    i = 0;
+                    var membersPaidForTMP = [];
+                    this.props.navigation.state.params.members.forEach(function(element) {
+                        expense.membersPaidFor.forEach(function(elementPaidFor){
+                            if(elementPaidFor.name == element){
+                                //console.log("in the if");
+                                //console.log(elementPaidFor.name == element);
+                                tmp = elementPaidFor;
+                                return;
+                            }
+                        })
+
+
+                        if(tmp != null){
+                            //console.log("tmp not null");
+                            //console.log(tmp);
+                            //console.log({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                            membersPaidForTMP.push({id: i, name: element, cost: tmp.cost, selected: tmp.selected });
+                        }else{
+                            //console.log("tmp null");
+                            //console.log({id: i, name: element, cost: 0, selected: 0 });
+                            membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
+                        }
+                        tmp = null;
+                        i++;
+                    });
+                }else{
+                    var membersPaidByTMP = [];
+                    var membersPaidForTMP = [];
+                    var i = 0;
+                    //console.log("membersPaidByTMP before");
+                    //console.log(membersPaidByTMP);
+                    this.props.navigation.state.params.members.forEach(function(element){
+                        membersPaidByTMP.push({id: i, name: element, cost: 0, selected: false });
+                        membersPaidForTMP.push({id: i, name: element, cost: 0, selected: false });
+                        i++
+                    });
+                    //console.log("membersPaidByTMP after");
+                    //console.log(membersPaidByTMP);
+                }
+
+                this.setState({
+                    new: neww,
+                    gallery: expense.gallery || [],
+                    items: expense.items || [],
+                    membersPaidBy: membersPaidByTMP || [],
+                    membersPaidFor: membersPaidForTMP || [],
+                    info: Object.keys(expense).length != 0 ? {
+                        receiver: expense.receiver,
+                        type: expense.type,
+                        curr: expense.curr,
+                        cat: expense.cat,
+                        date: new Date(expense.date),
+                        cost: expense.cost,
+                        notes: expense.notes,
+                        id: id
+                    } : {
+                        id: id
+                    },
+                    loaded: true,
+                });
+            }
+        )
+    }
+
     render(){
         if (this.state.loaded){
             var props = {
@@ -157,7 +272,7 @@ class GeneralScreen extends React.Component {
             totalLeft: this.props.screenProps.totalLeft,
             payments: this.props.screenProps.payments,
         }
-
+        
         this._submit = this._submit.bind(this)
         this.updateValues = this.updateValues.bind(this)
         this.updateMemberCost = this.updateMemberCost.bind(this)
@@ -205,11 +320,21 @@ class GeneralScreen extends React.Component {
     _submit(){
         var err = -1;
 
-        if (this.state.receiver == "") {
-            this.setState({ errReceiver: true });
-            err = 1;
-        } else {
-            this.setState({ errReceiver: false });
+        var totBy = 0;
+        this.state.membersPaidBy.map((elby) =>{
+            totBy += elby.cost
+        })
+        console.log(totBy);
+
+        var totFor = 0;
+        this.state.membersPaidFor.map((elfor) =>{
+            totFor += elfor.cost
+        })
+        console.log(totFor);
+
+
+        if(totBy != this.state.cost || totFor != this.state.cost){
+            return
         }
 
         if (this.state.cost == "") {
@@ -217,6 +342,13 @@ class GeneralScreen extends React.Component {
             err = 1;
         } else {
             this.setState({ errCost: false });
+        }
+
+        if (this.state.receiver == "") {
+            this.setState({ errReceiver: true });
+            err = 1;
+        } else {
+            this.setState({ errReceiver: false });
         }
 
         if (err == -1){
@@ -373,6 +505,98 @@ class GeneralScreen extends React.Component {
                                 checked={item.selected} 
                                 onPress={() => { this.memberSelection(item.id) }}
                                 textStyle={styles.members_list_ckbox_text}
+                            />
+                            <FormInput
+                                containerStyle={styles.members_list_text_container}
+                                keyboardType="numeric"
+                                underlineColorAndroid="transparent"
+                                editable={this.state.new }
+                                onChangeText={(val) => this.updateMemberCost(item.id, val,this.state.members)}
+                                value={String(item.cost)}
+                            />
+                        </View>
+                    })}
+                </ScrollView>
+            </View>
+        );
+    }
+
+    splitCostPaidBy(){
+        //console.log("splitCostPaidBy");
+        var tmpArray = [];
+        var countOfSelected = 0;
+        this.state.membersPaidBy.forEach(function(element){
+            if(element.selected){
+                countOfSelected++
+            }
+        });
+        var part = this.state.cost / countOfSelected;
+        /*
+        console.log("evenpart");
+        console.log(this.state.cost);
+        console.log(countOfSelected);
+        console.log(part);
+        */
+
+        this.state.membersPaidBy.forEach(function(element){
+            if(element.selected){
+                element.cost = part;
+            }else {
+                element.cost = 0
+            }
+            tmpArray.push(element);
+        });
+        this.setState({membersPaidBy: tmpArray});
+        /*
+        console.log("end of splitCostPaidBy");
+        console.log(tmpArray);
+        */
+    }
+
+    splitCostPaidFor(){
+        //console.log("splitCostPaidFor");
+        var tmpArray = [];
+        var countOfSelected = 0;
+        this.state.membersPaidFor.forEach(function(element){
+            if(element.selected){
+                countOfSelected++
+            }
+        });
+        var part = this.state.cost / countOfSelected;
+        /*
+        console.log("evenpart");
+        console.log(this.state.cost);
+        console.log(countOfSelected);
+        console.log(part);
+*/
+        this.state.membersPaidFor.forEach(function(element){
+            if(element.selected){
+                element.cost = part;
+            }else {
+                element.cost = 0
+            }
+            tmpArray.push(element);
+        });
+        this.setState({membersPaidFor: tmpArray});
+        /*
+        console.log("end of splitCostPaidFor");
+        console.log(tmpArray);
+        */
+    }
+
+    buildPaidByList() {
+        console.log(this.state.membersPaidBy);
+        return (
+            <View style={styles.members_wrapper}>
+                <FormLabel>{this.state.lang.trip.paidBy}</FormLabel>
+
+                <ScrollView style={styles.members_list_wrapper}>
+                    {this.state.membersPaidBy.map((item) => {
+                        return <View key={item.id} style={styles.members_list_item}>
+                            <CheckBox
+                                containerStyle={styles.members_list_ckbox_container}
+                                checked={item.selected}
+                                onPress={() => { this.memberPaidBySelection(item.id) }}
                                 title={item.name}
                             />
                             <FormInput 
@@ -381,7 +605,7 @@ class GeneralScreen extends React.Component {
                                 style={styles.members_list_text} 
                                 underlineColorAndroid="transparent"
                                 editable={this.state.type != 1 && this.state.cost != ""}
-                                onChangeText={(val) => this.updateMemberCost(item.id, val)}
+                                onChangeText={(val) => this.updateMemberCost(item.id, val,this.state.membersPaidBy)}
                                 value={String(item.cost)}
                             />
                         </View>
