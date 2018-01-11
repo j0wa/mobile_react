@@ -410,8 +410,8 @@ class SummariesScreen extends React.Component {
             summaries: this.props.screenProps.summaries,
             lang: this.props.screenProps.lang,
             id: this.props.screenProps.info.id,
+            curr: this.props.screenProps.info.curr,
         }
-
         this.changeCurr = this.changeCurr.bind(this);
     }
     
@@ -419,7 +419,14 @@ class SummariesScreen extends React.Component {
         store.get("currencies").then(
             (currs) => {
                 this.setState({
-                    currs: currs,
+                    currs: currs
+                });
+            }
+        );
+        store.get("categories").then(
+            (cats) => {
+                this.setState({
+                    cats: cats,
                     loaded: true
                 });
             }
@@ -437,46 +444,50 @@ class SummariesScreen extends React.Component {
             </View>
         }
         //building the base array
-       /*  this.state.trip.members.forEach(function(member){
+        this.state.trip.members.forEach(function(member){
             arraySummaries.push({id : i, name : member.name , amountPaid : 0, amountDue : 0, total : 0});
             i++;
         });
 
         this.state.expenses.map((element) => {
-            element.summaries.membersPaidBy.map((elementPaidBy) => {
-                if(elementPaidBy.selected){
-                    arraySummaries.map((mem) => {
-                        if(elementPaidBy.name == mem.name){
-                            mem.amountPaid += parseInt(this.changeCurr(this.state.curr,mem.curr,elementPaidBy.cost));
-                            return;
-                        }
-                    })
-                }
-            })
+            if (element.summaries.membersPaidBy){
+                element.summaries.membersPaidBy.map((elementPaidBy) => {
+                    if(elementPaidBy.selected){
+                        arraySummaries.map((mem) => {
+                            if(elementPaidBy.name == mem.name){
+                                mem.amountPaid += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidBy.cost));
+                                return;
+                            }
+                        })
+                    }
+                })
+            }
 
-
-            element.summaries.membersPaidFor.map((elementPaidFor) => {
-                if(elementPaidFor.selected){
-                    arraySummaries.map((mem) => {
-                        if(elementPaidFor.name == mem.name){
-                            mem.amountDue += parseInt(this.changeCurr(this.state.curr,mem.curr,elementPaidFor.cost));
-                            return;
-                        }
-                    })
-                }
-            })
+            if (element.summaries.membersPaidFor){
+                element.summaries.membersPaidFor.map((elementPaidFor) => {
+                    if(elementPaidFor.selected){
+                        arraySummaries.map((mem) => {
+                            if(elementPaidFor.name == mem.name){
+    
+                                mem.amountDue += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidFor.cost));
+                                return;
+                            }
+                        })
+                    }
+                })
+            }
 
             arraySummaries.forEach(function(mem){
-                mem.total += parseInt(mem.amountPaid) - parseInt(mem.amountDue)
+                mem.total = parseInt(mem.amountPaid) - parseInt(mem.amountDue)
             });
 
-        }) */
-        
+        })
+
         return (
             <View style={styles.members_wrapper}>
                 <ScrollView >
                     {arraySummaries.map((item) => {
-                        return <View key={item.id} style={styles.list_item_flex}>
+                        return <View key={item.id} style={{ height: 50, marginLeft: 10, marginRight: 10, borderBottomColor: "#aaa", borderBottomWidth: .5, flex: 1, flexDirection: 'row'}}>
                             <Text style={styles.list_item_part}>{item.name} </Text>
                             <Text style={styles.list_item_part}>{item.amountPaid} </Text>
                             <Text style={styles.list_item_part}>{item.amountDue} </Text>
@@ -504,6 +515,7 @@ class SummariesScreen extends React.Component {
                     else
                         this.setState({cat: value});
                 }}
+                style={styles.combobox}
             >
             {collection.map(item => {
                 return <ComboBoxItem label={item.name} value={item.id} key={item.id}/>
@@ -521,9 +533,56 @@ class SummariesScreen extends React.Component {
         })
         
         return( 
-            <View>
-                <FormLabel>{this.state.lang.summaries.totalCostOfTrip}</FormLabel>
+            <View style={{flex:1, flexDirection: "row", marginRight: 30, marginLeft: 30, marginBottom: 5}}>
+                <Text style={{marginRight: 15, fontWeight: "bold"}}>{this.state.lang.summaries.totalCostOfTrip}</Text>
                 <Text>{total}</Text>
+            </View>
+        )
+    }
+
+    totalByCat(){
+        if(this.state.new || this.state.expenses == null){
+            return
+        }
+        var totalRest = 0;
+        var totalTrans = 0;
+        var totalGroceries = 0;
+        var totalRefound = 0;
+        this.state.expenses.map((item) => {
+            switch (item.cat) {
+                case 1:
+                    totalRest += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+                case 2:
+                    totalTrans += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+                case 3:
+                    totalGroceries += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+                case 4:
+                    totalRefound += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+            }
+        })
+        
+        return( 
+            <View style={{flex: 1, marginLeft: 30, marginRight: 30}}>
+                <View style={{flex: 1, flexDirection: "row", marginBottom: 5}}>
+                    <Text style={{marginRight: 15, fontWeight: "bold"}}>{this.state.lang.summaries.totalRest}</Text>
+                    <Text>{totalRest}</Text>
+                </View>
+                <View style={{flex: 1, flexDirection: "row", marginBottom: 5}}>
+                    <Text style={{marginRight: 15, fontWeight: "bold"}}>{this.state.lang.summaries.totalTrans}</Text>
+                    <Text>{totalTrans}</Text>
+                </View>
+                <View style={{flex: 1, flexDirection: "row", marginBottom: 5}}>
+                    <Text style={{marginRight: 15, fontWeight: "bold"}}>{this.state.lang.summaries.totalGroceries}</Text>
+                    <Text>{totalGroceries}</Text>
+                </View>
+                <View style={{flex: 1, flexDirection: "row", marginBottom: 5}}>
+                    <Text style={{marginRight: 15, fontWeight: "bold"}}>{this.state.lang.summaries.totalRefound}</Text>
+                    <Text>{totalRefound}</Text>
+                </View>
             </View>
         )
     }
@@ -571,18 +630,18 @@ class SummariesScreen extends React.Component {
 
     render() {
         return (this.state.loaded) ?
-            <View>
+            <ScrollView>
                 <FormLabel>{this.state.lang.summaries.currChoices}</FormLabel>
                 <View style={styles.combobox}>
                     {this.getComboBox(this.state.currs, "curr")}
                 </View>
                 <View style={styles.list_title}>
-                        <Text style={styles.list_item_part}>{this.state.lang.summaries.name} </Text><Text style={styles.list_item_part}>{this.state.lang.summaries.amountPayed}</Text><Text style={styles.list_item_part}>{this.state.lang.summaries.amountDue}</Text><Text style={styles.list_item_part}>{this.state.lang.summaries.total}</Text>
+                    <Text style={styles.list_item_part}>{this.state.lang.summaries.name} </Text><Text style={styles.list_item_part}>{this.state.lang.summaries.amountPayed}</Text><Text style={styles.list_item_part}>{this.state.lang.summaries.amountDue}</Text><Text style={styles.list_item_part}>{this.state.lang.summaries.total}</Text>
                 </View>
                 {this.buildSheet()}
                 {this.totalExpensesOfTrip()}
-                <Text>{this.state.curr}</Text>
-            </View> :
+                {this.totalByCat()}
+            </ScrollView> :
             <Loader />
     }
 }
@@ -702,9 +761,10 @@ const styles = StyleSheet.create({
     },
 
     list_title: {
+        alignItems: "center",
         height: 50,
-        marginLeft: 30,
-        marginRight: 30,
+        marginLeft: 10,
+        marginRight: 10,
         flexDirection: 'row',
     },
 
@@ -731,9 +791,9 @@ const styles = StyleSheet.create({
 
     list_item_part: {
         flex: 1,
-        paddingLeft: 30,
         marginTop: 10,
-        fontSize: 18
+        fontSize: 18,
+        textAlign: "center"
     },
 
 
@@ -749,6 +809,11 @@ const styles = StyleSheet.create({
         marginBottom: 30,
         alignItems: "center"
     },
+
+    combobox: {
+        marginLeft: 20,
+        marginRight: 20
+    }
 });
 
 const Tab = TabNavigator({

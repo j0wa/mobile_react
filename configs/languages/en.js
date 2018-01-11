@@ -82,7 +82,11 @@ export default {
 
     summaries: {
         title: "Summaries",
-        totalCostOfTrip: "Total of all Expences",
+        totalCostOfTrip: "Total of all Expenses",
+        totalRest: "Total of all Restaurant Expenses",
+        totalTrans: "Total of all Transport Expenses",
+        totalGroceries: "Total of all Groceries Expenses",
+        totalRefound: "Total of all Refound Expenses",
         name: "Name",
         amountDue: "Due",
         amountPayed: "Paid",

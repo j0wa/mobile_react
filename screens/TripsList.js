@@ -41,6 +41,7 @@ export default class TripsList extends React.Component{
         return <ScrollView>
                 {trips.map((item) =>  {
                     item = item.info;
+                    
                     return <TouchableHighlight
                         key={item.id}
                         onPress={() => {
