@@ -7,7 +7,7 @@ export default resetStorage = {
     },
 
     categories() {
-        store.delete("cats");
+        store.delete("categories");
     },
 
     settings() {
@@ -16,5 +16,9 @@ export default resetStorage = {
 
     langs() {
         store.delete("langs");
+    },
+
+    ids() {
+        store.delete("ids");
     }
 }

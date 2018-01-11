@@ -21,8 +21,9 @@ export default class App extends React.Component {
 
     async componentDidMount() {
         /* uncomment when storage reset needed */
-        // resetStorage.trips();
         // resetStorage.categories();
+        // resetStorage.trips();
+        // resetStorage.ids();
         // resetStorage.settings();
         // resetStorage.langs();
         dataFeed.currencies();
@@ -30,6 +31,7 @@ export default class App extends React.Component {
         dataFeed.categories();
         dataFeed.settings();
         dataFeed.langs();
+        dataFeed.ids();
 
         await Expo.Font.loadAsync({
             'Material Icons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),

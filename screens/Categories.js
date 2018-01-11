@@ -20,8 +20,14 @@ export default class Categories extends React.Component{
         }
     }
 
-    async componentWillMount(){
-        store.get("cats").then(cats => {
+    componentWillMount(){
+        store.get("ids").then(ids => {
+            this.setState({
+                id: ids[0].cat_id
+            });
+        });
+
+        store.get("categories").then(cats => {
             this.setState({ 
                 cats: cats,
                 loaded: true
@@ -30,23 +36,25 @@ export default class Categories extends React.Component{
     }
 
     buildList(){
-        return <ScrollView>{
-            this.state.cats.map((item, index) =>  {
-                return (
-                    <View key={item.id} style={styles.list_item}>
-                        <View style={styles.list_item_info}>
-                            <Text>{item.name}</Text>
+        return (
+            <ScrollView>
+                {this.state.cats.map((item, index) =>  {
+                    return (
+                        <View key={item.id} style={styles.list_item}>
+                            <View style={styles.list_item_info}>
+                                <Text>{item.name}</Text>
+                            </View>
+                            <View style={styles.arrow}>
+                                <Icon name='delete-forever' onPress={() => { this._delete(item.id) }} size={32.0}/>
+                            </View>
                         </View>
-                        <View style={styles.arrow}>
-                            <Icon name='delete-forever' onPress={() => { this._delete(item.id) }} size={32.0}/>
-                        </View>
-                    </View>
-                );
-            })
-        }</ScrollView>
+                    );
+                })}
+            </ScrollView>
+        );
     }
     
-    _delete(index) {
+    _delete(id) {
         Alert.alert(
             this.state.lang.cat.remove_title,
             this.state.lang.cat.remove_text,
@@ -54,11 +62,17 @@ export default class Categories extends React.Component{
                 {text: this.state.lang.misc.remove_no, style: 'cancel'},
                 {text: this.state.lang.misc.remove_yes, onPress: () => { 
                     var cats = this.state.cats;
-                    cats.splice(index, 1);
+                    
+                    cats.map((item, index) => {
+                        if (item.id == id)
+                            cats.splice(index, 1);
+                    })
                     
                     this.setState({
                         cats: cats
                     });
+                    
+                    updateStorage("categories", cats, false, () => {});
                 }},
             ],
         );
@@ -79,13 +93,18 @@ export default class Categories extends React.Component{
         if (err == -1)
         {
             var c = {id: this.state.id, name: this.state.name}
-            updateStorage("cats", c, true, null);
+            var newId = this.state.id + 1;
+
+            updateStorage("categories", c, true, () => {});
+            updateStorage("ids", {cat_id: newId}, false, () => {});
+
             this.setState(prevState => ({
                 modalVisible: false,
                 cats: [
                     ...this.state.cats,
                     c
-                ]
+                ],
+                id: newId
             }))
         }
 
