@@ -23,6 +23,18 @@ export default class Expenses extends React.Component {
     }
 
     componentWillMount(){
+        var getTotal = (exp) => {
+            var val = exp.cost;
+        
+            if (exp.payments.length > 0){
+                exp.payments.map(item => {
+                    val -= item.amount;
+                });
+            }
+
+            return val;
+        };
+
         if (!this.props.navigation.state.params.new){
             var expense = this.props.navigation.state.params.expense;
 
@@ -30,7 +42,7 @@ export default class Expenses extends React.Component {
                 new: false,
                 items: expense.items,
                 payments: expense.payments || [],                
-                totalLeft: expense.totalLeft || 0,            
+                totalLeft: expense.totalLeft || getTotal(expense),            
                 info: {
                     receiver: expense.receiver,
                     type: expense.type,
@@ -84,7 +96,7 @@ export default class Expenses extends React.Component {
 
     updatePayment(payments, totalLeft){
         this.setState({ 
-            payments: [...payments],
+            payments: payments,
             totalLeft: totalLeft
         });
     }
@@ -94,7 +106,7 @@ export default class Expenses extends React.Component {
         
         if (this.state.payments.length > 0){
             this.state.payments.map(item => {
-                val -= item.val;
+                val -= item.amount;
             });
         }
 
@@ -116,6 +128,7 @@ export default class Expenses extends React.Component {
                 updateItems: this.updateItems,
                 updatePayment: this.updatePayment,
                 updateTotalLeft: this.updateTotalLeft,
+                getTotalLeft: this.getTotalLeft,
                 members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item.name, cost: 0, selected: true}})
             };
 
@@ -182,6 +195,9 @@ class GeneralScreen extends React.Component {
                     cost: exp.cost || "",
                     notes: exp.notes || ""
                 });
+
+                if (!this.state.new)
+                    this.updateValues();
             }
         );
     }
@@ -364,7 +380,7 @@ class GeneralScreen extends React.Component {
                                 keyboardType="numeric"
                                 style={styles.members_list_text} 
                                 underlineColorAndroid="transparent"
-                                editable={this.state.new && this.state.type != 1 && this.state.cost != ""}
+                                editable={this.state.type != 1 && this.state.cost != ""}
                                 onChangeText={(val) => this.updateMemberCost(item.id, val)}
                                 value={String(item.cost)}
                             />
@@ -653,13 +669,14 @@ class PaymentsScreen extends React.Component {
         }
 
         if (err == -1){
-            var tmp = {to: this.state.to, from: this.state.from, amount: this.state.val, date: new Date().getTime()};
+            var tmp = this.state.payments;
+            tmp.push({to: this.state.to, from: this.state.from, amount: this.state.val, date: new Date().getTime()});
             var val = this.state.totalLeft - this.state.val;
             
-            this.setState(prev => ({
+            this.setState({
                 totalLeft: val,
-                payments: [...prev.payments, tmp]
-            }));
+                payments: tmp
+            });
 
             this.props.screenProps.updatePayment(tmp);
             this.toggleModal();
