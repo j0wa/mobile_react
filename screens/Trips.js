@@ -56,37 +56,48 @@ export default class Trips extends React.Component {
     }
 
     componentWillMount(){
-        store.get("trips").then(trips => {
-            var neww = this.props.navigation.state.params.new;
-            var id = this.props.navigation.state.params.id;
-            var trip = {};
+        store.get("ids").then(ids => {
+            store.get("trips").then(trips => {
+                var neww = this.props.navigation.state.params.new;
+                var id = this.props.navigation.state.params.id;
+                var trip = {};
 
-            if (!neww)
-            {
-                trips.find((t) => {
+                if (!neww)
+                {
+                    trips.find((t) => {
 
-                    if (t.id == id){
-                        trip = t;
-                        return;
-                    }
+                        if (t.id == id){
+                            trip = t;
+                            return;
+                        }
+                    });
+                }
+
+                this.setState({
+                    new: neww,
+                    expenses: trip.expenses || [],
+                    summaries: trip.summaries || [],
+                    info: Object.keys(trip).length != 0 ? {
+                        location: trip.location,
+                        date: trip.date,
+                        curr: trip.curr,
+                        members: trip.members,
+                        desc: trip.desc,
+                        id: id,
+                        member_id: ids[0].member_id,
+                        expense_id: ids[0].expense_id,
+                    } : {
+                        id: ids[0].trip_id,
+                        member_id: ids[0].member_id,
+                        expense_id: ids[0].expense_id,
+                        location: "",
+                        date: "",
+                        curr: "",
+                        members: [],
+                        desc: "",
+                    },
+                    loaded: true,
                 });
-            }
-
-            this.setState({
-                new: neww,
-                expenses: trip.expenses || [],
-                summaries: trip.summaries || [],
-                info: Object.keys(trip).length != 0 ? {
-                    location: trip.location,
-                    date: trip.date,
-                    curr: trip.curr,
-                    members: trip.members,
-                    desc: trip.desc,
-                    id: id
-                } : {
-                    id: id
-                },
-                loaded: true,
             });
         })
     }
@@ -102,6 +113,9 @@ export default class Trips extends React.Component {
                 summaries: this.state.summaries,
                 updateTrips: this.props.navigation.state.params.updateTrips,
                 updateExpenses: this.updateExpenses,
+                expense_id: this.state.expense_id,
+                trip_id: this.state.trip_id,
+                member_id: this.state.member_id,
             }
 
             return this.state.new ? <TripScreen screenProps={{...props, updateNew: this.updateNew}}/> : <Tab screenProps={props} />
@@ -129,6 +143,8 @@ class TripScreen extends React.Component {
             summaries: this.props.screenProps.summaries,
             lang: this.props.screenProps.lang,
             id: this.props.screenProps.info.id,
+            expense_id: this.props.screenProps.info.expense_id,
+            member_id: this.props.screenProps.info.member_id,
         }
 
 
@@ -137,7 +153,7 @@ class TripScreen extends React.Component {
         this._submit = this._submit.bind(this)
     }
 
-    async componentWillMount(){
+    componentWillMount(){
         store.get("settings").then((item) => {
             store.get("currencies").then(
                 (currs) => {
@@ -184,8 +200,9 @@ class TripScreen extends React.Component {
                 curr: this.state.curr,
                 members: this.state.members,
                 desc: this.state.desc,
-            };
+            };            
 
+            updateStorage("ids", {trip_id: this.state.id + 1}, false, () => {});
             updateStorage("trips", t, this.state.new, () => {
                 this.props.screenProps.updateTrips(t);
 
@@ -193,7 +210,7 @@ class TripScreen extends React.Component {
                     this.props.screenProps.updateNew(t);
                 else
                     this.props.screenProps.navigation.goBack()
-            });
+            });            
         }
     }
 
@@ -208,11 +225,16 @@ class TripScreen extends React.Component {
         }
 
         if (err === -1) {
+            var newId = this.state.member_id + 1;
+
             this.setState(prevState => ({
-                members: [...prevState.members, this.state.memberName],
+                members: [...prevState.members, ...{id: this.state.member_id, name: this.state.memberName}],
                 modalVisible: false,
-                memberName: ""
+                memberName: "",
+                member_id: newId
             }));
+
+            updateStorage("ids", {member_id: newId}, false, () => {});
         }
     }
 
@@ -259,7 +281,7 @@ class TripScreen extends React.Component {
                 <ScrollView style={styles.members_list_wrapper}>
                     {this.state.members != "" && this.state.members.map((item, index) => {
                         return <View key={index} style={styles.list_item}>
-                            <Text key={index} style={styles.list_item_text}>{item}</Text>
+                            <Text key={index} style={styles.list_item_text}>{item.name}</Text>
                             {this.props.id == null && <Icon style={styles.list_item_icon} name='delete-forever' onPress={() => { this._delete_member(index) }} size={32.0}/> }
                         </View>
                     })}
@@ -289,6 +311,10 @@ class TripScreen extends React.Component {
                     { this.state.errMemberName && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit_new_member} />
+                    
+                    <TouchableHighlight onPress={() => { this.setModalVisible(false) }}>
+                        <View><FormLabel containerStyle={styles.modal_back_button_wrapper}>{this.state.lang.payment.back}</FormLabel></View>
+                    </TouchableHighlight>
                 </View>
             </TouchableHighlight>
         </Modal>
@@ -765,6 +791,12 @@ const styles = StyleSheet.create({
         position: "absolute",
         right: 10,
         top: 10
+    },
+
+    modal_back_button_wrapper: {
+        marginTop: 10,
+        marginBottom: 30,
+        alignItems: "center"
     },
 });
 

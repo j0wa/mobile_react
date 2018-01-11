@@ -15,37 +15,25 @@ export default class ExpensesList extends React.Component{
             lang: this.props.screenProps.lang || this.props.screenProps,
             members: this.props.screenProps.info.members,
             curr:  this.props.screenProps.info.curr,
-
+            id: this.props.screenProps.expense_id,
         }
 
         this.updateListing = this.updateListing.bind(this);
+        this.updateId = this.updateId.bind(this);
         
     }
 
-    updateListing(e) {
-        this.setState(prevState => ({
-            expenses: [
-                ...prevState.expenses,
-                e
-            ]
-        }));
-        
-        this.props.screenProps.updateExpenses(e);
-        this.resetCatFilter = this.resetCatFilter.bind(this);
-        this.updateList = this.updateList.bind(this);
-        this.updateExpenses = this.updateExpenses.bind(this);
-    }
-
-    async componentWillMount() {
+    componentWillMount() {
         store.get("categories").then(
             (cats) => {
                 this.setState({
                     cats: cats,
                 })
-            })
+            }
+        )
+
         store.get("expenses").then(
             expenses => {
-
                 var ar1 = [];
                 var ar2 = [ar1];
                 //added the value[0] != null because the storage sometime retreive a empty arrays in place of null...
@@ -62,6 +50,29 @@ export default class ExpensesList extends React.Component{
                     this.setState({ loaded: true });
             }
         );
+    }
+
+    updateId(){
+        var newId = this.state.id + 1;
+        this.setState({
+            id: newId
+        });
+
+        updateStorage("ids", {expense_id: newId}, false, () => {});
+    }
+
+    updateListing(e) {
+        this.setState(prevState => ({
+            expenses: [
+                ...prevState.expenses,
+                e
+            ]
+        }));
+        
+        this.props.screenProps.updateExpenses(e);
+        this.resetCatFilter = this.resetCatFilter.bind(this);
+        this.updateList = this.updateList.bind(this);
+        this.updateExpenses = this.updateExpenses.bind(this);
     }
 
     updateExpenses(exp){
@@ -124,12 +135,12 @@ export default class ExpensesList extends React.Component{
         return <View style={styles.button}>
             <Icon name='add-circle' size={64.0} onPress={() => {
                 this.props.screenProps.navigation.navigate('ExpensesItem', {
-
-                    id: (this.state.expenses.length + 1),
+                    id: this.state.id,
                     new: true,
                     curr: this.state.curr,
                     members: this.state.members,
-                    updateExpenses: this.updateListing
+                    updateExpenses: this.updateListing,
+                    updateId: this.updateId
                 })
             }}/>
         </View>

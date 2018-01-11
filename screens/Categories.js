@@ -139,6 +139,10 @@ export default class Categories extends React.Component{
                     { this.state.errName && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit.bind(this)} />
+
+                    <TouchableHighlight onPress={() => { this.setModalVisible(false) }}>
+                        <View><FormLabel containerStyle={styles.modal_back_button_wrapper}>{this.state.lang.payment.back}</FormLabel></View>
+                    </TouchableHighlight>
                 </View>
             </TouchableHighlight>
         </Modal>
@@ -249,5 +253,11 @@ const styles = StyleSheet.create({
         minHeight: 200,
         width: (Dimensions.get("window").width - 50),
         borderRadius: 10
+    },
+
+    modal_back_button_wrapper: {
+        marginTop: 10,
+        marginBottom: 30,
+        alignItems: "center"
     },
 });

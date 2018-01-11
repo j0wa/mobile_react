@@ -22,31 +22,6 @@ export default class Expenses extends React.Component {
         this.updateTotalLeft = this.updateTotalLeft.bind(this);
     }
 
-    updateItems(items){
-        this.setState({ 
-            items: items 
-        });
-    }
-
-    updatePayment(payments, totalLeft){
-        this.setState({ 
-            payments: [...payments],
-            totalLeft: totalLeft
-        });
-    }
-
-    updateTotalLeft(totalLeft){
-        var val = totalLeft;
-        
-        if (this.state.payments.length > 0){
-            this.state.payments.map(item => {
-                val -= item.val;
-            });
-        }
-
-        this.setState({totalLeft: totalLeft});
-    }
-
     componentWillMount(){
         if (!this.props.navigation.state.params.new){
             var expense = this.props.navigation.state.params.expense;
@@ -99,7 +74,32 @@ export default class Expenses extends React.Component {
             items: this.state.items,
             payments: this.state.payments
         })
-    }    
+    }
+
+    updateItems(items){
+        this.setState({ 
+            items: items 
+        });
+    }
+
+    updatePayment(payments, totalLeft){
+        this.setState({ 
+            payments: [...payments],
+            totalLeft: totalLeft
+        });
+    }
+
+    updateTotalLeft(totalLeft){
+        var val = totalLeft;
+        
+        if (this.state.payments.length > 0){
+            this.state.payments.map(item => {
+                val -= item.val;
+            });
+        }
+
+        this.setState({totalLeft: totalLeft});
+    }
 
     render(){
         if (this.state.new){
@@ -112,6 +112,7 @@ export default class Expenses extends React.Component {
                 payments: this.state.payments,
                 totalLeft: this.state.totalLeft,
                 updateExpenses: this.props.navigation.state.params.updateExpenses,
+                updateId: this.props.navigation.state.params.updateId,
                 updateItems: this.updateItems,
                 updatePayment: this.updatePayment,
                 updateTotalLeft: this.updateTotalLeft,
@@ -219,6 +220,11 @@ class GeneralScreen extends React.Component {
 
             updateStorage("expenses", e, this.state.new, () => {
                 this.props.screenProps.updateExpenses(e);
+
+                if (this.state.new){
+                    this.props.screenProps.updateId();
+                }
+
                 this.props.screenProps.navigation.goBack();
             });
         }
@@ -583,6 +589,9 @@ class ItemsScreen extends React.Component {
                     { this.state.errItemPrice && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                     <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit_new_item} />
+                    <TouchableHighlight onPress={() => { this.setModalVisible(false) }}>
+                        <View><FormLabel containerStyle={styles.modal_back_button_wrapper}>{this.state.lang.payment.back}</FormLabel></View>
+                    </TouchableHighlight>
                 </View>
             </TouchableHighlight>
         </Modal>
