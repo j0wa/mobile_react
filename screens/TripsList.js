@@ -40,18 +40,16 @@ export default class TripsList extends React.Component{
         
         return <ScrollView>
                 {trips.map((item) =>  {
-                    item = item.info;
-                    
                     return <TouchableHighlight
-                        key={item.id}
+                        key={item}
                         onPress={() => {
                             navigation.navigate('TripsItem', {id: item.id, new: false, updateTrips: this.updateTrips});
                         }}
                     >
                         <View style={styles.list_item}>
                             <View style={styles.list_item_info}>
-                                <Text style={styles.marg_bottom_10} >{item.location}</Text>
-                                <Text>{formatDate(item.date)}</Text>
+                                <Text style={styles.marg_bottom_10} >{item.info.location}</Text>
+                                <Text>{formatDate(item.info.date)}</Text>
                             </View>
                             <View style={styles.arrow}>
                                 <Icon name='chevron-right' size={40.0}/>

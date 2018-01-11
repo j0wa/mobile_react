@@ -71,19 +71,16 @@ export default class ExpensesList extends React.Component{
         this.updateList = this.updateList.bind(this);
     }
 
-    updateList() {
-        /* store.get("expenses").then(
+    filterList() {
+        store.get("expenses").then(
             expenses => {
-                var filteredExp = expenses.filter(e => e.trip_id == this.props.screenProps.info.id);
-                if(this.state.cat != undefined && this.state.cat != null){
-
-                    var filteredExp = filteredExp.filter(e => e.cat == this.state.cat);
-                }
+                var filteredExp = expenses.filter(e => e.cat == this.state.filter_cat);
+                
                 this.setState(prevState => ({
                     expenses: filteredExp
                 }));
             }
-        ) */
+        )
     }
 
     buildList(navigate) {
@@ -157,15 +154,10 @@ export default class ExpensesList extends React.Component{
             return;
 
         return <ComboBox
-                selectedValue={this.state[stateItem]}
+                selectedValue={this.state.filter_cat}
                 onValueChange={(value) => {
-                    if (stateItem == "type")
-                        this.setState({type: value});
-                    else if (stateItem == "curr")
-                        this.setState({curr: value});
-                    else
-                        this.updateList();
-                        this.setState({cat: value});
+                    this.filterList();
+                    this.setState({filter_cat: value});
                 }}
                 style={styles.combobox}
             >
@@ -177,9 +169,10 @@ export default class ExpensesList extends React.Component{
 
     resetCatFilter(){
         this.setState({
-            cat : null,
+            filter_cat : 1,
         });
-        this.updateList();
+
+        this.filterList();
     }
 
     render(){
@@ -189,7 +182,7 @@ export default class ExpensesList extends React.Component{
             <View style={styles.wrapper}>
                 {/* category */}
                 <FormLabel>{this.state.lang.cat.title}</FormLabel>
-                {this.getComboBox(this.state.cats, "cat")}
+                {this.getComboBox(this.state.cats)}
                 <TouchableNativeFeedback onPress={() => { this.resetCatFilter() }} >
                     <FormLabel containerStyle={styles.btn_search}>{this.state.lang.misc.reset_filter}</FormLabel>
                 </TouchableNativeFeedback>

@@ -512,32 +512,31 @@ class SummariesScreen extends React.Component {
         });
 
         this.state.expenses.map((element) => {
-            if (element.summaries.membersPaidBy){
-                element.summaries.membersPaidBy.map((elementPaidBy) => {
-                    if(elementPaidBy.selected){
-                        arraySummaries.map((mem) => {
-                            if(elementPaidBy.name == mem.name){
-                                mem.amountPaid += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidBy.cost));
-                                return;
-                            }
-                        })
-                    }
-                })
-            }
+            if (!element.summaries)
+                return;
 
-            if (element.summaries.membersPaidFor){
-                element.summaries.membersPaidFor.map((elementPaidFor) => {
-                    if(elementPaidFor.selected){
-                        arraySummaries.map((mem) => {
-                            if(elementPaidFor.name == mem.name){
-    
-                                mem.amountDue += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidFor.cost));
-                                return;
-                            }
-                        })
-                    }
-                })
-            }
+            element.summaries.membersPaidBy.map((elementPaidBy) => {
+                if(elementPaidBy.selected){
+                    arraySummaries.map((mem) => {
+                        if(elementPaidBy.name == mem.name){
+                            mem.amountPaid += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidBy.cost));
+                            return;
+                        }
+                    })
+                }
+            })
+            
+            element.summaries.membersPaidFor.map((elementPaidFor) => {
+                if(elementPaidFor.selected){
+                    arraySummaries.map((mem) => {
+                        if(elementPaidFor.name == mem.name){
+
+                            mem.amountDue += parseInt(this.changeCurr(this.state.curr,element.curr,elementPaidFor.cost));
+                            return;
+                        }
+                    })
+                }
+            })
 
             arraySummaries.forEach(function(mem){
                 mem.total = parseInt(mem.amountPaid) - parseInt(mem.amountDue)
