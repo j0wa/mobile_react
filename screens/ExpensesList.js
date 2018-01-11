@@ -17,6 +17,7 @@ export default class ExpensesList extends React.Component{
             members: this.props.screenProps.info.members,
             curr:  this.props.screenProps.info.curr,
             id: this.props.screenProps.info.expense_id,
+
         }
 
         this.updateListing = this.updateListing.bind(this);
@@ -68,7 +69,7 @@ export default class ExpensesList extends React.Component{
         
         this.props.screenProps.updateExpenses(e);
         this.resetCatFilter = this.resetCatFilter.bind(this);
-        this.updateList = this.updateList.bind(this);
+        this.filterList = this.filterList.bind(this);
     }
 
     filterList() {

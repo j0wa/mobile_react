@@ -433,70 +433,53 @@ class SummariesScreen extends React.Component {
         );
     }
 
-/*
-    buildCategoryPersonSheet(){
-        var arraySummaries = [];
-        var i =0;
-
-        if(this.state.trip.members == undefined || this.state.expenses == undefined){
-            return
-            <View>
-                <Text>{this.state.lang.trip.members}</Text>
-            </View>
+    buildSheet(){
+        var removeLeadingZeros = (val) => {
+            if (typeof val == "string"){
+                var index = 0;
+                for (var i = 0; i < val.length; i++){
+                    if (val[i] == "0")
+                        index++;
+                    else
+                        break;
+                }
+        
+                if (index != -1){
+                    return val.substr(index);
+                }
+        
+                return val;
+            }
         }
-        /*
-        return(
-            <View style={styles.members_wrapper}>
-                <ScrollView >
-                    {this.state.trip.members.map((item) => {
-                        return <View key={item.id} style={styles.list_item_flex}>
-                                {
-                                    this.state.expenses.map((exp) => {
-                                        if()
-                                    })
-                                }
-                            </View>
-                    })}
-                </ScrollView>
-            </View>
-        )
 
-
-        this.state.trip.members.forEach(function(member){
-            arraySummaries.push({id : i, name : member , categories : {}});
-            i++;
-        });
-        var memberName
-        arraySummaries.map((element) => {
-            this.state.cats.forEach(function(cat){
-                element.categories[cat.id] = cat.name;
-            });
-            console.log(element);
-            memberName = element.member;
-            element.categories.map((catEl) => {
-                this.state.expenses.forEach(function(expTmp){
-                    expTmp.elementPaidBy.map((gnagnagna) =>{
-                        if(gnagnagna.selected){
-                            if(gnagnagna.name == memberName && expTmp.cat == catEl.id){
-                                catEl[expTmp.date] = expTmp
-                            }
+        var stuff = [];
+        
+        this.state.expenses.map(item => {
+            item.members.map(m => {
+                var obj = {};
+                if (item.payments != undefined && item.payments.length > 0){
+                    item.payments.map(p => {
+                        if (p.to == m.id){
+                            obj.paid = removeLeadingZeros(p.amount);
+                            obj.due = removeLeadingZeros(m.cost - p.amount);
                         }
                     })
-                });
+
+                    obj.member = m.name
+                }
+                else {
+                    obj = {member: m.name, due: removeLeadingZeros(m.cost), paid: 0, cat: item.cat, total: removeLeadingZeros(m.cost)}
+                }
+                
+                obj.total = removeLeadingZeros(obj.paid + obj.due);
+                stuff.push(obj);
             })
-        })
-        console.log(arraySummaries);
-        return(
-        <View>
-            <Text>{blabla}</Text>
-        </View>)
 
-    }
+            // item.cat
+            // item.members
+            // item.payments;
+        });
 
-    */
-
-    buildSheet(){
-        var arraySummaries = [];
         var i =0;
 
         if(this.state.trip.members == undefined || this.state.expenses == undefined){
@@ -505,12 +488,7 @@ class SummariesScreen extends React.Component {
                 <Text>{this.state.lang.trip.members}</Text>
             </View>
         }
-        //building the base array
-        this.state.trip.members.forEach(function(member){
-            arraySummaries.push({id : i, name : member.name , amountPaid : 0, amountDue : 0, total : 0});
-            i++;
-        });
-
+        
         this.state.expenses.map((element) => {
             if (!element.summaries)
                 return;
@@ -537,21 +515,16 @@ class SummariesScreen extends React.Component {
                     })
                 }
             })
-
-            arraySummaries.forEach(function(mem){
-                mem.total = parseInt(mem.amountPaid) - parseInt(mem.amountDue)
-            });
-
         })
-
+        
         return (
             <View style={styles.members_wrapper}>
                 <ScrollView >
-                    {arraySummaries.map((item) => {
-                        return <View key={item.id} style={{ height: 50, marginLeft: 10, marginRight: 10, borderBottomColor: "#aaa", borderBottomWidth: .5, flex: 1, flexDirection: 'row'}}>
-                            <Text style={styles.list_item_part}>{item.name} </Text>
-                            <Text style={styles.list_item_part}>{item.amountPaid} </Text>
-                            <Text style={styles.list_item_part}>{item.amountDue} </Text>
+                    {stuff.map((item, index) => {
+                        return <View key={index} style={{ height: 50, marginLeft: 10, marginRight: 10, borderBottomColor: "#aaa", borderBottomWidth: .5, flex: 1, flexDirection: 'row'}}>
+                            <Text style={styles.list_item_part}>{item.member} </Text>
+                            <Text style={styles.list_item_part}>{item.paid} </Text>
+                            <Text style={styles.list_item_part}>{item.due} </Text>
                             <Text style={styles.list_item_part}>{item.total} </Text>
                         </View>
                     })}
