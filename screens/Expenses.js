@@ -30,7 +30,7 @@ export default class Expenses extends React.Component {
 
     updatePayment(payments, totalLeft){
         this.setState({ 
-            payments: payments,
+            payments: [...payments],
             totalLeft: totalLeft
         });
     }
@@ -84,21 +84,44 @@ export default class Expenses extends React.Component {
         }
     }
 
-    render(){
-        return this.state.loaded ? <Tab screenProps={{
-            navigation: this.props.navigation,
-            lang: this.props.screenProps,
-            new: this.state.new,
-            info: this.state.info,
+    updateNew(trip){
+        this.setState({
+            new: false,
+            id: this.state.id,
+            receiver: this.state.receiver,
+            date: this.state.date,
+            curr: this.state.curr,
+            type: this.state.type,
+            cat: this.state.cat,
+            members: this.state.members,
+            cost: this.state.cost,
+            notes: this.state.notes,
             items: this.state.items,
-            payments: this.state.payments,
-            totalLeft: this.state.totalLeft,
-            updateExpenses: this.props.navigation.state.params.updateExpenses,
-            updateItems: this.updateItems,
-            updatePayment: this.updatePayment,
-            updateTotalLeft: this.updateTotalLeft,
-            members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true} }), 
-        }} /> : <Loader/>;
+            payments: this.state.payments
+        })
+    }    
+
+    render(){
+        if (this.state.new){
+            var props = {
+                navigation: this.props.navigation,
+                lang: this.props.screenProps,
+                new: this.state.new,
+                info: this.state.info,
+                items: this.state.items,
+                payments: this.state.payments,
+                totalLeft: this.state.totalLeft,
+                updateExpenses: this.props.navigation.state.params.updateExpenses,
+                updateItems: this.updateItems,
+                updatePayment: this.updatePayment,
+                updateTotalLeft: this.updateTotalLeft,
+                members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true}})
+            };
+
+            return this.state.new ? <Tab2 screenProps={props} /> : <Tab screenProps={props} /> 
+        }
+
+        return <Loader/>;
     }
 }
 
@@ -116,7 +139,9 @@ class GeneralScreen extends React.Component {
             members: this.props.screenProps.members,
             errReceiver: false,
             errCost: false,
-            cost: this.props.screenProps.cost
+            cost: this.props.screenProps.cost,
+            totalLeft: this.props.screenProps.totalLeft,
+            payments: this.props.screenProps.payments,
         }
 
         this._submit = this._submit.bind(this)
@@ -189,6 +214,7 @@ class GeneralScreen extends React.Component {
                 cost: this.state.cost,
                 notes: this.state.notes,
                 items: this.state.items,
+                payments: this.state.payments
             };
 
             updateStorage("expenses", e, this.state.new, () => {
@@ -587,45 +613,44 @@ class PaymentsScreen extends React.Component {
             payments: this.props.screenProps.payments,
             totalLeft:  this.props.screenProps.totalLeft,
             showModal: false,
-            errFrom: false,  
-            errTo: false,  
             errVal: false,  
-            from: "",  
-            to: "",  
+            errSame: false,
+            from: 0,  
+            to: 0,  
             val: "",  
         }
+
+        this._submit_payment = this._submit_payment.bind(this);
     }
     
-     _submit_payment(){
+    _submit_payment(){
         var err = -1;
 
-        if (this.state.from == "") {
-            this.setState({ errFrom: true });
-            err = 1;
-        } else {
-            this.setState({ errFrom: false });
-        }
-
-        if (this.state.to == "") {
-            this.setState({ errTo: true });
-            err = 1;
-        } else {
-            this.setState({ errTo: false });
-        }
-        
         if (this.state.val == "") {
             this.setState({ errVal: true });
             err = 1;
         } else {
             this.setState({ errVal: false });
         }
+        
+        if (this.state.from == this.state.to) {
+            this.setState({ errSame: true });
+            err = 1;
+        } else {
+            this.setState({ errSame: false });
+        }
 
         if (err == -1){
+            var tmp = {to: this.state.to, from: this.state.from, amount: this.state.val, date: new Date().getTime()};
+            var val = this.state.totalLeft - this.state.val;
+            
             this.setState(prev => ({
-                totalLeft: prev.totalLeft - this.state.val
+                totalLeft: val,
+                payments: [...prev.payments, tmp]
             }));
 
-            this.props.screenprops.updatePayment({...this.state.payments, ...{to: this.state.to, from: this.state.from, val: this.state.val}}, this.state.totalLeft)
+            this.props.screenProps.updatePayment(tmp);
+            this.toggleModal();
         }
     }
 
@@ -642,29 +667,34 @@ class PaymentsScreen extends React.Component {
                 visible={this.state.showModal}
                 onRequestClose={() => { this.toggleModal(false) }}
             >
-                <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.toggleModal(false) }}>
+                <View style={styles.modal_wrapper}>
                     <View style={styles.modal_container}>
                         <Text style={styles.modal_title}>{this.state.lang.payment.new_payment}</Text>
 
                         <FormLabel>{this.state.lang.payment.from}</FormLabel>
                         { this.getComboBox(this.state.members, "to") }
-                        { this.state.errFrom && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+                        { this.state.errSame && <FormValidationMessage>{this.state.lang.payment.same}</FormValidationMessage> }
                         
                         <FormLabel>{this.state.lang.payment.to}</FormLabel>
                         { this.getComboBox(this.state.members, "from") }
-                        { this.state.errTo && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
+                        { this.state.errSame && <FormValidationMessage>{this.state.lang.payment.same}</FormValidationMessage> }
 
                         <FormLabel>{this.state.lang.payment.val}</FormLabel>
                         <FormInput
                             autoCapitalize="sentences"
                             onChangeText={(val) => this.setState({val: val})}
                             style={styles.input}
+                            keyboardType="numeric"
                         />
                         { this.state.errVal && <FormValidationMessage>{this.state.lang.err.required}</FormValidationMessage> }
 
                         <Button title={this.state.lang.misc.btn} containerViewStyle={styles.btnContainer} buttonStyle={styles.btnStyle} onPress={this._submit_payment} />
+                        
+                        <TouchableHighlight onPress={() => { this.toggleModal(false) }}>
+                            <View><FormLabel containerStyle={styles.modal_back_button_wrapper}>{this.state.lang.payment.back}</FormLabel></View>
+                        </TouchableHighlight>
                     </View>
-                </TouchableHighlight>
+                </View>
             </Modal>
         );
     }
@@ -677,21 +707,20 @@ class PaymentsScreen extends React.Component {
 
         return <ComboBox
                 selectedValue={this.state[stateItem]}
-                onValueChange={(value) => this.state[stateItem]}
+                onValueChange={(value) => this.setState({[stateItem]: value})}
+                style={styles.combobox}
             >
             {collection.map((item, index) => {
-                return <ComboBoxItem label={item.name} value={index} key={index}/>
+                return <ComboBoxItem label={item.name} value={item.id} key={item.id}/>
             })}
         </ComboBox>
     }
 
     buildList(){
-        var color = StyleSheet.flatten(styles.total_left, styles.total_left_none);//((this.state.totalLeft == 0) ? styles.total_left_none : styles.total_left_red));
-
         return (
-            <View>
-                <Text style={color}>{this.state.lang.payment.total_left} {this.state.totalLeft}</Text>
-                <View style={styles.members_list_wrapper}>
+            <View style={{flex: 1}}>
+                <Text style={styles.total_left}>{this.state.lang.payment.total_left} {this.state.totalLeft}</Text>
+                <View style={{marginBottom: 20}}>
                     <FormLabel>{this.state.lang.payment.payments}</FormLabel>
                     { this.state.totalLeft > 0 && 
                         <TouchableNativeFeedback onPress={() => { this.toggleModal(true) }} >
@@ -699,14 +728,20 @@ class PaymentsScreen extends React.Component {
                         </TouchableNativeFeedback>
                     }
                 </View>
-
-                <ScrollView style={styles.members_list_wrapper}>
-                    {this.state.payments.map((item) => {
-                        return <View key={item.id} style={styles.members_list_item}>
-                            <Text>{item.from} -----> </Text>
-                            <Text>{item.to} </Text>
-                            <Text>{item.amount} </Text>
-                            <Text>{item.date} </Text>
+                
+                <ScrollView style={{flex: 1, paddingLeft: 20, paddingRight: 20}}>
+                    <View style={{flex:1, flexDirection: "row", justifyContent:"space-between"}}>
+                        <Text style={styles.theader}>{this.state.lang.payment.to}</Text>
+                        <Text style={styles.theader}>{this.state.lang.payment.from}</Text>
+                        <Text style={styles.theader}>{this.state.lang.payment.val}</Text>
+                        <Text style={styles.theader}>{this.state.lang.payment.date}</Text>
+                    </View>
+                    {this.state.payments.map((item, index) => {
+                        return <View key={index} style={styles.members_list_item}>
+                            <Text>{this.getName(item.from)}</Text>
+                            <Text>{this.getName(item.to)}</Text>
+                            <Text>{item.amount}</Text>
+                            <Text>{formatDate(item.date, true)}</Text>
                         </View>
                     })}
                 </ScrollView>
@@ -721,6 +756,19 @@ class PaymentsScreen extends React.Component {
                 {this.buildModal()}
             </View>
         );
+    }
+
+    getName(id){
+        var name = "";
+        
+        this.state.members.map((item, index) => {
+            console.log("iid", item);
+            if (item.id == id){
+                name = item.name;
+            }
+        });
+        
+        return name;
     }
 }
 
@@ -914,13 +962,12 @@ const styles = StyleSheet.create({
 
     members_list_item: {
         height: 50,
-        marginLeft: 30,
-        marginRight: 30,
         borderBottomColor: "#aaa",
         borderBottomWidth: .5,
         flex: 1,
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        alignItems: "center"
     },
 
     members_list_ckbox_container: {
@@ -997,5 +1044,16 @@ const styles = StyleSheet.create({
 
     total_left_none: {
         color: "#35AA31"
+    },
+
+    modal_back_button_wrapper: {
+        marginTop: 10,
+        marginBottom: 30,
+        alignItems: "center"
+    },
+
+    theader: {
+        fontWeight: "bold",
+        textAlign: "center"
     }
 });

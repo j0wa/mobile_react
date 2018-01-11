@@ -94,8 +94,11 @@ export default {
         new_payment: "New Payment",
         to: "To",
         from: "From",
-        val: "Value",
+        val: "Amount",
         total_left: "Total left:",
-        payments: "Payments"
+        payments: "Payments",
+        back: "Back",
+        same: "They can't be the same person",
+        date: "Date"
     }
 }
