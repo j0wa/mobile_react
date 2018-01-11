@@ -545,6 +545,44 @@ class SummariesScreen extends React.Component {
                 </View>)
     }
 
+    totalByCat(){
+        if(this.state.new || this.state.expenses == null){
+            return
+        }
+        var totalRest = 0;
+        var totalTrans = 0;
+        var totalGroceries = 0;
+        var totalRefound = 0;
+        this.state.expenses.map((item) => {
+            switch (item.cat) {
+                case 1:
+                    totalRest += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+                case 2:
+                    totalTrans += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+                case 3:
+                    totalGroceries += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+                case 4:
+                    totalRefound += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
+                    break;
+            }
+        })
+        //console.log("i am the total");
+        //console.log(total);
+        return( <View>
+                    <FormLabel>{this.state.lang.summaries.totalRest}</FormLabel>
+                    <Text>{totalRest}</Text>
+                    <FormLabel>{this.state.lang.summaries.totalTrans}</FormLabel>
+                    <Text>{totalTrans}</Text>
+                    <FormLabel>{this.state.lang.summaries.totalGroceries}</FormLabel>
+                    <Text>{totalGroceries}</Text>
+                    <FormLabel>{this.state.lang.summaries.totalRefound}</FormLabel>
+                    <Text>{totalRefound}</Text>
+                </View>)
+    }
+
     changeCurr(changeTo,changeFrom,value){
         if(changeTo == changeFrom){
             return value;
@@ -592,7 +630,7 @@ class SummariesScreen extends React.Component {
 
     render() {
         return (this.state.loaded) ?
-            <View>
+            <ScrollView>
                 <FormLabel>{this.state.lang.summaries.currChoices}</FormLabel>
                 <View style={styles.combobox}>
                     {this.getComboBox(this.state.currs, "curr")}
@@ -602,7 +640,8 @@ class SummariesScreen extends React.Component {
                 </View>
                 {this.buildSheet()}
                 {this.totalExpensesOfTrip()}
-            </View> :
+                {this.totalByCat()}
+            </ScrollView> :
             <Loader />
     }
 }

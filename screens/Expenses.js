@@ -246,9 +246,23 @@ class GeneralScreen extends React.Component {
 
     _submit(){
         var err = -1;
+/*
+
+        var totBy = 0;
+        this.state.membersPaidBy.map((elby) =>{
+            totBy += elby.cost
+        })
+
+        var totFor = 0;
+        this.state.membersPaidFor.map((elfor) =>{
+            totFor += elfor.cost
+        })
 
 
-
+        if(totBy != this.state.cost || totFor != this.state.cost){
+            err = 1;
+        }
+*/
         if (this.state.cost == "") {
             this.setState({ errCost: true });
             err = 1;
@@ -530,7 +544,6 @@ class GeneralScreen extends React.Component {
                                 containerStyle={styles.members_list_text_container}
                                 keyboardType="numeric"
                                 underlineColorAndroid="transparent"
-                                editable={this.state.new }
                                 onChangeText={(val) => this.updateMemberCost(item.id, val,this.state.membersPaidBy)}
                                 value={String(item.cost)}
                             />
