@@ -247,7 +247,7 @@ class GeneralScreen extends React.Component {
     _submit(){
         var err = -1;
 
-
+/*
         var totBy = 0;
         this.state.membersPaidBy.map((elby) =>{
             totBy += elby.cost
@@ -260,11 +260,10 @@ class GeneralScreen extends React.Component {
         })
         console.log(totFor);
 
-
         if(totBy != this.state.cost || totFor != this.state.cost){
             return
         }
-
+*/
         if (this.state.cost == "") {
             this.setState({ errCost: true });
             err = 1;
