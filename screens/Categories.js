@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Modal, TouchableHighlight, Alert } from "react-native";
 import { Icon, Button, FormValidationMessage, FormInput, FormLabel } from 'react-native-elements'
 import Required from '../components/Required';
-import updateStorage from '../utils/update_storage';
+import {updateStorage, updateStorageIDs} from '../utils/update_storage';
 import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
 
@@ -23,7 +23,7 @@ export default class Categories extends React.Component{
     componentWillMount(){
         store.get("ids").then(ids => {
             this.setState({
-                id: ids[0].cat_id
+                id: ids.cat_id
             });
         });
 
@@ -96,7 +96,7 @@ export default class Categories extends React.Component{
             var newId = this.state.id + 1;
 
             updateStorage("categories", c, true, () => {});
-            updateStorage("ids", {cat_id: newId}, false, () => {});
+            updateStorageIDs("cat_id");
 
             this.setState(prevState => ({
                 modalVisible: false,

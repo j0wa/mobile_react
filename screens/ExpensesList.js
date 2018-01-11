@@ -5,6 +5,7 @@ import store from 'react-native-simple-store';
 import Loader from '../components/Loader';
 import formatDate from '../utils/date_format';
 import { ComboBox, ComboBoxItem } from '../components/ComboBox';
+import { updateStorage, updateStorageIDs } from '../utils/update_storage';
 
 export default class ExpensesList extends React.Component{
     constructor(props){
@@ -15,12 +16,11 @@ export default class ExpensesList extends React.Component{
             lang: this.props.screenProps.lang || this.props.screenProps,
             members: this.props.screenProps.info.members,
             curr:  this.props.screenProps.info.curr,
-            id: this.props.screenProps.expense_id,
+            id: this.props.screenProps.info.expense_id,
         }
 
         this.updateListing = this.updateListing.bind(this);
         this.updateId = this.updateId.bind(this);
-        
     }
 
     componentWillMount() {
@@ -34,20 +34,11 @@ export default class ExpensesList extends React.Component{
 
         store.get("expenses").then(
             expenses => {
-                var ar1 = [];
-                var ar2 = [ar1];
-                //added the value[0] != null because the storage sometime retreive a empty arrays in place of null...
-                if (!this.props.screenProps.new && expenses != null && JSON.stringify(expenses)!=JSON.stringify(ar2)){
-                    var filteredExp = expenses.filter(e => e.trip_id == this.props.screenProps.info.id);
+                this.setState({
+                    expenses : expenses == null ? [] : expenses,
+                    loaded: true,
 
-                    this.setState({
-                        expenses: filteredExp,
-                        loaded: true,
-
-                    });
-                }
-                else
-                    this.setState({ loaded: true });
+                });
             }
         );
     }
@@ -58,29 +49,30 @@ export default class ExpensesList extends React.Component{
             id: newId
         });
 
-        updateStorage("ids", {expense_id: newId}, false, () => {});
+        updateStorageIDs("expense_id");
     }
 
     updateListing(e) {
-        this.setState(prevState => ({
-            expenses: [
-                ...prevState.expenses,
-                e
-            ]
-        }));
+        var tmp = this.state.expenses;
+        
+        if (tmp.length == 0)
+            tmp = [e];
+        else 
+            tmp.push(e);
+
+        tmp.push(e);
+
+        this.setState({
+            expenses: tmp
+        });
         
         this.props.screenProps.updateExpenses(e);
         this.resetCatFilter = this.resetCatFilter.bind(this);
         this.updateList = this.updateList.bind(this);
-        this.updateExpenses = this.updateExpenses.bind(this);
-    }
-
-    updateExpenses(exp){
-        this.setState({ expenses: exp });
     }
 
     updateList() {
-        store.get("expenses").then(
+        /* store.get("expenses").then(
             expenses => {
                 var filteredExp = expenses.filter(e => e.trip_id == this.props.screenProps.info.id);
                 if(this.state.cat != undefined && this.state.cat != null){
@@ -90,8 +82,8 @@ export default class ExpensesList extends React.Component{
                 this.setState(prevState => ({
                     expenses: filteredExp
                 }));
-        })
-
+            }
+        ) */
     }
 
     buildList(navigate) {
@@ -102,7 +94,7 @@ export default class ExpensesList extends React.Component{
                 <Text style={styles.empty_text}>{this.state.lang.expense.no_expenses}</Text>
             </View>
         }
-
+        
         return <ScrollView>{
             expenses.map((item) =>  {
                 return <TouchableHighlight
@@ -119,8 +111,20 @@ export default class ExpensesList extends React.Component{
                 >
                     <View style={styles.list_item} >
                         <View style={styles.list_item_info}>
-                            <Text style={styles.marg_bottom_10}>{item.cost}</Text>
-                            <Text>{formatDate(item.date)}</Text>
+                            <View style={{justifyContent: "space-between", flexDirection: "row", marginRight: 50}}>
+                                <View>
+                                    <Text style={{fontWeight: "bold"}}>{this.state.lang.expense.receiver}</Text>
+                                    <Text style={styles.marg_bottom_10}>{item.receiver}</Text>
+                                </View>
+                                <View>
+                                    <Text style={{fontWeight: "bold"}}>{this.state.lang.expense.cost}</Text>
+                                    <Text style={styles.marg_bottom_10}>{item.cost}</Text>
+                                </View>
+                            </View>
+                            <View style={{flexDirection: "row"}}>
+                                <Text style={{fontWeight: "bold", marginRight: 10}}>{this.state.lang.expense.date}</Text>
+                                <Text>{formatDate(item.date)}</Text>
+                            </View>
                         </View>
                         <View style={styles.arrow}>
                             <Icon name='chevron-right' size={40.0}/>

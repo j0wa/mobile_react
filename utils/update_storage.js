@@ -1,7 +1,7 @@
 import React from 'react';
 import store from 'react-native-simple-store';
 
-export default function updateStorage(collection, item, creating, callback) {
+export function updateStorage(collection, item, creating, callback) {
     var tmp = [];
 
     store.get(collection).then((values) => {
@@ -11,8 +11,6 @@ export default function updateStorage(collection, item, creating, callback) {
                 item.map(i => {
                     tmp.push(i);
                 });
-
-
             }
             else {
                 values.map(v => {
@@ -25,11 +23,27 @@ export default function updateStorage(collection, item, creating, callback) {
                 });
 
                 tmp.push(item)
+
             }
         }
     }).then(() => {
         store.delete(collection).then(() => {
             store.save(collection, tmp).then(() => { callback && callback() });
+        });
+    });
+}
+
+export function updateStorageIDs(id) {
+    var tmp = [];
+
+    store.get("ids").then((values) => {
+        tmp = values;
+        console.log("update id b4", tmp);
+        tmp[id] = values[id] + 1;
+    }).then(() => {
+        store.delete("ids").then(() => {
+            console.log("update id after", tmp);
+            store.save("ids", tmp).then(() => {});
         });
     });
 }

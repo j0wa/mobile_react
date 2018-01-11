@@ -7,7 +7,7 @@ import ExpensesList from "./ExpensesList";
 import Loader from '../components/Loader';
 import { ComboBox, ComboBoxItem } from '../components/ComboBox';
 import Required from '../components/Required';
-import updateStorage from '../utils/update_storage';
+import { updateStorage, updateStorageIDs } from '../utils/update_storage';
 import store from 'react-native-simple-store';
 
 export default class Trips extends React.Component {
@@ -23,35 +23,43 @@ export default class Trips extends React.Component {
     }
 
     updateExpenses(exp){
+        var tmp = this.state.expenses;
+
+        tmp.push(exp);
+
         updateStorage("trips", {
             id: this.state.info.id,
-            location: this.state.info.location,
-            date: this.state.info.date,
-            curr: this.state.info.curr,
-            members: this.state.info.members,
-            desc: this.state.info.desc,
-            expenses: [...this.state.expenses, exp]
+            info: {
+                location: this.state.info.location,
+                date: this.state.info.date,
+                curr: this.state.info.curr,
+                members: this.state.info.members,
+                desc: this.state.info.desc,
+                desc: this.state.info.id,
+            },
+            expenses: tmp
         }, false, () => {});
         
-        this.setState(prev => ({ 
-            expenses: [
-                ...prev.expenses, 
-                exp
-            ] 
-        }));
+        this.setState({ 
+            expenses: tmp
+        });
     }
 
     updateNew(trip){
         this.setState({
             new: false,
             info: {
-                id: trip.id,
-                location: trip.location,
-                date: trip.date,
-                curr: trip.curr,
-                members: trip.members,
-                desc: trip.desc,
-            }
+                id: trip.info.id,
+                location: trip.info.location,
+                date: trip.info.date,
+                curr: trip.info.curr,
+                members: trip.info.members,
+                desc: trip.info.desc,
+                member_id: trip.info.member_id,
+                expense_id: trip.info.expense_id,
+            },
+            expenses: [],
+            summaries: [],
         })
     }
 
@@ -61,11 +69,9 @@ export default class Trips extends React.Component {
                 var neww = this.props.navigation.state.params.new;
                 var id = this.props.navigation.state.params.id;
                 var trip = {};
-
                 if (!neww)
                 {
                     trips.find((t) => {
-
                         if (t.id == id){
                             trip = t;
                             return;
@@ -78,18 +84,18 @@ export default class Trips extends React.Component {
                     expenses: trip.expenses || [],
                     summaries: trip.summaries || [],
                     info: Object.keys(trip).length != 0 ? {
-                        location: trip.location,
-                        date: trip.date,
-                        curr: trip.curr,
-                        members: trip.members,
-                        desc: trip.desc,
+                        location: trip.info.location,
+                        date: trip.info.date,
+                        curr: trip.info.curr,
+                        members: trip.info.members,
+                        desc: trip.info.desc,
                         id: id,
-                        member_id: ids[0].member_id,
-                        expense_id: ids[0].expense_id,
+                        member_id: ids.member_id,
+                        expense_id: ids.expense_id,
                     } : {
-                        id: ids[0].trip_id,
-                        member_id: ids[0].member_id,
-                        expense_id: ids[0].expense_id,
+                        id: ids.trip_id,
+                        member_id: ids.member_id,
+                        expense_id: ids.expense_id,
                         location: "",
                         date: "",
                         curr: "",
@@ -113,9 +119,9 @@ export default class Trips extends React.Component {
                 summaries: this.state.summaries,
                 updateTrips: this.props.navigation.state.params.updateTrips,
                 updateExpenses: this.updateExpenses,
-                expense_id: this.state.expense_id,
-                trip_id: this.state.trip_id,
-                member_id: this.state.member_id,
+                id: this.state.id,
+                expense_id: this.state.info.expense_id,
+                member_id: this.state.info.member_id,
             }
 
             return this.state.new ? <TripScreen screenProps={{...props, updateNew: this.updateNew}}/> : <Tab screenProps={props} />
@@ -145,9 +151,9 @@ class TripScreen extends React.Component {
             id: this.props.screenProps.info.id,
             expense_id: this.props.screenProps.info.expense_id,
             member_id: this.props.screenProps.info.member_id,
+            members: []
         }
-
-
+        
         this._submit_new_member = this._submit_new_member.bind(this)
         this._delete_member = this._delete_member.bind(this)
         this._submit = this._submit.bind(this)
@@ -167,7 +173,7 @@ class TripScreen extends React.Component {
                         loaded: true,
                         location: trip.location || "",
                         date: trip.date || new Date(),
-                        id: this.props.screenProps.info.id,
+                        id: trip.id,
                         desc: trip.desc || "",
                     });
                 }
@@ -195,14 +201,21 @@ class TripScreen extends React.Component {
         if (err === -1){
             var t = {
                 id: this.state.id,
-                location: this.state.location,
-                date: this.state.date,
-                curr: this.state.curr,
-                members: this.state.members,
-                desc: this.state.desc,
-            };            
+                expenses: this.state.expenses,
+                summaries: this.state.summaries,
+                info: {
+                    id: this.state.id,
+                    location: this.state.location,
+                    date: this.state.date,
+                    curr: this.state.curr,
+                    members: this.state.members,
+                    desc: this.state.desc,
+                    member_id: this.state.member_id,
+                    expense_id: this.state.expense_id,
+                },
+            };
 
-            updateStorage("ids", {trip_id: this.state.id + 1}, false, () => {});
+            updateStorageIDs("trip_id");
             updateStorage("trips", t, this.state.new, () => {
                 this.props.screenProps.updateTrips(t);
 
@@ -226,15 +239,18 @@ class TripScreen extends React.Component {
 
         if (err === -1) {
             var newId = this.state.member_id + 1;
-
+            var members = this.state.members;
+            
+            members.push({id: this.state.member_id, name: this.state.memberName});
+            
             this.setState(prevState => ({
-                members: [...prevState.members, ...{id: this.state.member_id, name: this.state.memberName}],
+                members: members,
                 modalVisible: false,
                 memberName: "",
                 member_id: newId
             }));
 
-            updateStorage("ids", {member_id: newId}, false, () => {});
+            updateStorageIDs("member_id");
         }
     }
 
@@ -274,7 +290,7 @@ class TripScreen extends React.Component {
     buildMembersList(){
         return (
             <View style={styles.members_wrapper}>
-                <FormLabel>{this.state.lang.trip.members}</FormLabel>
+                <FormLabel>{this.state.lang.trip.members} <Required /> </FormLabel>
                 <TouchableNativeFeedback onPress={() => { this.setModalVisible(true) }} >
                     <FormLabel containerStyle={styles.new_member}>{this.state.lang.trip.new_member}</FormLabel>
                 </TouchableNativeFeedback>
@@ -298,7 +314,7 @@ class TripScreen extends React.Component {
             visible={this.state.modalVisible}
             onRequestClose={() => { this.setModalVisible(false) }}
         >
-            <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.setModalVisible(false) }}>
+            <View style={styles.modal_wrapper}>
                 <View style={styles.modal_container}>
                     <Text style={styles.modal_title}>{this.state.lang.trip.new_member_title}</Text>
 
@@ -316,7 +332,7 @@ class TripScreen extends React.Component {
                         <View><FormLabel containerStyle={styles.modal_back_button_wrapper}>{this.state.lang.payment.back}</FormLabel></View>
                     </TouchableHighlight>
                 </View>
-            </TouchableHighlight>
+            </View>
         </Modal>
     }
 
@@ -360,7 +376,7 @@ class TripScreen extends React.Component {
                     editable={this.props.new}
                     multiline={true}
                     autoGrow={true}
-                    value={this.state.desc}
+                    value={String(this.state.desc)}
                     onChangeText={(desc) => {this.state.loaded && this.setState({desc: desc})}}
                     style={StyleSheet.flatten([styles.input, styles.input_textarea])}
                 />
@@ -398,23 +414,8 @@ class SummariesScreen extends React.Component {
 
         this.changeCurr = this.changeCurr.bind(this);
     }
-    async componentDidMount(){
-        store.get("expenses").then(
-            expenses => {
-                var ar1 = [];
-                var ar2 = [ar1];
-                if (!this.props.screenProps.new && expenses != null && JSON.stringify(expenses)!=JSON.stringify(ar2)){
-                    var filteredExp = expenses.filter(e => e.trip_id == this.props.screenProps.info.id);
-
-                    //console.log("checkiking the filterring");
-                    //console.log(this.props.trip_id);
-                    //console.log(expenses);
-                    this.setState({
-                        expenses: filteredExp
-                    });
-                }
-            }
-        );
+    
+    componentDidMount(){
         store.get("currencies").then(
             (currs) => {
                 this.setState({
@@ -436,62 +437,16 @@ class SummariesScreen extends React.Component {
             </View>
         }
         //building the base array
-        this.state.trip.members.forEach(function(member){
-            arraySummaries.push({id : i, name : member , amountPaid : 0, amountDue : 0, total : 0});
+       /*  this.state.trip.members.forEach(function(member){
+            arraySummaries.push({id : i, name : member.name , amountPaid : 0, amountDue : 0, total : 0});
             i++;
         });
 
-        /*
-        this.state.expenses.forEach(function(element){
-            element.membersPaidBy.forEach(function(elementPaidBy){
-                if(elementPaidBy.selected){
-                    arraySummaries.forEach(function(mem){
-                        if(elementPaidBy.name == mem.name){
-                            /*
-                            if(this.state.curr == undefined){
-                                var tempVal = this.changeCurr(1,item.curr,elementPaidBy.cost)
-                            }else{
-                                var tempVal = this.changeCurr(this.state.curr,item.curr,elementPaidBy.cost)
-                            }
-
-                            mem.amountPaid += parseInt(elementPaidBy.cost);
-                            return;
-                        }
-                    });
-                }
-            });
-
-            element.membersPaidFor.forEach(function(elementPaidFor){
-                if(elementPaidFor.selected){
-                    arraySummaries.forEach(function(mem){
-                        if(elementPaidFor.name == mem.name){
-                            /*
-                            if(this.state.curr == undefined){
-                                var tempVal = this.changeCurr(1,item.curr,elementPaidFor.cost)
-                            }else{
-                                var tempVal = this.changeCurr(this.state.curr,item.curr,elementPaidFor.cost)
-                            }
-
-                            mem.amountDue += parseInt(elementPaidFor.cost);
-                            return;
-                        }
-                    });
-                }
-            });
-
-            arraySummaries.forEach(function(mem){
-                mem.total += parseInt(mem.amountPaid) - parseInt(mem.amountDue)
-            });
-
-        });
-        */
-
         this.state.expenses.map((element) => {
-            element.membersPaidBy.map((elementPaidBy) => {
+            element.summaries.membersPaidBy.map((elementPaidBy) => {
                 if(elementPaidBy.selected){
                     arraySummaries.map((mem) => {
                         if(elementPaidBy.name == mem.name){
-
                             mem.amountPaid += parseInt(this.changeCurr(this.state.curr,mem.curr,elementPaidBy.cost));
                             return;
                         }
@@ -500,11 +455,10 @@ class SummariesScreen extends React.Component {
             })
 
 
-            element.membersPaidFor.map((elementPaidFor) => {
+            element.summaries.membersPaidFor.map((elementPaidFor) => {
                 if(elementPaidFor.selected){
                     arraySummaries.map((mem) => {
                         if(elementPaidFor.name == mem.name){
-
                             mem.amountDue += parseInt(this.changeCurr(this.state.curr,mem.curr,elementPaidFor.cost));
                             return;
                         }
@@ -516,18 +470,18 @@ class SummariesScreen extends React.Component {
                 mem.total += parseInt(mem.amountPaid) - parseInt(mem.amountDue)
             });
 
-        })
-        /*
-        console.log("final arraySummaries");
-        console.log(arraySummaries);
-        */
+        }) */
+        
         return (
             <View style={styles.members_wrapper}>
                 <ScrollView >
                     {arraySummaries.map((item) => {
                         return <View key={item.id} style={styles.list_item_flex}>
-                                <Text style={styles.list_item_part}>{item.name} </Text><Text style={styles.list_item_part}>{item.amountPaid} </Text><Text style={styles.list_item_part}>{item.amountDue} </Text><Text style={styles.list_item_part}>{item.total} </Text>
-                            </View>
+                            <Text style={styles.list_item_part}>{item.name} </Text>
+                            <Text style={styles.list_item_part}>{item.amountPaid} </Text>
+                            <Text style={styles.list_item_part}>{item.amountDue} </Text>
+                            <Text style={styles.list_item_part}>{item.total} </Text>
+                        </View>
                     })}
                 </ScrollView>
             </View>
@@ -565,12 +519,13 @@ class SummariesScreen extends React.Component {
         this.state.expenses.map((item) => {
             total += parseInt(this.changeCurr(this.state.curr,item.curr,item.cost));
         })
-        //console.log("i am the total");
-        //console.log(total);
-        return( <View>
-                    <FormLabel>{this.state.lang.summaries.totalCostOfTrip}</FormLabel>
-                    <Text>{total}</Text>
-                </View>)
+        
+        return( 
+            <View>
+                <FormLabel>{this.state.lang.summaries.totalCostOfTrip}</FormLabel>
+                <Text>{total}</Text>
+            </View>
+        )
     }
 
     changeCurr(changeTo,changeFrom,value){
@@ -584,20 +539,16 @@ class SummariesScreen extends React.Component {
         //change to dollar
         switch (changeFrom) {
             case 2:
-                //console.log("from dollar");
                 dollarValue = value;
                 break;
             case 3:
-                //console.log("from aus");
                 dollarValue = value*0.783;
                 break;
             case 4:
-                //console.log("from gpd");
                 dollarValue = value*1.352;
                 break;
             //if nothing it's not initialased but showing 1, so 1 is default
             default:
-                //console.log("from eu");
                 dollarValue = value*1.194;
         }
 

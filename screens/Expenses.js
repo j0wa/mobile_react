@@ -8,7 +8,7 @@ import Loader from '../components/Loader';
 import { ComboBox, ComboBoxItem } from '../components/ComboBox';
 import Required from '../components/Required';
 import formatDate from '../utils/date_format';
-import updateStorage from '../utils/update_storage';
+import { updateStorage } from '../utils/update_storage';
 
 export default class Expenses extends React.Component {
     constructor(props){
@@ -54,7 +54,7 @@ export default class Expenses extends React.Component {
                 loaded: true,
                 new: true,
                 payments: [],
-                totalLeft: 0     
+                totalLeft: 0  
             })
         }
     }
@@ -102,7 +102,7 @@ export default class Expenses extends React.Component {
     }
 
     render(){
-        if (this.state.new){
+        if (this.state.loaded){
             var props = {
                 navigation: this.props.navigation,
                 lang: this.props.screenProps,
@@ -116,7 +116,7 @@ export default class Expenses extends React.Component {
                 updateItems: this.updateItems,
                 updatePayment: this.updatePayment,
                 updateTotalLeft: this.updateTotalLeft,
-                members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item, cost: 0, selected: true}})
+                members: this.props.navigation.state.params.members.map((item, index) => { return {id: index, name: item.name, cost: 0, selected: true}})
             };
 
             return this.state.new ? <Tab2 screenProps={props} /> : <Tab screenProps={props} /> 
@@ -218,9 +218,10 @@ class GeneralScreen extends React.Component {
                 payments: this.state.payments
             };
 
+
             updateStorage("expenses", e, this.state.new, () => {
                 this.props.screenProps.updateExpenses(e);
-
+                
                 if (this.state.new){
                     this.props.screenProps.updateId();
                 }
@@ -233,6 +234,7 @@ class GeneralScreen extends React.Component {
     updateValues(){
         var type = this.state.type;
         
+        // split evenly
         if (type == 1) {
             var members = this.state.members;
             var cost = this.state.cost;
@@ -243,7 +245,7 @@ class GeneralScreen extends React.Component {
                     len++;
             });
 
-            var value = cost / len;
+            var value = (cost / len).toFixed(2);
             
             members.map((m) => {
                 m.cost = (m.selected) ? value : 0;
@@ -265,7 +267,7 @@ class GeneralScreen extends React.Component {
 
                     Alert.alert(
                         this.state.lang.err.title,
-                        this.state.lang.expense.overbudget
+                        this.state.lang.expense.overbudget,
                         [
                             {text: this.state.lang.setting.updated }
                         ],
@@ -348,6 +350,7 @@ class GeneralScreen extends React.Component {
 
                 <ScrollView style={styles.members_list_wrapper}>
                     {this.state.members.map((item) => {
+                        
                         return <View key={item.id} style={styles.members_list_item}>
                             <CheckBox 
                                 containerStyle={styles.members_list_ckbox_container} 
@@ -567,7 +570,7 @@ class ItemsScreen extends React.Component {
             visible={this.state.modalVisible}
             onRequestClose={() => { this.setModalVisible(false) }}
         >
-            <TouchableHighlight style={styles.modal_wrapper} onPress={() => { this.setModalVisible(false) }}>
+            <View style={styles.modal_wrapper} >
                 <View style={styles.modal_container}>
                     <Text style={styles.modal_title}>{this.state.lang.expense.new_item_title}</Text>
 
@@ -593,7 +596,7 @@ class ItemsScreen extends React.Component {
                         <View><FormLabel containerStyle={styles.modal_back_button_wrapper}>{this.state.lang.payment.back}</FormLabel></View>
                     </TouchableHighlight>
                 </View>
-            </TouchableHighlight>
+            </View>
         </Modal>
     }
 
@@ -771,7 +774,6 @@ class PaymentsScreen extends React.Component {
         var name = "";
         
         this.state.members.map((item, index) => {
-            console.log("iid", item);
             if (item.id == id){
                 name = item.name;
             }

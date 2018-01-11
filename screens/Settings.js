@@ -7,7 +7,7 @@ import lang from "../configs/languages/lang";
 import store from 'react-native-simple-store';
 import { ComboBox, ComboBoxItem } from '../components/ComboBox';
 import Loader from '../components/Loader';
-import updateStorage from '../utils/update_storage';
+import { updateStorage } from '../utils/update_storage';
 
 export default class Settings extends React.Component {
     constructor(props){
@@ -54,19 +54,19 @@ export default class Settings extends React.Component {
 
         var tmp = {};
         var message = ""
-        if (type === "selectedLang"){
-            tmp = { lang: value, curr: this.state.selectedCurr }
-            message = this.state.lang.setting.updated_text; 
+        if (type == "selectedLang"){
+            tmp = { lang: value, curr: this.state.selectedCurr };
+            message = this.state.lang.setting.updated_text_restart
         }
         else {
-            tmp = { lang: this.state.selectedLang, curr: value }
-            message = this.state.lang.setting.updated_text_restart
+            tmp = { lang: this.state.selectedLang, curr: value };
+            message = this.state.lang.setting.updated_text; 
         }
 
         updateStorage("settings", tmp, false, () => {
             Alert.alert(
                 this.state.lang.setting.updated_title,
-                message
+                message,
                 [
                     {text: this.state.lang.setting.updated }
                 ],

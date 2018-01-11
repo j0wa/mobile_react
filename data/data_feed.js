@@ -66,12 +66,12 @@ export default dataFeed = {
     ids(){
         store.get("ids").then(settings => {
             if (settings == null) {
-                store.save('ids', [{
+                store.save('ids', {
                     cat_id: 5,
                     trip_id: 1,
                     expense_id: 1,
                     member_id: 1,
-                }]);
+                });
             }
         });
     }

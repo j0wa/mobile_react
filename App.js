@@ -1,6 +1,6 @@
 import React from 'react';
 import { Font } from 'expo';
-import { StatusBar } from 'react-native';
+import { StatusBar, AsyncStorage } from 'react-native';
 import store from 'react-native-simple-store';
 import { StackNavigator, DrawerNavigator, DrawerItems } from 'react-navigation';
 import dataFeed from './data/data_feed';
@@ -20,7 +20,8 @@ export default class App extends React.Component {
     }
 
     async componentDidMount() {
-        /* uncomment when storage reset needed */
+        /* uncomment when storage reset needed */ 
+        // AsyncStorage.clear();
         // resetStorage.categories();
         // resetStorage.trips();
         // resetStorage.ids();
@@ -54,14 +55,6 @@ export default class App extends React.Component {
                 }
             });
         })
-
-        await store.get("expenses").then(
-            expenses => {
-                if(expenses == null){
-                    store.push("expenses", []);
-                }
-            }
-        )
     }
 
     render(){

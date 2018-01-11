@@ -19,7 +19,7 @@ export default class TripsList extends React.Component{
         this.updateTrips = this.updateTrips.bind(this);
     }
 
-    async componentWillMount(){
+    componentWillMount(){
         store.get("trips").then(
             trips => this.setState({
                 trips : trips == null ? [] : trips,
@@ -37,9 +37,10 @@ export default class TripsList extends React.Component{
                 <Text style={styles.empty_text}>{this.state.lang.trip.no_trips}</Text>
             </View>
         }
-
+        
         return <ScrollView>
                 {trips.map((item) =>  {
+                    item = item.info;
                     return <TouchableHighlight
                         key={item.id}
                         onPress={() => {
@@ -61,15 +62,20 @@ export default class TripsList extends React.Component{
         </ScrollView>
     }
 
-    //fixed to avoid duplicates keys
     updateTrips(trip){
-        store.get("trips").then((value) => this.setState({trips : value}));
+        var tmp = this.state.trips;
+        
+        tmp.push(trip);
+
+        this.setState({
+            trips: tmp
+        });
     }
 
     buildButton(navigation){
         return <View style={styles.button}>
             <Icon name='add-circle' size={64.0} onPress={() => {
-                navigation.navigate('TripsItem', {new: true, id: this.state.trips.length + 1, updateTrips: this.updateTrips})
+                navigation.navigate('TripsItem', {new: true, updateTrips: this.updateTrips})
             }} />
         </View>
     }
