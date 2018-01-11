@@ -199,7 +199,7 @@ class GeneralScreen extends React.Component {
         console.log(this.state.membersPaidBy);
         console.log("test membersPaidFor");
         console.log(this.props.screenProps.membersPaidFor);
-*/
+        */
 
         this._submit = this._submit.bind(this)
         this.updateValues = this.updateValues.bind(this)
@@ -246,23 +246,25 @@ class GeneralScreen extends React.Component {
 
     _submit(){
         var err = -1;
-/*
+
 
         var totBy = 0;
         this.state.membersPaidBy.map((elby) =>{
             totBy += elby.cost
         })
+        console.log(totBy);
 
         var totFor = 0;
         this.state.membersPaidFor.map((elfor) =>{
             totFor += elfor.cost
         })
+        console.log(totFor);
 
 
         if(totBy != this.state.cost || totFor != this.state.cost){
-            err = 1;
+            return
         }
-*/
+
         if (this.state.cost == "") {
             this.setState({ errCost: true });
             err = 1;
